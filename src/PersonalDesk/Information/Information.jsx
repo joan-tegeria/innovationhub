@@ -12,8 +12,7 @@ const timePeriods = [
   { value: "1 Month", label: "1 Month" },
 ];
 
-export default function Information({loading,setIsLoading}) {
- 
+export default function Information({ loading, setIsLoading }) {
   const { personalDeskUserInfo, handlePersonalDesk, period, setPeriod } =
     useBooking();
 
@@ -38,7 +37,7 @@ export default function Information({loading,setIsLoading}) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          height: 500,
+          height: 501,
         }}
       >
         <CircularProgress
