@@ -1,7 +1,14 @@
 import React from "react";
 import { Button } from "@mui/material";
-import styles from "./Footer.module.css";
-export default function Footer({ price }) {
+import styles from "./Footer.module.css";src/PersonalDesk/Footer/Footer.jsx
+
+export default function Footer({
+  price,
+  handleNext,
+  handleBack,
+  isBackDisabled,
+  isNextDisabled,
+}) {
   return (
     <div className={styles.formFooter}>
       <div className={styles.priceInfo}>
@@ -11,8 +18,9 @@ export default function Footer({ price }) {
       <div className={styles.btnRow}>
         <Button
           variant="outlined"
-          color="#222222"
           style={{ width: 150, height: 42 }}
+          onClick={handleBack}
+          disabled={isBackDisabled}
         >
           Cancel
         </Button>
@@ -25,6 +33,8 @@ export default function Footer({ price }) {
             },
           }}
           style={{ width: 150, height: 42 }}
+          onClick={handleNext}
+          disabled={isNextDisabled}
         >
           Next
         </Button>
