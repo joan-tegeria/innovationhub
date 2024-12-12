@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@mui/material";
-import styles from "./Footer.module.css";src/PersonalDesk/Footer/Footer.jsx
+import styles from "./Footer.module.css";
 
 export default function Footer({
   price,
