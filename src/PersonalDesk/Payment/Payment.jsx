@@ -1,28 +1,31 @@
 import React, { useEffect, useState } from "react";
-import styles from "./Information.module.css";
+import styles from "./Payment.module.css";
 import LabeledInput from "../../components/LabeledInput";
 import { useBooking } from "../../context/BookingContext";
 import CircularProgress, {
   circularProgressClasses,
 } from "@mui/material/CircularProgress";
-import dayjs from "dayjs";
+import { TextField } from "@mui/material";
+
 const timePeriods = [
   { value: "24 Hours", label: "24 Hours" },
   { value: "1 Week", label: "1 Week" },
   { value: "1 Month", label: "1 Month" },
 ];
 
-export default function Information({ loading, setIsLoading, checkOffice }) {
+export default function Payment({ loading, setIsLoading }) {
   const { personalDeskUserInfo, handlePersonalDesk, period, setPeriod } =
     useBooking();
 
   useEffect(() => {
-    console.log(
-      "🚀 ~ Information ~ personalDeskUserInfo:",
-      personalDeskUserInfo
-    );
-   
+    console.log("🚀 ~ Payment ~ personalDeskUserInfo:", personalDeskUserInfo);
   }, [personalDeskUserInfo]);
+
+  const formatDate = (dateObj) => {
+    const formattedDate = dateObj.format("YYYY-MM-DDTHH:mm:ssZ");
+
+    return formattedDate;
+  };
 
   if (loading) {
     return (
@@ -57,39 +60,26 @@ export default function Information({ loading, setIsLoading, checkOffice }) {
 
   return (
     <div className={styles.formBody}>
-      <div className={styles.sectionTittle}>Time Period</div>
-      <div className={styles.formRow}>
-        <LabeledInput
-          label={"Time Period"}
-          placeholder={"eg. John"}
-          items={timePeriods}
-          type="select"
-          isRequired
-          selectValue={period}
-          onChange={(event) => setPeriod(event.target.value)}
-        />
-        <LabeledInput
-          type="date"
-          label={"Select Date"}
-          onChange={(value) => {
-            handlePersonalDesk("selectDate", value);
-            checkOffice(value);
-          }}
-        />
+      <div className={styles.sectionTittle}>
+        This service has been scheduled for:
+      </div>
+      <div>
+        <p>Daily service (24h)</p>
+        <p>23 November 2024 - 30 November 2024</p>
       </div>
       <div className={styles.divider} />
-      <div className={styles.sectionTittle}>Personal Information</div>
+      <div className={styles.sectionTittle}>Payment Information</div>
       <div className={styles.formRow}>
         <LabeledInput
-          label={"First Name"}
-          placeholder={"eg. John"}
+          label={"Card's holder name"}
+          placeholder={"Full Name"}
           onChange={(event) =>
             handlePersonalDesk("firstName", event.target.value)
           }
         />
         <LabeledInput
-          label={"Last Name"}
-          placeholder={"eg. Doe"}
+          label={"Card Number"}
+          placeholder={"XXXXXXXXXXXXXX"}
           onChange={(event) =>
             handlePersonalDesk("lastName", event.target.value)
           }
@@ -97,24 +87,24 @@ export default function Information({ loading, setIsLoading, checkOffice }) {
       </div>
       <div className={styles.formRow}>
         <LabeledInput
-          type="date"
-          label={"Birthday"}
-          onChange={(value) => handlePersonalDesk("birthday", valueZ)}
+          label={"CSV"}
+          placeholder={"XXXX"}
+          onChange={(event) =>
+            handlePersonalDesk("idNumber", event.target.value)
+          }
         />
         <LabeledInput
-          label={"Identification Number"}
-          placeholder={"XXXXXXXXX"}
+          label={"Expiring date"}
+          placeholder={"mm/yy"}
           onChange={(event) =>
             handlePersonalDesk("idNumber", event.target.value)
           }
         />
       </div>
-      <div style={{ width: "316px", marginBottom: "25px" }}>
-        <LabeledInput
-          label={"Email"}
-          placeholder={"johndoe@gmail.com"}
-          onChange={(event) => handlePersonalDesk("email", event.target.value)}
-        />
+      <div className={styles.sectionTittle}>Address</div>
+      <div className={styles.formRow}>
+        <TextField placeholder="Street" style={{ width: "100%" }} />
+        <TextField placeholder="City" style={{ width: "100%" }} />
       </div>
       <div className={styles.divider} />
     </div>

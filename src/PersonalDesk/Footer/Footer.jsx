@@ -8,22 +8,30 @@ export default function Footer({
   handleBack,
   isBackDisabled,
   isNextDisabled,
+  isLast,
 }) {
   return (
-    <div className={styles.formFooter}>
-      <div className={styles.priceInfo}>
-        <span className={styles.totalPay}>Total to pay</span>
-        <span className={styles.price}>{price} ALL</span>
-      </div>
+    <div
+      className={styles.formFooter}
+      style={{ flexDirection: isLast && "row-reverse" }}
+    >
+      {!isLast && (
+        <div className={styles.priceInfo}>
+          <span className={styles.totalPay}>Total to pay</span>
+          <span className={styles.price}>{price} ALL</span>
+        </div>
+      )}
       <div className={styles.btnRow}>
-        <Button
-          variant="outlined"
-          style={{ width: 150, height: 42 }}
-          onClick={handleBack}
-          disabled={isBackDisabled}
-        >
-          Cancel
-        </Button>
+        {!isLast && (
+          <Button
+            variant="outlined"
+            style={{ width: 150, height: 42 }}
+            onClick={handleBack}
+            disabled={isBackDisabled}
+          >
+            Cancel
+          </Button>
+        )}
         <Button
           variant="contained"
           sx={{
@@ -36,7 +44,7 @@ export default function Footer({
           onClick={handleNext}
           disabled={isNextDisabled}
         >
-          Next
+          {isLast ? "Finish" : "Next"}
         </Button>
       </div>
     </div>

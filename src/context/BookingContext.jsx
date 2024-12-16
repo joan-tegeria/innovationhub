@@ -6,17 +6,17 @@ export default function BookingProvider({ children }) {
   const [period, setPeriod] = useState("24 Hours");
   const [personalDeskUserInfo, setPersonalDeskUserInfo] = useState({
     selectDate: "",
+    endDate: "",
     firstName: "",
     lastName: "",
     birthday: "",
     idNumber: "",
     email: "",
     totalToPay: 5000,
+    workspace: "",
   });
 
   const handlePersonalDesk = (field, value) => {
-    console.log("🚀 ~ handlePersonalDesk ~ value:", value);
-    console.log("🚀 ~ handlePersonalDesk ~ field:", field);
     setPersonalDeskUserInfo((prevState) => ({
       ...prevState,
       [field]: value,
