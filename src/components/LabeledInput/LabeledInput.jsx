@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import styles from "./LabeledInput.module.css";
 import TextField from "@mui/material/TextField";
 import { DatePicker } from "@mui/x-date-pickers";
-import InputLabel from "@mui/material/InputLabel";
+// import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
@@ -15,8 +15,9 @@ export default function LabeledInput({
   type = "text",
   items = [],
   selectValue,
+  regex,
 }) {
-  // console.log("🚀 ~ items:", items);
+  console.log("🚀 ~ items:", items);
   const [value, setValue] = useState("");
   const [error, setError] = useState(false);
 
@@ -26,8 +27,23 @@ export default function LabeledInput({
     onChange && onChange(e);
 
     if (isRequired && newValue.trim() === "") {
+      console.log(" i AM NOT BEING FILLED I AM SUPPOSED TO BE ERROR");
       setError(true);
     } else {
+      setError(false);
+    }
+  };
+
+  const handleBlur = () => {
+    if (regex && !regex.test(value)) {
+      console.log("🚀 ~ handleBlur ~ regex:", regex);
+      console.log(" I AM A REGEX ERROR");
+      setError(true);
+    } else if (isRequired && value.trim() === "") {
+      console.log(" i AM NOT BEING FILLED I AM SUPPOSED TO BE ERROR");
+      setError(true);
+    } else {
+      console.log(" I AM NO ERROR");
       setError(false);
     }
   };
@@ -37,6 +53,7 @@ export default function LabeledInput({
       value={value}
       onChange={handleChange}
       required={isRequired}
+      onBlur={handleBlur}
       placeholder={placeholder || "Placeholder"}
       error={error}
       // helperText={error ? "This field is required" : ""}

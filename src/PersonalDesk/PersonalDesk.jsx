@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./PersonalDesk.module.css";
 import Information from "./Information";
 import Footer from "./Footer";
@@ -13,6 +13,7 @@ import Payment from "./Payment";
 import Modal from "./Modal";
 import dayjs from "dayjs";
 import Finished from "./Finished";
+import { Alert } from "@mui/material";
 const steps = ["Information", "Payment", "Finished"];
 
 // Styled components
@@ -82,8 +83,9 @@ export default function PersonalDesk() {
     period,
     handlePersonalDesk,
   } = useBooking();
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
+  const [hasError, setHasError] = useState(false);
   const handleClose = () => setOpen(false);
   const checkOfficeAvaliablity = async ({ startDate }) => {
     try {
@@ -116,7 +118,28 @@ export default function PersonalDesk() {
     }
   };
 
+  const isUserEmpty = Object.values(personalDeskUserInfo).some(
+    (value) => value === "" || value === null || value === undefined
+  );
+
+  useEffect(() => {
+    if (hasError) {
+      if (isUserEmpty) {
+        console.log("I am empty");
+        return;
+      } else {
+        console.log("I am not empty");
+        setHasError(false);
+      }
+    }
+  }, [personalDeskUserInfo]);
+
   const createUser = async () => {
+    if (isUserEmpty) {
+      setHasError(true);
+      return;
+    }
+
     setLoading(true);
     const userData = {
       name: personalDeskUserInfo.firstName,
@@ -231,17 +254,21 @@ export default function PersonalDesk() {
           <div className={styles.stepContent}>
             {renderStepContent(activeStep)}
           </div>
-
-          {/* Footer */}
-          {!loading && (
-            <Footer
-              price={price}
-              handleNext={handleNext}
-              handleBack={handleBack}
-              isBackDisabled={activeStep === 0}
-              isNextDisabled={activeStep === steps.length - 1}
-              isLast={activeStep === 2}
-            />
+          {hasError ? (
+            <Alert severity="error">
+              Please fill out all the fields before continuing.
+            </Alert>
+          ) : (
+            !loading && (
+              <Footer
+                price={price}
+                handleNext={handleNext}
+                handleBack={handleBack}
+                isBackDisabled={activeStep === 0}
+                isNextDisabled={activeStep === steps.length - 1}
+                isLast={activeStep === 2}
+              />
+            )
           )}
         </div>
       </div>
