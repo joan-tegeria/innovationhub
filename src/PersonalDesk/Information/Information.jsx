@@ -16,12 +16,12 @@ export default function Information({ loading, setIsLoading, checkOffice }) {
   const { personalDeskUserInfo, handlePersonalDesk, period, setPeriod } =
     useBooking();
   const [error, setError] = useState(false);
-  useEffect(() => {
-    console.log(
-      "🚀 ~ Information ~ personalDeskUserInfo:",
-      personalDeskUserInfo
-    );
-  }, [personalDeskUserInfo]);
+  // useEffect(() => {
+  //   console.log(
+  //     "🚀 ~ Information ~ personalDeskUserInfo:",
+  //     personalDeskUserInfo
+  //   );
+  // }, [personalDeskUserInfo]);
 
   if (loading) {
     return (

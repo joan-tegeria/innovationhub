@@ -17,9 +17,9 @@ export default function Payment({ loading, setIsLoading }) {
   const { personalDeskUserInfo, handlePersonalDesk, period, setPeriod } =
     useBooking();
 
-  useEffect(() => {
-    console.log("🚀 ~ Payment ~ personalDeskUserInfo:", personalDeskUserInfo);
-  }, [personalDeskUserInfo]);
+  // useEffect(() => {
+  //   console.log("🚀 ~ Payment ~ personalDeskUserInfo:", personalDeskUserInfo);
+  // }, [personalDeskUserInfo]);
 
   const formatDate = (dateObj) => {
     const formattedDate = dateObj.format("YYYY-MM-DDTHH:mm:ssZ");

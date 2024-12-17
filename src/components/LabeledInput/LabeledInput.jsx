@@ -17,7 +17,7 @@ export default function LabeledInput({
   selectValue,
   regex,
 }) {
-  console.log("🚀 ~ items:", items);
+  
   const [value, setValue] = useState("");
   const [error, setError] = useState(false);
 
@@ -27,7 +27,6 @@ export default function LabeledInput({
     onChange && onChange(e);
 
     if (isRequired && newValue.trim() === "") {
-      console.log(" i AM NOT BEING FILLED I AM SUPPOSED TO BE ERROR");
       setError(true);
     } else {
       setError(false);
@@ -36,14 +35,10 @@ export default function LabeledInput({
 
   const handleBlur = () => {
     if (regex && !regex.test(value)) {
-      console.log("🚀 ~ handleBlur ~ regex:", regex);
-      console.log(" I AM A REGEX ERROR");
       setError(true);
     } else if (isRequired && value.trim() === "") {
-      console.log(" i AM NOT BEING FILLED I AM SUPPOSED TO BE ERROR");
       setError(true);
     } else {
-      console.log(" I AM NO ERROR");
       setError(false);
     }
   };
