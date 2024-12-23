@@ -5,14 +5,19 @@ import { useBooking } from "../../context/BookingContext";
 import CircularProgress, {
   circularProgressClasses,
 } from "@mui/material/CircularProgress";
-import dayjs from "dayjs";
+
 const timePeriods = [
   { value: "24 Hours", label: "24 Hours" },
   { value: "1 Week", label: "1 Week" },
   { value: "1 Month", label: "1 Month" },
 ];
 
-export default function Information({ loading, setIsLoading, checkOffice }) {
+export default function Information({
+  loading,
+  setIsLoading,
+  checkOffice,
+  workspaces,
+}) {
   const { personalDeskUserInfo, handlePersonalDesk, period, setPeriod } =
     useBooking();
   const [error, setError] = useState(false);
@@ -56,7 +61,20 @@ export default function Information({ loading, setIsLoading, checkOffice }) {
 
   return (
     <div className={styles.formBody}>
-      <div className={styles.sectionTittle}>Time Period</div>
+      <div style={{ width: "316px", marginBottom: "25px" }}>
+        <LabeledInput
+          label={"Select space"}
+          // placeholder={"eg. John"}
+          items={workspaces}
+          type="select"
+          isRequired={true}
+          selectValue={personalDeskUserInfo.workspace}
+          onChange={(event) =>
+            handlePersonalDesk("workspace", event.target.value)
+          }
+        />
+      </div>
+      {/* <div className={styles.sectionTittle}>Time Period</div> */}
       <div className={styles.formRow}>
         <LabeledInput
           label={"Time Period"}
@@ -73,6 +91,7 @@ export default function Information({ loading, setIsLoading, checkOffice }) {
           isRequired={true}
           onChange={(value) => {
             handlePersonalDesk("selectDate", value);
+            console.log(value);
             checkOffice(value);
           }}
         />
@@ -92,6 +111,7 @@ export default function Information({ loading, setIsLoading, checkOffice }) {
         <LabeledInput
           label={"Last Name"}
           placeholder={"eg. Doe"}
+          value={personalDeskUserInfo.lastName}
           onChange={(event) =>
             handlePersonalDesk("lastName", event.target.value)
           }
@@ -106,6 +126,7 @@ export default function Information({ loading, setIsLoading, checkOffice }) {
         <LabeledInput
           label={"Identification Number"}
           placeholder={"XXXXXXXXX"}
+          value={personalDeskUserInfo.idNumber}
           regex={/^[A-Za-z]\d{8}[A-Za-z]$/}
           onChange={(event) =>
             handlePersonalDesk("idNumber", event.target.value)
@@ -115,6 +136,7 @@ export default function Information({ loading, setIsLoading, checkOffice }) {
       <div style={{ width: "316px", marginBottom: "25px" }}>
         <LabeledInput
           label={"Email"}
+          value={personalDeskUserInfo.email}
           regex={/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/}
           placeholder={"johndoe@gmail.com"}
           onChange={(event) => handlePersonalDesk("email", event.target.value)}

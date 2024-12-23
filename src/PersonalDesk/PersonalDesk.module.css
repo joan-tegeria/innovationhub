@@ -1,17 +1,18 @@
 .container {
-  background-image: url("http://35.176.180.59/wp-content/uploads/2024/11/contacty-us-1.jpeg");
+  background-image: url("http://35.176.180.59/wp-content/uploads/2024/12/back.png");
   width: 100%;
-  height: 911px;
+  height: 1140px;
   background-size: cover;
   background-position: center;
   display: flex;
   justify-content: center;
   align-items: center;
+  /* -webkit-filter: blur(8px); */
 }
 
 .formContainer {
   width: 780px;
-  height: 860px;
+  height: 1003px;
   background-color: white;
   padding-inline: 54px;
   padding-top: 50px;

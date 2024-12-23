@@ -20,9 +20,9 @@ function DebugDevPage() {
         <button onClick={navigateToPersonalDesk} style={buttonStyle}>
           Go to Personal Desk
         </button>
-        <button onClick={navigateToAbout} style={buttonStyle}>
+        {/* <button onClick={navigateToAbout} style={buttonStyle}>
           Go to Full Office
-        </button>
+        </button> */}
       </div>
     </div>
   );

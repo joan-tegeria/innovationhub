@@ -16,17 +16,21 @@ export default function LabeledInput({
   items = [],
   selectValue,
   regex,
+  value = "",
+  // setValue,
 }) {
-  
-  const [value, setValue] = useState("");
   const [error, setError] = useState(false);
 
   const handleChange = (e) => {
-    const newValue = e.target.value;
-    setValue(newValue);
+    const newValue = e;
+    if (typeof onChange === "function") {
+      onChange(newValue); 
+    } else {
+      console.warn("setValue is not a function");
+    }
     onChange && onChange(e);
 
-    if (isRequired && newValue.trim() === "") {
+    if (isRequired && newValue.target.value.trim() === "") {
       setError(true);
     } else {
       setError(false);
