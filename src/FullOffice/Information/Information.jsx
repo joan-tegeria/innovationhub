@@ -13,21 +13,24 @@ const timePeriods = [
   { value: "1 Month", label: "1 Month" },
 ];
 
+const businessSizes = [
+  { value: "1", label: "1-5 Employees" },
+  { value: "2", label: "5-10 Employees" },
+  { value: "3", label: "10+ Employees" },
+];
+
 export default function Information({
   loading,
-  setIsLoading,
+  // setIsLoading,
   checkOffice,
   workspaces,
 }) {
-  const { personalDeskUserInfo, handlePersonalDesk, period, setPeriod } =
-    useBooking();
-  const [error, setError] = useState(false);
+  const { fullOfficeInfo, handleFullOffice, period, setPeriod } = useBooking();
+  const [teamSize, setTeamSize] = useState("1");
+
   // useEffect(() => {
-  //   console.log(
-  //     "🚀 ~ Information ~ personalDeskUserInfo:",
-  //     personalDeskUserInfo
-  //   );
-  // }, [personalDeskUserInfo]);
+  //   console.log("🚀 ~ fullOfficeInfo:", fullOfficeInfo);
+  // }, [fullOfficeInfo]);
 
   if (loading) {
     return (
@@ -69,9 +72,9 @@ export default function Information({
           items={workspaces}
           type="select"
           isRequired={true}
-          selectValue={personalDeskUserInfo.workspace}
+          selectValue={fullOfficeInfo.workspace}
           onChange={(event) =>
-            handlePersonalDesk("workspace", event.target.value)
+            handleFullOffice("workspace", event.target.value)
           }
         />
       </div>
@@ -91,58 +94,75 @@ export default function Information({
           label={"Select Date"}
           isRequired={true}
           onChange={(value) => {
-            handlePersonalDesk("selectDate", value);
+            handleFullOffice("selectDate", value);
             console.log(value);
             checkOffice(value);
           }}
         />
       </div>
       <div className={styles.divider} />
-      <div className={styles.sectionTittle}>Personal Information</div>
+      <div className={styles.sectionTittle}>Business Information</div>
       <div className={styles.formRow}>
         <LabeledInput
-          label={"First Name"}
+          label={"Business Name"}
           isRequired={true}
-          value={personalDeskUserInfo.firstName}
+          value={fullOfficeInfo.businessName}
           placeholder={"eg. John"}
           onChange={(event) =>
-            handlePersonalDesk("firstName", event.target.value)
+            handleFullOffice("businessName", event.target.value)
           }
         />
         <LabeledInput
-          label={"Last Name"}
+          label={"NIPT"}
           placeholder={"eg. Doe"}
-          value={personalDeskUserInfo.lastName}
-          onChange={(event) =>
-            handlePersonalDesk("lastName", event.target.value)
-          }
+          value={fullOfficeInfo.nipt}
+          onChange={(event) => handleFullOffice("nipt", event.target.value)}
         />
       </div>
       <div className={styles.formRow}>
         <LabeledInput
-          type="date"
-          label={"Birthday"}
-          onChange={(value) =>
-            handlePersonalDesk("birthday", formatBirthDate(value))
-          }
+          label={"Business Size"}
+          placeholder={"eg. John"}
+          items={businessSizes}
+          type="select"
+          isRequired={true}
+          selectValue={teamSize}
+          onChange={(event) => setTeamSize(event.target.value)}
         />
         <LabeledInput
-          label={"Identification Number"}
-          placeholder={"XXXXXXXXX"}
-          value={personalDeskUserInfo.idNumber}
-          regex={/^[A-Za-z]\d{8}[A-Za-z]$/}
+          label={"Phone Number"}
+          placeholder={"06XXXXXXX"}
+          value={fullOfficeInfo.phoneNumber}
+          // regex={/^[A-Za-z]\d{8}[A-Za-z]$/}
           onChange={(event) =>
-            handlePersonalDesk("idNumber", event.target.value)
+            handleFullOffice("phoneNumber", event.target.value)
           }
         />
       </div>
       <div style={{ width: "316px", marginBottom: "25px" }}>
         <LabeledInput
           label={"Email"}
-          value={personalDeskUserInfo.email}
+          value={fullOfficeInfo.email}
           regex={/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/}
           placeholder={"johndoe@gmail.com"}
-          onChange={(event) => handlePersonalDesk("email", event.target.value)}
+          onChange={(event) => handleFullOffice("email", event.target.value)}
+        />
+      </div>
+      <div className={styles.divider} />
+      <div className={styles.sectionTittle}>Address</div>
+      <div className={styles.formRow}>
+        <LabeledInput
+          label={"Street"}
+          isRequired={true}
+          value={fullOfficeInfo.street}
+          placeholder={"Muhamet Gjollesha"}
+          onChange={(event) => handleFullOffice("street", event.target.value)}
+        />
+        <LabeledInput
+          label={"City"}
+          placeholder={"Tirna"}
+          value={fullOfficeInfo.city}
+          onChange={(event) => handleFullOffice("city", event.target.value)}
         />
       </div>
       <div className={styles.divider} />

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import styles from "./PersonalDesk.module.css";
+import styles from "./FullOffice.module.css";
 import axios from "axios";
 import dayjs from "dayjs";
 import { useLocalStorage } from "../hooks/useLocalStorage/useLocalStorage";
@@ -17,11 +17,11 @@ import { useBooking } from "../context/BookingContext";
 
 import Information from "./Information";
 import Footer from "./Footer";
-import Payment from "./Payment";
+
 import Modal from "./Modal";
 import Finished from "./Finished";
 
-const steps = ["Information", "Payment", "Finished"];
+const steps = ["Information", "Finished"];
 
 const CustomStepConnector = styled(StepConnector)(({ theme }) => ({
   "& .MuiStepConnector-line": {
@@ -50,7 +50,7 @@ const CustomStepLabel = styled(StepLabel)(({ theme }) => ({
   },
 }));
 
-export default function PersonalDesk() {
+export default function FullOffice() {
   //State
   const [price, setPrice] = useState(5000);
   const [activeStep, setActiveStep] = useState(0);
@@ -62,19 +62,12 @@ export default function PersonalDesk() {
   const [hasError, setHasError] = useState(false);
   const [workspaces, setWorkspaces] = useState([{ value: "", label: "" }]);
   //Context
-  const {
-    personalDeskUserInfo,
-    setPersonalDeskUserInfo,
-    period,
-    handlePersonalDesk,
-  } = useBooking();
+  const { fullOfficeInfo, period, handleFullOffice, setFullOfficeInfo } =
+    useBooking();
 
   useEffect(() => {
-    console.log(
-      "🚀 ~ PersonalDesk ~ personalDeskUserInfo:",
-      personalDeskUserInfo
-    );
-  }, [personalDeskUserInfo]);
+    console.log("🚀 ~ PersonalDesk ~ fullOfficeInfo:", fullOfficeInfo);
+  }, [fullOfficeInfo]);
 
   //Handlers
   const handleOpen = () => setOpen(true);
@@ -87,7 +80,7 @@ export default function PersonalDesk() {
         const {
           data: { data: allOffices },
         } = await axios.get(
-          "https://8ey3ox6oxi.execute-api.eu-central-1.amazonaws.com/prod/leads/shared"
+          "https://8ey3ox6oxi.execute-api.eu-central-1.amazonaws.com/prod/leads/office"
         );
 
         console.log("🚀 ~ checkOfficeAvaliablity ~ allOffices:", allOffices);
@@ -97,7 +90,7 @@ export default function PersonalDesk() {
         }));
         setWorkspaces(transformed);
         setLoading(false);
-        handlePersonalDesk("workspace", transformed[0].value);
+        handleFullOffice("workspace", transformed[0].value);
       } catch (error) {
         console.log("🚀 ~ getAllOffices ~ error:", error);
       }
@@ -105,128 +98,99 @@ export default function PersonalDesk() {
     getAllOffices();
   }, []);
 
+  const sendBookRequest = async () => {
+    setLoading(true);
+    const userData = {
+      name: fullOfficeInfo.businessName,
+      lastName: fullOfficeInfo.businessName,
+      email: fullOfficeInfo.email,
+      company: fullOfficeInfo.businessName,
+      referral: "Private Office Form",
+      birthdate: "2003-11-02",
+      id: "123456789123",
+      // address: fullOfficeInfo.street,
+      // state: fullOfficeInfo.street,
+      // country: "Albania",
+      // code: "3001",
+      nipt: fullOfficeInfo.nipt,
+      phone: fullOfficeInfo.phoneNumber,
+    };
+
+    try {
+      const {
+        data: { data: response },
+      } = await axios.post(
+        "https://8ey3ox6oxi.execute-api.eu-central-1.amazonaws.com/prod/leads",
+        userData
+      );
+      console.log("🚀 ~ sendBookRequest ~ response:", response);
+
+      const bookingData = {
+        username: fullOfficeInfo.businessName + " " + fullOfficeInfo.nipt,
+        user: response.id,
+        from: fullOfficeInfo.selectedDate,
+        to: fullOfficeInfo.endDate,
+        room: fullOfficeInfo.workspace,
+        flexible: "no",
+        description: "Booking submitted via web form",
+      };
+
+      const bookingResponse = await axios.post(
+        "https://8ey3ox6oxi.execute-api.eu-central-1.amazonaws.com/prod/leads/office",
+        bookingData
+      );
+      console.log("🚀 ~ sendBookRequest ~ bookingResponse:", bookingResponse);
+      setLoading(false);
+      setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    } catch (error) {
+      console.log("🚀 ~ sendBookRequest ~ error:", error);
+    }
+  };
+
   const checkOfficeAvaliablity = async (startDate) => {
     try {
       const fromDate = dayjs(startDate);
       const toDate = calculateEndDate(fromDate, period);
-      const endDate = dayjs(personalDeskUserInfo.toDate);
 
-      handlePersonalDesk("selectDate", fromDate.format("YYYY-MM-DDTHH:mm:ssZ"));
-      handlePersonalDesk("endDate", endDate.format("YYYY-MM-DDTHH:mm:ssZ"));
+      const formattedStartDate = formatDate(startDate).replace(/\+/g, "%2B");
+      const formattedEndDate = formatDate(toDate).replace(/\+/g, "%2B");
 
-      const { data: availabilityData } = await axios.get(
-        `https://8ey3ox6oxi.execute-api.eu-central-1.amazonaws.com/prod/leads/shared/${
-          personalDeskUserInfo.workspace
-        }?from=${formatDate(startDate)}&to=${formatDate(toDate)}`
-      );
+      handleFullOffice("selectDate", formattedStartDate);
+      handleFullOffice("endDate", formattedEndDate);
 
-      setRandomSeat(
-        availabilityData.availableSeats[
-          Math.floor(Math.random() * availabilityData.availableSeats.length)
-        ]
-      );
-    } catch (error) {
-      console.log("🚀 ~ checkOfficeAvaliablity ~ error:", error);
-    }
-  };
-
-  // const isUserEmpty = Object.values(personalDeskUserInfo).some(
-  //   (value) => value === "" || value === null || value === undefined
-  // );
-
-  // useEffect(() => {
-  //   if (hasError) {
-  //     if (isUserEmpty) {
-  //       console.log("I am empty");
-  //       return;
-  //     } else {
-  //       console.log("I am not empty");
-  //       setHasError(false);
-  //     }
-  //   }
-  // }, [personalDeskUserInfo]);
-
-  const createUser = async () => {
-    if (Object.values(personalDeskUserInfo).some((value) => !value)) {
-      setHasError(true);
-      return;
-    }
-
-    setLoading(true);
-    const userData = {
-      name: personalDeskUserInfo.firstName,
-      lastName: personalDeskUserInfo.lastName,
-      email: personalDeskUserInfo.email,
-      birthday: personalDeskUserInfo.birthday,
-      // check: "ERROR",
-      id: personalDeskUserInfo.idNumber,
-    };
-
-    setLocalData(userData);
-
-    try {
-      // Create user
       const {
         data: { data: response },
-      } = await axios.post(
-        "https://8ey3ox6oxi.execute-api.eu-central-1.amazonaws.com/prod/account",
-        userData
+      } = await axios.get(
+        `https://8ey3ox6oxi.execute-api.eu-central-1.amazonaws.com/prod/leads/office/${fullOfficeInfo.workspace}?from=${formattedStartDate}&to=${formattedEndDate}`
       );
-      console.log("🚀 ~ createUser ~ response:", response);
-      setLoading(false);
-      setUserId(response.id);
-      setActiveStep((prevActiveStep) => prevActiveStep + 1);
+      console.log("🚀 ~ checkOfficeAvaliablity ~ response:", response);
     } catch (error) {
-      console.error("Error creating user:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const bookOffice = async () => {
-    const bookingData = {
-      user: userId,
-      room: personalDeskUserInfo.workspace,
-      phoneNumber: "0682464577",
-      from: personalDeskUserInfo.selectDate,
-      to: personalDeskUserInfo.endDate,
-      seat: randomSeat.toString(),
-      referral: "Shared Office Form",
-    };
-    console.log("🚀 ~ bookOffice ~ bookingData:", bookingData);
-
-    try {
-      const bookingResponse = await axios.post(
-        "https://8ey3ox6oxi.execute-api.eu-central-1.amazonaws.com/prod/leads/shared",
-        bookingData
-      );
-      console.log("🚀 ~ bookOffice ~ bookingResponse:", bookingResponse);
-      setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    } catch (error) {
-      console.log("🚀 ~ bookOffice ~ error:", error);
+      console.log("🚀 ~ checkOfficeAvaliablity ~ error:", error);
     }
   };
 
   const handleNext = () => {
     // setActiveStep((prevActiveStep) => prevActiveStep + 1);
     if (activeStep === 0) {
-      createUser();
-    } else if (activeStep === 1) {
-      bookOffice();
+      sendBookRequest();
     } else {
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
   };
 
-  const handleBack = () => {
-    setPersonalDeskUserInfo({
+  const resetForm = () => {
+    const currentOffice = fullOfficeInfo.workspace;
+    setFullOfficeInfo({
       selectDate: "",
-      firstName: "",
-      lastName: "",
-      birthday: "",
-      idNumber: "",
+      endDate: "",
+      businessName: "",
+      nipt: "",
+      businessSize: "",
       email: "",
-      totalToPay: 5000,
+      street: "",
+      city: "",
+      workspace: currentOffice,
+      phoneNumber: "",
     });
     setActiveStep(0);
   };
@@ -235,13 +199,13 @@ export default function PersonalDesk() {
     0: (
       <Information
         loading={loading}
-        setIsLoading={setLoading}
+        // setIsLoading={setLoading}
         checkOffice={checkOfficeAvaliablity}
         workspaces={workspaces}
       />
     ),
-    1: <Payment loading={loading} setIsLoading={setLoading} />,
-    2: <Finished />,
+
+    1: <Finished />,
   };
 
   return (
@@ -283,11 +247,13 @@ export default function PersonalDesk() {
           {!loading && (
             <Footer
               price={price}
-              handleNext={handleNext}
-              handleBack={handleBack}
+              handleNext={
+                activeStep === steps.length - 1 ? resetForm : handleNext
+              }
+              handleBack={resetForm}
               isBackDisabled={activeStep === 0}
               isNextDisabled={activeStep === steps.length - 1}
-              isLast={activeStep === 2}
+              isLast={activeStep === 1}
             />
           )}
         </div>

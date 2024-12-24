@@ -1,4 +1,4 @@
 import { calculateEndDate } from "./calculateEndDate";
-import { formatDate } from "./formatDate";
+import { formatDate, formatBirthDate } from "./formatDate";
 
-export { calculateEndDate, formatDate }
+export { calculateEndDate, formatDate, formatBirthDate }

@@ -1,0 +1,58 @@
+.container {
+  display: flex;
+  /* max-width: 900px; */
+  width: 100%;
+  background: #fff;
+  border-radius: 3px;
+  overflow: hidden;
+  color: #000000;
+  /* padding-left: 300px;
+  padding-right: 300px; */
+  box-sizing: border-box;
+}
+
+.formSection {
+  border-top: 1px solid #999999;
+  padding: 30px;
+  flex: 1;
+}
+
+.formTitle {
+  size: 24px;
+  font-weight: 700px;
+}
+
+.formSection p {
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #666;
+}
+
+.terms {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 15px;
+}
+
+.terms a {
+  color: #ed3a7a;
+  text-decoration: none;
+}
+
+.email {
+  font-size: 14px;
+  margin-top: 15px;
+  text-align: center;
+}
+
+.email a {
+  color: #ed3a7a;
+  text-decoration: none;
+}
+
+.imageSection {
+  flex: 1;
+  background: url("http://35.176.180.59/wp-content/uploads/2024/11/contacty-us-1.jpeg")
+    no-repeat center center;
+  background-size: cover;
+}

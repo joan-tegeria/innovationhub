@@ -1,0 +1,45 @@
+.container {
+  background-image: url("http://35.176.180.59/wp-content/uploads/2024/12/back.png");
+  width: 100%;
+  height: 1240px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* -webkit-filter: blur(8px); */
+}
+
+.formContainer {
+  width: 780px;
+  height: 1120px;
+  background-color: white;
+  padding-inline: 54px;
+  padding-top: 50px;
+  padding-bottom: 25px;
+  box-sizing: border-box;
+}
+
+.desc {
+  color: #222222;
+  font-size: 16px;
+  font-weight: 400;
+  margin: 0;
+  padding: 0;
+}
+.formTitle {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 26px;
+}
+
+.title {
+  color: #222222;
+  font-weight: 700;
+  font-size: 28px;
+}
+
+.stepper {
+  margin-bottom: 26px;
+}

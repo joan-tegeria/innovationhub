@@ -8,7 +8,10 @@ function DebugDevPage() {
     navigate("/pdesk");
   };
 
-  const navigateToAbout = () => {
+  const navigateToContact = () => {
+    navigate("/contact");
+  };
+  const navigateToOffice = () => {
     navigate("/fullOffice");
   };
 
@@ -19,6 +22,12 @@ function DebugDevPage() {
       <div>
         <button onClick={navigateToPersonalDesk} style={buttonStyle}>
           Go to Personal Desk
+        </button>
+        <button onClick={navigateToContact} style={buttonStyle}>
+          Go to Contact Us
+        </button>
+        <button onClick={navigateToOffice} style={buttonStyle}>
+          Go to Full Office
         </button>
         {/* <button onClick={navigateToAbout} style={buttonStyle}>
           Go to Full Office

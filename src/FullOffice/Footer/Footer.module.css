@@ -1,0 +1,36 @@
+.formFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  color: #222222;
+  font-weight: 700;
+  font-size: 28px;
+}
+
+.priceInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.totalPay {
+  color: #999999;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.price {
+  font-weight: 700;
+  font-size: 20px;
+  color: #222222;
+}
+
+.btnRow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 19px;
+}

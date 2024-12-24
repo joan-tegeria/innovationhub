@@ -16,6 +16,26 @@ export default function BookingProvider({ children }) {
     workspace: "",
   });
 
+  const [fullOfficeInfo, setFullOfficeInfo] = useState({
+    selectDate: "",
+    endDate: "",
+    businessName: "",
+    nipt: "",
+    businessSize: "",
+    email: "",
+    street: "",
+    city: "",
+    workspace: "",
+    phoneNumber: "",
+  });
+
+  const handleFullOffice = (field, value) => {
+    setFullOfficeInfo((prevState) => ({
+      ...prevState,
+      [field]: value,
+    }));
+  };
+
   const handlePersonalDesk = (field, value) => {
     setPersonalDeskUserInfo((prevState) => ({
       ...prevState,
@@ -54,6 +74,9 @@ export default function BookingProvider({ children }) {
         period,
         setPeriod,
         setPersonalDeskUserInfo,
+        handleFullOffice,
+        fullOfficeInfo,
+        setFullOfficeInfo,
       }}
     >
       {children}
