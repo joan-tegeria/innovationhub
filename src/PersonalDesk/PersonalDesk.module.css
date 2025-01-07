@@ -1,23 +1,14 @@
-.container {
-  background-image: url("http://35.176.180.59/wp-content/uploads/2024/12/back.png");
-  width: 100%;
-  height: 1140px;
-  background-size: cover;
-  background-position: center;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  /* -webkit-filter: blur(8px); */
-}
-
 .formContainer {
+  border: 1px solid black;
   width: 780px;
-  height: 1003px;
+  /* height: 1003px; */
   background-color: white;
   padding-inline: 54px;
   padding-top: 50px;
   padding-bottom: 25px;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
 .desc {
@@ -42,4 +33,8 @@
 
 .stepper {
   margin-bottom: 26px;
+}
+
+.formBody {
+  flex: 2;
 }

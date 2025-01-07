@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import styles from "./Information.module.css";
 import LabeledInput from "../../components/LabeledInput";
 import { useBooking } from "../../context/BookingContext";
+
 import CircularProgress, {
   circularProgressClasses,
 } from "@mui/material/CircularProgress";

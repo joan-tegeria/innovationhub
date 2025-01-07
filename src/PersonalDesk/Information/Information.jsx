@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import styles from "./Information.module.css";
 import LabeledInput from "../../components/LabeledInput";
 import { useBooking } from "../../context/BookingContext";
+import infowhite from "../../assets/infowhite.svg";
+import infoico from "../../assets/info.svg";
 import CircularProgress, {
   circularProgressClasses,
 } from "@mui/material/CircularProgress";
@@ -21,7 +23,7 @@ export default function Information({
 }) {
   const { personalDeskUserInfo, handlePersonalDesk, period, setPeriod } =
     useBooking();
-  const [error, setError] = useState(false);
+  const [info, setInfo] = useState("error");
   // useEffect(() => {
   //   console.log(
   //     "🚀 ~ Information ~ personalDeskUserInfo:",
@@ -60,9 +62,39 @@ export default function Information({
     );
   }
 
+  let Info = null;
+
+  switch (info) {
+    case "":
+      Info = null;
+      break;
+    case "error":
+      Info = (
+        <div className={styles.error}>
+          <div className={styles.errorIcon}>
+            <img src={infowhite} alt="" />
+          </div>
+          <span>The access to the space is for 24 hours.</span>
+        </div>
+      );
+      break;
+    case "info":
+      Info = (
+        <div className={styles.info}>
+          <img src={infoico} alt="" />
+          <span>The access to the space is for 24 hours.</span>
+        </div>
+      );
+      break;
+    default:
+      Info = null;
+      break;
+  }
+
   return (
     <div className={styles.formBody}>
-      <div style={{ width: "316px", marginBottom: "25px" }}>
+      <div className={styles.sectionTittle}>Space Information</div>
+      <div className={styles.formRow}>
         <LabeledInput
           label={"Select space"}
           // placeholder={"eg. John"}
@@ -97,6 +129,9 @@ export default function Information({
           }}
         />
       </div>
+
+      {Info}
+
       <div className={styles.divider} />
       <div className={styles.sectionTittle}>Personal Information</div>
       <div className={styles.formRow}>

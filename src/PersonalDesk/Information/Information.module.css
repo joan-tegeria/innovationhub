@@ -19,3 +19,38 @@
   background-color: #999999;
   margin-bottom: 20px;
 }
+
+.info {
+  width: 100%;
+  height: 42px;
+  box-sizing: border-box;
+  padding-left: 12px;
+  border: 1px solid #999999;
+  background-color: #efefef;
+  display: flex;
+  align-items: center;
+  margin-bottom: 32px;
+  gap: 8px;
+}
+
+.error {
+  width: 100%;
+  height: 42px;
+  box-sizing: border-box;
+  /* padding-left: 12px; */
+  border: 1px solid #ff3e48;
+  background-color: #ff3e481a;
+  display: flex;
+  align-items: center;
+  margin-bottom: 32px;
+  gap: 8px;
+}
+
+.errorIcon {
+  background-color: #ff3e48;
+  width: 46px;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

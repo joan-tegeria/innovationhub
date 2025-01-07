@@ -34,18 +34,19 @@ const CustomStepLabel = styled(StepLabel)(({ theme }) => ({
   "& .MuiStepIcon-root": {
     color: "#E0E0E0", // Default color for the step icons
     "&.Mui-active": {
-      color: "#01A9BB", // Active step color
+      color: "#886DDE", // Active step color
     },
     "&.Mui-completed": {
-      color: "#01A9BB", // Completed step color
+      color: "#886DDE", // Completed step color
     },
   },
   "& .MuiStepLabel-label": {
     color: "#BDBDBD", // Default text color
     "&.Mui-active": {
-      color: "#000000", // Active step text color
+      color: "#886DDE", // Active step text color
       fontWeight: 600,
     },
+
     textAlign: "center", // Center the labels
   },
 }));
@@ -76,9 +77,7 @@ export default function PersonalDesk() {
     );
   }, [personalDeskUserInfo]);
 
-  //Handlers
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const [info, setInfo] = useState("error");
 
   useEffect(() => {
     const getAllOffices = async () => {
@@ -246,19 +245,11 @@ export default function PersonalDesk() {
 
   return (
     <>
-      {/* <Modal open={open} onClose={handleClose} title={"Error"} isError={true}>
-        <div>Hello Wolrd</div>
-      </Modal> */}
-      <div className={styles.container}>
-        <div className={styles.formContainer}>
+      {/* <div className={styles.container}> */}
+      <div className={styles.formContainer}>
+        <div className={styles.formBody}>
           <div className={styles.formTitle}>
             <span className={styles.title}>Ready to get started</span>
-            <p className={styles.desc}>
-              Reserve your ideal space today, designed for productivity and
-              tailored to your needs. Enjoy perks like reliable high-speed
-              Wi-Fi, fully equipped meeting rooms, and a comfortable,
-              professional environment where you can thrive.
-            </p>
           </div>
 
           {/* Stepper */}
@@ -280,18 +271,19 @@ export default function PersonalDesk() {
           <div className={styles.stepContent}>
             {stepComponents[activeStep] || stepComponents[0]}
           </div>
-          {!loading && (
-            <Footer
-              price={price}
-              handleNext={handleNext}
-              handleBack={handleBack}
-              isBackDisabled={activeStep === 0}
-              isNextDisabled={activeStep === steps.length - 1}
-              isLast={activeStep === 2}
-            />
-          )}
         </div>
+        {!loading && (
+          <Footer
+            price={price}
+            handleNext={handleNext}
+            handleBack={handleBack}
+            isBackDisabled={activeStep === 0}
+            isNextDisabled={activeStep === steps.length - 1}
+            isLast={activeStep === 2}
+          />
+        )}
       </div>
+      {/* </div> */}
     </>
   );
 }
