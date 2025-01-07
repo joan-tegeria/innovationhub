@@ -76,7 +76,7 @@ export default function FullOffice() {
   useEffect(() => {
     const getAllOffices = async () => {
       try {
-        setLoading(true);
+        // setLoading(true);
         const {
           data: { data: allOffices },
         } = await axios.get(
@@ -99,7 +99,7 @@ export default function FullOffice() {
   }, []);
 
   const sendBookRequest = async () => {
-    setLoading(true);
+    // setLoading(true);
     const userData = {
       name: fullOfficeInfo.businessName,
       lastName: fullOfficeInfo.businessName,
@@ -213,51 +213,51 @@ export default function FullOffice() {
       {/* <Modal open={open} onClose={handleClose} title={"Error"} isError={true}>
         <div>Hello Wolrd</div>
       </Modal> */}
-      <div className={styles.container}>
-        <div className={styles.formContainer}>
-          <div className={styles.formTitle}>
-            <span className={styles.title}>Ready to get started</span>
-            <p className={styles.desc}>
-              Reserve your ideal space today, designed for productivity and
-              tailored to your needs. Enjoy perks like reliable high-speed
-              Wi-Fi, fully equipped meeting rooms, and a comfortable,
-              professional environment where you can thrive.
-            </p>
-          </div>
-
-          {/* Stepper */}
-          <div className={styles.stepper}>
-            <Stepper
-              activeStep={activeStep}
-              nonLinear // Ensures the labels are horizontally aligned
-              connector={<CustomStepConnector />}
-            >
-              {steps.map((label, index) => (
-                <Step key={label}>
-                  <CustomStepLabel>{label}</CustomStepLabel>
-                </Step>
-              ))}
-            </Stepper>
-          </div>
-
-          {/* Render step content */}
-          <div className={styles.stepContent}>
-            {stepComponents[activeStep] || stepComponents[0]}
-          </div>
-          {!loading && (
-            <Footer
-              price={price}
-              handleNext={
-                activeStep === steps.length - 1 ? resetForm : handleNext
-              }
-              handleBack={resetForm}
-              isBackDisabled={activeStep === 0}
-              isNextDisabled={activeStep === steps.length - 1}
-              isLast={activeStep === 1}
-            />
-          )}
+      {/* <div className={styles.container}> */}
+      <div className={styles.formContainer}>
+        <div className={styles.formTitle}>
+          <span className={styles.title}>Ready to get started</span>
+          <p className={styles.desc}>
+            Reserve your ideal space today, designed for productivity and
+            tailored to your needs. Enjoy perks like reliable high-speed Wi-Fi,
+            fully equipped meeting rooms, and a comfortable, professional
+            environment where you can thrive.
+          </p>
         </div>
+
+        {/* Stepper */}
+        {/* <div className={styles.stepper}>
+          <Stepper
+            activeStep={activeStep}
+            nonLinear // Ensures the labels are horizontally aligned
+            connector={<CustomStepConnector />}
+          >
+            {steps.map((label, index) => (
+              <Step key={label}>
+                <CustomStepLabel>{label}</CustomStepLabel>
+              </Step>
+            ))}
+          </Stepper>
+        </div> */}
+
+        {/* Render step content */}
+        <div className={styles.stepContent}>
+          {stepComponents[activeStep] || stepComponents[0]}
+        </div>
+        {!loading && (
+          <Footer
+            price={price}
+            handleNext={
+              activeStep === steps.length - 1 ? resetForm : handleNext
+            }
+            handleBack={resetForm}
+            isBackDisabled={activeStep === 0}
+            isNextDisabled={activeStep === steps.length - 1}
+            isLast={activeStep === 1}
+          />
+        )}
       </div>
+      {/* </div> */}
     </>
   );
 }
