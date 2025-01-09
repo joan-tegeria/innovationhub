@@ -20,10 +20,12 @@ export default function Information({
   setIsLoading,
   checkOffice,
   workspaces,
+  info,
+  infoMessage,
 }) {
   const { personalDeskUserInfo, handlePersonalDesk, period, setPeriod } =
     useBooking();
-  const [info, setInfo] = useState("error");
+
   // useEffect(() => {
   //   console.log(
   //     "🚀 ~ Information ~ personalDeskUserInfo:",
@@ -74,7 +76,7 @@ export default function Information({
           <div className={styles.errorIcon}>
             <img src={infowhite} alt="" />
           </div>
-          <span>The access to the space is for 24 hours.</span>
+          <span>{infoMessage}</span>
         </div>
       );
       break;
@@ -82,7 +84,7 @@ export default function Information({
       Info = (
         <div className={styles.info}>
           <img src={infoico} alt="" />
-          <span>The access to the space is for 24 hours.</span>
+          <span>{infoMessage}</span>
         </div>
       );
       break;

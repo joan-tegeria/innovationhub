@@ -72,7 +72,7 @@ export default function Finished({ loading, setIsLoading }) {
           <div>{personalDeskUserInfo.totalToPay}</div>
         </div>
       </div>
-      <div className={styles.divider} />
+      {/* <div className={styles.divider} /> */}
     </div>
   );
 }

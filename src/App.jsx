@@ -7,21 +7,26 @@ import BookingProvider from "./context/BookingContext";
 import Home from "./Home";
 import ContactUs from "./ContactUs";
 import FullOffice from "./FullOffice";
+import { AuthProvider } from "./context/Auth";
+import DeskBooking from "./Desks";
 function App() {
   return (
-    <BookingProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Define the main route for "/personaldesk" */}
-          <Route path="/pdesk" element={<PersonalDesk />} />
+    <AuthProvider>
+      <BookingProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Define the main route for "/personaldesk" */}
+            <Route path="/pdesk" element={<PersonalDesk />} />
 
-          {/* Optionally, you can add a fallback route or home route */}
-          <Route path="/fullOffice" element={<FullOffice />} />
-          <Route path="/" element={<Home />} />
-          <Route path="/contact" element={<ContactUs />} />
-        </Routes>
-      </BrowserRouter>
-    </BookingProvider>
+            {/* Optionally, you can add a fallback route or home route */}
+            <Route path="/fullOffice" element={<FullOffice />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/contact" element={<ContactUs />} />
+            <Route path="/desks" element={<DeskBooking />} />
+          </Routes>
+        </BrowserRouter>
+      </BookingProvider>
+    </AuthProvider>
   );
 }
 

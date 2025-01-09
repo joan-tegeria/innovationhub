@@ -15,6 +15,10 @@ function DebugDevPage() {
     navigate("/fullOffice");
   };
 
+  const navigateToDesks = () => {
+    navigate("/desks");
+  };
+
   return (
     <div style={{ padding: "20px", textAlign: "center" }}>
       <h1>Debug Development Page</h1>
@@ -28,6 +32,9 @@ function DebugDevPage() {
         </button>
         <button onClick={navigateToOffice} style={buttonStyle}>
           Go to Full Office
+        </button>
+        <button onClick={navigateToDesks} style={buttonStyle}>
+          Go to Desks
         </button>
         {/* <button onClick={navigateToAbout} style={buttonStyle}>
           Go to Full Office

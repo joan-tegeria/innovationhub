@@ -29,7 +29,7 @@ const ContactForm = () => {
 
     try {
       const response = await fetch(
-        "https://8ey3ox6oxi.execute-api.eu-central-1.amazonaws.com/prod/contact",
+        "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod//contact",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

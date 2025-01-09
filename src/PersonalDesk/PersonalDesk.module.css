@@ -1,6 +1,6 @@
 .formContainer {
-  border: 1px solid black;
   width: 780px;
+  min-height: 966px;
   /* height: 1003px; */
   background-color: white;
   padding-inline: 54px;
@@ -8,6 +8,7 @@
   padding-bottom: 25px;
   box-sizing: border-box;
   display: flex;
+  justify-content: center;
   flex-direction: column;
 }
 
@@ -29,6 +30,7 @@
   color: #222222;
   font-weight: 700;
   font-size: 28px;
+  margin-bottom: 20px;
 }
 
 .stepper {

@@ -5,6 +5,12 @@
   margin-bottom: 9px;
 }
 
+.formBody {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .formRow {
   display: flex;
   justify-content: center;

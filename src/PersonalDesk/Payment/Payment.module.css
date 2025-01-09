@@ -6,7 +6,9 @@
 }
 
 .formBody {
-  height: 501px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
 .formRow {
@@ -22,4 +24,45 @@
   height: 1px;
   background-color: #999999;
   margin-bottom: 20px;
+}
+
+.serviceDetails {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  height: 75px;
+  box-sizing: border-box;
+  background-color: #efefef;
+  margin-bottom: 32px;
+}
+
+.period {
+  background-color: #4264af;
+  border-radius: 24px;
+  width: 71px;
+  height: 34px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.period span {
+  font-size: 12px;
+  color: white;
+  font-weight: 800;
+}
+
+.row {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 16px;
+}
+
+.infoCol {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }

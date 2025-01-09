@@ -20,6 +20,7 @@ import Footer from "./Footer";
 import Payment from "./Payment";
 import Modal from "./Modal";
 import Finished from "./Finished";
+import { useAuth } from "../context/Auth";
 
 const steps = ["Information", "Payment", "Finished"];
 
@@ -61,6 +62,9 @@ export default function PersonalDesk() {
   const [randomSeat, setRandomSeat] = useState("");
   const [open, setOpen] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [isAvaliable, setIsAvaliable] = useState(false);
+  const [info, setInfo] = useState("none");
+  const [infoMessage, setInfoMessage] = useState("");
   const [workspaces, setWorkspaces] = useState([{ value: "", label: "" }]);
   //Context
   const {
@@ -70,6 +74,9 @@ export default function PersonalDesk() {
     handlePersonalDesk,
   } = useBooking();
 
+  const { accessToken, tokenType, tokenLoading, error } = useAuth();
+  console.log("🚀 ~ PersonalDesk ~ accessToken:", accessToken);
+
   useEffect(() => {
     console.log(
       "🚀 ~ PersonalDesk ~ personalDeskUserInfo:",
@@ -77,32 +84,37 @@ export default function PersonalDesk() {
     );
   }, [personalDeskUserInfo]);
 
-  const [info, setInfo] = useState("error");
-
   useEffect(() => {
-    const getAllOffices = async () => {
-      try {
-        setLoading(true);
-        const {
-          data: { data: allOffices },
-        } = await axios.get(
-          "https://8ey3ox6oxi.execute-api.eu-central-1.amazonaws.com/prod/leads/shared"
-        );
+    if (!tokenLoading) {
+      const getAllOffices = async () => {
+        try {
+          setLoading(true);
+          const {
+            data: { data: allOffices },
+          } = await axios.get(
+            "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/shared",
+            {
+              headers: {
+                Authorization: `${tokenType} ${accessToken}`,
+              },
+            }
+          );
 
-        console.log("🚀 ~ checkOfficeAvaliablity ~ allOffices:", allOffices);
-        const transformed = allOffices.map((item) => ({
-          value: item.id,
-          label: item.Name,
-        }));
-        setWorkspaces(transformed);
-        setLoading(false);
-        handlePersonalDesk("workspace", transformed[0].value);
-      } catch (error) {
-        console.log("🚀 ~ getAllOffices ~ error:", error);
-      }
-    };
-    getAllOffices();
-  }, []);
+          console.log("🚀 ~ checkOfficeAvaliablity ~ allOffices:", allOffices);
+          const transformed = allOffices.map((item) => ({
+            value: item.id,
+            label: item.Name,
+          }));
+          setWorkspaces(transformed);
+          setLoading(false);
+          handlePersonalDesk("workspace", transformed[0].value);
+        } catch (error) {
+          console.log("🚀 ~ getAllOffices ~ error:", error);
+        }
+      };
+      getAllOffices();
+    }
+  }, [tokenLoading]);
 
   const checkOfficeAvaliablity = async (startDate) => {
     try {
@@ -110,13 +122,18 @@ export default function PersonalDesk() {
       const toDate = calculateEndDate(fromDate, period);
       const endDate = dayjs(personalDeskUserInfo.toDate);
 
-      handlePersonalDesk("selectDate", fromDate.format("YYYY-MM-DDTHH:mm:ssZ"));
-      handlePersonalDesk("endDate", endDate.format("YYYY-MM-DDTHH:mm:ssZ"));
+      handlePersonalDesk("selectDate", fromDate.format("YYYY-MM-DD"));
+      handlePersonalDesk("endDate", endDate.format("YYYY-MM-DD"));
 
       const { data: availabilityData } = await axios.get(
-        `https://8ey3ox6oxi.execute-api.eu-central-1.amazonaws.com/prod/leads/shared/${
+        `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/shared/${
           personalDeskUserInfo.workspace
-        }?from=${formatDate(startDate)}&to=${formatDate(toDate)}`
+        }?from=${formatDate(startDate)}&to=${formatDate(toDate)}`,
+        {
+          headers: {
+            Authorization: `${tokenType} ${accessToken}`,
+          },
+        }
       );
 
       setRandomSeat(
@@ -124,26 +141,12 @@ export default function PersonalDesk() {
           Math.floor(Math.random() * availabilityData.availableSeats.length)
         ]
       );
+      setInfo("info");
+      setInfoMessage("Space is avaliable for " + period);
     } catch (error) {
       console.log("🚀 ~ checkOfficeAvaliablity ~ error:", error);
     }
   };
-
-  // const isUserEmpty = Object.values(personalDeskUserInfo).some(
-  //   (value) => value === "" || value === null || value === undefined
-  // );
-
-  // useEffect(() => {
-  //   if (hasError) {
-  //     if (isUserEmpty) {
-  //       console.log("I am empty");
-  //       return;
-  //     } else {
-  //       console.log("I am not empty");
-  //       setHasError(false);
-  //     }
-  //   }
-  // }, [personalDeskUserInfo]);
 
   const createUser = async () => {
     if (Object.values(personalDeskUserInfo).some((value) => !value)) {
@@ -160,6 +163,7 @@ export default function PersonalDesk() {
       // check: "ERROR",
       id: personalDeskUserInfo.idNumber,
     };
+    console.log("🚀 ~ createUser ~ userData:", userData);
 
     setLocalData(userData);
 
@@ -168,8 +172,13 @@ export default function PersonalDesk() {
       const {
         data: { data: response },
       } = await axios.post(
-        "https://8ey3ox6oxi.execute-api.eu-central-1.amazonaws.com/prod/account",
-        userData
+        "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/account",
+        userData,
+        {
+          headers: {
+            Authorization: `${tokenType} ${accessToken}`,
+          },
+        }
       );
       console.log("🚀 ~ createUser ~ response:", response);
       setLoading(false);
@@ -184,20 +193,28 @@ export default function PersonalDesk() {
 
   const bookOffice = async () => {
     const bookingData = {
+      username:
+        personalDeskUserInfo.firstName + " " + personalDeskUserInfo.lastName,
       user: userId,
       room: personalDeskUserInfo.workspace,
-      phoneNumber: "0682464577",
+      // phoneNumber: "0682464577",
       from: personalDeskUserInfo.selectDate,
       to: personalDeskUserInfo.endDate,
       seat: randomSeat.toString(),
       referral: "Shared Office Form",
+      booked: period,
     };
     console.log("🚀 ~ bookOffice ~ bookingData:", bookingData);
 
     try {
       const bookingResponse = await axios.post(
-        "https://8ey3ox6oxi.execute-api.eu-central-1.amazonaws.com/prod/leads/shared",
-        bookingData
+        "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/shared",
+        bookingData,
+        {
+          headers: {
+            Authorization: `${tokenType} ${accessToken}`,
+          },
+        }
       );
       console.log("🚀 ~ bookOffice ~ bookingResponse:", bookingResponse);
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -212,6 +229,8 @@ export default function PersonalDesk() {
       createUser();
     } else if (activeStep === 1) {
       bookOffice();
+    } else if (activeStep === 2) {
+      handleBack();
     } else {
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
@@ -227,6 +246,7 @@ export default function PersonalDesk() {
       email: "",
       totalToPay: 5000,
     });
+    setInfo("none");
     setActiveStep(0);
   };
 
@@ -237,6 +257,8 @@ export default function PersonalDesk() {
         setIsLoading={setLoading}
         checkOffice={checkOfficeAvaliablity}
         workspaces={workspaces}
+        info={info}
+        infoMessage={infoMessage}
       />
     ),
     1: <Payment loading={loading} setIsLoading={setLoading} />,
@@ -278,7 +300,7 @@ export default function PersonalDesk() {
             handleNext={handleNext}
             handleBack={handleBack}
             isBackDisabled={activeStep === 0}
-            isNextDisabled={activeStep === steps.length - 1}
+            isNextDisabled={false}
             isLast={activeStep === 2}
           />
         )}

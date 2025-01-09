@@ -6,6 +6,7 @@ import CircularProgress, {
   circularProgressClasses,
 } from "@mui/material/CircularProgress";
 import { TextField } from "@mui/material";
+import Calendar from "../../assets/calendar.svg";
 
 const timePeriods = [
   { value: "24 Hours", label: "24 Hours" },
@@ -60,12 +61,21 @@ export default function Payment({ loading, setIsLoading }) {
 
   return (
     <div className={styles.formBody}>
-      <div className={styles.sectionTittle}>
-        This service has been scheduled for:
-      </div>
-      <div>
-        <p>Daily service (24h)</p>
-        <p>23 November 2024 - 30 November 2024</p>
+      <div className={styles.sectionTittle}>Service Details</div>
+      <div className={styles.serviceDetails}>
+        <div className={styles.infoCol}>
+          <div className={styles.row}>
+            <img src={Calendar} alt="calendar icon" />
+            <span>Flexible desk</span>
+          </div>
+          <div className={styles.row}>
+            <img src={Calendar} alt="calendar icon" />
+            <span>12 - 13 November 2024</span>
+          </div>
+        </div>
+        <div className={styles.period}>
+          <span>Daily</span>
+        </div>
       </div>
       <div className={styles.divider} />
       <div className={styles.sectionTittle}>Payment Information</div>
@@ -101,10 +111,23 @@ export default function Payment({ loading, setIsLoading }) {
           }
         />
       </div>
+      <div className={styles.divider} />
       <div className={styles.sectionTittle}>Address</div>
       <div className={styles.formRow}>
-        <TextField placeholder="Street" style={{ width: "100%" }} />
-        <TextField placeholder="City" style={{ width: "100%" }} />
+        <LabeledInput
+          label={"Street"}
+          placeholder={"Muhamet Gjollesha"}
+          // onChange={(event) =>
+          //   handlePersonalDesk("idNumber", event.target.value)
+          // }
+        />
+        <LabeledInput
+          label={"City"}
+          placeholder={"Tirana"}
+          // onChange={(event) =>
+          //   handlePersonalDesk("idNumber", event.target.value)
+          // }
+        />
       </div>
       <div className={styles.divider} />
     </div>

@@ -22,7 +22,7 @@
 
 .formBody {
   /* height: 501px; */
-  padding-top: 57px;
+  padding-top: 120px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -46,6 +46,10 @@
   font-size: 17px;
   color: #222222;
   margin-bottom: 29px;
+  background-color: #efefef;
+  padding: 20px 24px;
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
 }
 
 .infoTitle {

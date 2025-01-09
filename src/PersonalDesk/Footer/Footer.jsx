@@ -40,11 +40,11 @@ export default function Footer({
               backgroundColor: "#6E63BC",
             },
           }}
-          style={{ width: 150, height: 42 }}
+          style={{ width: isLast ? 671 : 150, height: 42 }}
           onClick={handleNext}
           disabled={isNextDisabled}
         >
-          {isLast ? "Finish" : "Next"}
+          {isLast ? "Start new booking" : "Next"}
         </Button>
       </div>
     </div>
