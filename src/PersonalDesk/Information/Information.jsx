@@ -10,9 +10,9 @@ import CircularProgress, {
 import { formatBirthDate } from "../../utility";
 
 const timePeriods = [
-  { value: "24 Hours", label: "24 Hours" },
-  { value: "1 Week", label: "1 Week" },
-  { value: "1 Month", label: "1 Month" },
+  { value: "Daily", label: "Daily" },
+  { value: "Weekly", label: "Weekly" },
+  { value: "Monthly", label: "Monthly" },
 ];
 
 export default function Information({
@@ -113,7 +113,7 @@ export default function Information({
       <div className={styles.formRow}>
         <LabeledInput
           label={"Time Period"}
-          placeholder={"eg. John"}
+          // placeholder={"eg. John"}
           items={timePeriods}
           type="select"
           isRequired={true}

@@ -7,14 +7,14 @@ export function calculateEndDate(startDate, timePeriodValue) {
     let date = dayjs(startDate);
 
     switch (timePeriodValue) {
-        case "24 Hours":
-            date = date.add(24, "hour"); // Add 24 hours
+        case "Daily":
+            date = date.add(24, "hour"); // Add Daily
             break;
-        case "1 Week":
-            date = date.add(1, "week"); // Add 1 week
+        case "Weekly":
+            date = date.add(1, "week"); // Add Weekly
             break;
-        case "1 Month":
-            date = date.add(1, "month"); // Add 1 month
+        case "Monthly":
+            date = date.add(1, "month"); // Add Monthly
             break;
         default:
             console.log("Invalid time period");

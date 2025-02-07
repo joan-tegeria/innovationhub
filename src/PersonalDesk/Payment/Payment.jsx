@@ -9,9 +9,9 @@ import { TextField } from "@mui/material";
 import Calendar from "../../assets/calendar.svg";
 
 const timePeriods = [
-  { value: "24 Hours", label: "24 Hours" },
-  { value: "1 Week", label: "1 Week" },
-  { value: "1 Month", label: "1 Month" },
+  { value: "Daily", label: "Daily" },
+  { value: "Weekly", label: "Weekly" },
+  { value: "Monthly", label: "Monthly" },
 ];
 
 export default function Payment({ loading, setIsLoading }) {

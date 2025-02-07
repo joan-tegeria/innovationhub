@@ -14,6 +14,7 @@ import { styled } from "@mui/material/styles";
 import { Alert } from "@mui/material";
 
 import { useBooking } from "../context/BookingContext";
+import { useAuth } from "../context/Auth";
 
 import Information from "./Information";
 import Footer from "./Footer";
@@ -64,6 +65,7 @@ export default function FullOffice() {
   //Context
   const { fullOfficeInfo, period, handleFullOffice, setFullOfficeInfo } =
     useBooking();
+  const { accessToken, tokenType, tokenLoading } = useAuth();
 
   useEffect(() => {
     console.log("🚀 ~ PersonalDesk ~ fullOfficeInfo:", fullOfficeInfo);
@@ -80,7 +82,12 @@ export default function FullOffice() {
         const {
           data: { data: allOffices },
         } = await axios.get(
-          "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod//leads/office"
+          "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/private",
+          {
+            headers: {
+              Authorization: `${tokenType} ${accessToken}`,
+            },
+          }
         );
 
         console.log("🚀 ~ checkOfficeAvaliablity ~ allOffices:", allOffices);
@@ -108,10 +115,6 @@ export default function FullOffice() {
       referral: "Private Office Form",
       birthdate: "2003-11-02",
       id: "123456789123",
-      // address: fullOfficeInfo.street,
-      // state: fullOfficeInfo.street,
-      // country: "Albania",
-      // code: "3001",
       nipt: fullOfficeInfo.nipt,
       phone: fullOfficeInfo.phoneNumber,
     };
@@ -120,24 +123,34 @@ export default function FullOffice() {
       const {
         data: { data: response },
       } = await axios.post(
-        "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod//leads",
-        userData
+        "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/leads",
+        userData,
+        {
+          headers: {
+            Authorization: `${tokenType} ${accessToken}`,
+          },
+        }
       );
       console.log("🚀 ~ sendBookRequest ~ response:", response);
-
+      console.log("fullOfficeInfo", fullOfficeInfo);
       const bookingData = {
         username: fullOfficeInfo.businessName + " " + fullOfficeInfo.nipt,
         user: response.id,
-        from: fullOfficeInfo.selectedDate,
+        from: fullOfficeInfo.selectDate,
         to: fullOfficeInfo.endDate,
         room: fullOfficeInfo.workspace,
-        flexible: "no",
-        description: "Booking submitted via web form",
+        booking: period,
+        requestedFrom: "Business",
       };
 
       const bookingResponse = await axios.post(
-        "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod//leads/office",
-        bookingData
+        "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/private",
+        bookingData,
+        {
+          headers: {
+            Authorization: `${tokenType} ${accessToken}`,
+          },
+        }
       );
       console.log("🚀 ~ sendBookRequest ~ bookingResponse:", bookingResponse);
       setLoading(false);
@@ -152,8 +165,8 @@ export default function FullOffice() {
       const fromDate = dayjs(startDate);
       const toDate = calculateEndDate(fromDate, period);
 
-      const formattedStartDate = formatDate(startDate).replace(/\+/g, "%2B");
-      const formattedEndDate = formatDate(toDate).replace(/\+/g, "%2B");
+      const formattedStartDate = formatDate(startDate).replace(/\+/g, "+");
+      const formattedEndDate = formatDate(toDate).replace(/\+/g, "+");
 
       handleFullOffice("selectDate", formattedStartDate);
       handleFullOffice("endDate", formattedEndDate);
@@ -161,7 +174,12 @@ export default function FullOffice() {
       const {
         data: { data: response },
       } = await axios.get(
-        `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod//leads/office/${fullOfficeInfo.workspace}?from=${formattedStartDate}&to=${formattedEndDate}`
+        `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/private/${fullOfficeInfo.workspace}?from=${formattedStartDate}&to=${formattedEndDate}`,
+        {
+          headers: {
+            Authorization: `${tokenType} ${accessToken}`,
+          },
+        }
       );
       console.log("🚀 ~ checkOfficeAvaliablity ~ response:", response);
     } catch (error) {
@@ -207,6 +225,10 @@ export default function FullOffice() {
 
     1: <Finished />,
   };
+
+  if (!accessToken) {
+    return null;
+  }
 
   return (
     <>

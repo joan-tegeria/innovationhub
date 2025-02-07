@@ -9,13 +9,13 @@ const deskData = {
       type: "Flexible Desk",
       description: "Ideal for freelancers, remote workers, and digital nomads who need a flexible and collaborative workspace.",
       price: "12 EUR",
-      access: "for 24 hours access"
+      access: "for Daily access"
     },
     {
       type: "Dedicated Desk",
       description: "Your personal, reserved workspace in a productive and inspiring open environment.",
       price: "15 EUR",
-      access: "for 24 hours access"
+      access: "for Daily access"
     }
   ],
   weekly: [
@@ -32,7 +32,7 @@ const deskData = {
       access: "for 7 days access"
     }
   ],
-  monthly: [
+  Weekly: [
     {
       type: "Flexible Desk",
       description: "Ideal for freelancers, remote workers, and digital nomads who need a flexible and collaborative workspace.",
@@ -56,7 +56,7 @@ const DeskBooking = () => {
         <div className={styles.titleContainer}>
       <span className={styles.title}>Desks</span>
       <div className={styles.tabContainer}>
-        {['daily', 'weekly', 'monthly'].map((tab) => (
+        {['daily', 'weekly', 'Weekly'].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}

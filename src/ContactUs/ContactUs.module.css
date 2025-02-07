@@ -1,14 +1,12 @@
 .container {
   display: flex;
-  /* max-width: 900px; */
   width: 100%;
   background: #fff;
   border-radius: 3px;
   overflow: hidden;
   color: #000000;
-  /* padding-left: 300px;
-  padding-right: 300px; */
   box-sizing: border-box;
+  gap: 20px;
 }
 
 .formSection {
@@ -48,11 +46,4 @@
 .email a {
   color: #ed3a7a;
   text-decoration: none;
-}
-
-.imageSection {
-  flex: 1;
-  background: url("http://35.176.180.59/wp-content/uploads/2024/11/contacty-us-1.jpeg")
-    no-repeat center center;
-  background-size: cover;
 }

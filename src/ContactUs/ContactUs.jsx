@@ -3,9 +3,11 @@ import { TextField, Button } from "@mui/material";
 import styles from "./ContactUs.module.css";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+import { useAuth } from "../context/Auth";
 
 const ContactForm = () => {
   const [open, setOpen] = useState(false);
+  const { accessToken, tokenType, tokenLoading } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     lastName: "",
@@ -29,10 +31,13 @@ const ContactForm = () => {
 
     try {
       const response = await fetch(
-        "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod//contact",
+        "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/contact",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `${tokenType} ${accessToken}`,
+          },
           body: JSON.stringify(submitData),
         }
       );
@@ -51,6 +56,10 @@ const ContactForm = () => {
 
     setOpen(false);
   };
+
+  if (!accessToken) {
+    return null;
+  }
 
   return (
     <div className={styles.container}>
@@ -140,7 +149,6 @@ const ContactForm = () => {
           <a href="mailto:contact@innovationhub.al">contact@innovationhub.al</a>
         </p>
       </div>
-      <div className={styles.imageSection}></div>
     </div>
   );
 };

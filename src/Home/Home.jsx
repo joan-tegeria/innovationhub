@@ -19,6 +19,14 @@ function DebugDevPage() {
     navigate("/desks");
   };
 
+  const navigateToEvents = () => {
+    navigate("/events");
+  };
+
+  const navigateToMembershipPlans = () => {
+    navigate("/membershipplans");
+  };
+
   return (
     <div style={{ padding: "20px", textAlign: "center" }}>
       <h1>Debug Development Page</h1>
@@ -35,6 +43,12 @@ function DebugDevPage() {
         </button>
         <button onClick={navigateToDesks} style={buttonStyle}>
           Go to Desks
+        </button>
+        <button onClick={navigateToEvents} style={buttonStyle}>
+          Go to Events
+        </button>
+        <button onClick={navigateToMembershipPlans} style={buttonStyle}>
+          Go to Membership Plans
         </button>
         {/* <button onClick={navigateToAbout} style={buttonStyle}>
           Go to Full Office

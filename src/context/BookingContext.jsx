@@ -3,7 +3,7 @@ import React, { createContext, useState, useContext, useEffect } from "react";
 const BookingContext = createContext();
 
 export default function BookingProvider({ children }) {
-  const [period, setPeriod] = useState("24 Hours");
+  const [period, setPeriod] = useState("Daily");
   const [personalDeskUserInfo, setPersonalDeskUserInfo] = useState({
     selectDate: "",
     endDate: "",
