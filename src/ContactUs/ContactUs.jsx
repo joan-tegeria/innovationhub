@@ -76,8 +76,10 @@ const ContactForm = () => {
       <div className={styles.formSection}>
         <h1 className={styles.formTitle}>Join Our Habitat – Let's Connect</h1>
         <p>
-          No matter your budget or needs, we make it simple to find the ideal
-          workspace.
+          We're here to support your journey — whether it's finding the perfect
+          workspace, hosting impactful events, or fostering connections with
+          like-minded innovators. Reach out to discover how we can help you
+          thrive.
         </p>
         <form id="contact-form" onSubmit={handleSubmit}>
           <TextField
@@ -89,6 +91,14 @@ const ContactForm = () => {
             margin="normal"
             value={formData.name}
             onChange={handleChange}
+            sx={{
+              "& .MuiInputBase-root": {
+                fontFamily: "Termina, sans-serif",
+              },
+              "& .MuiInputLabel-root": {
+                fontFamily: "Termina, sans-serif",
+              },
+            }}
           />
           <TextField
             id="lastName"
@@ -99,6 +109,14 @@ const ContactForm = () => {
             margin="normal"
             value={formData.lastName}
             onChange={handleChange}
+            sx={{
+              "& .MuiInputBase-root": {
+                fontFamily: "Termina, sans-serif",
+              },
+              "& .MuiInputLabel-root": {
+                fontFamily: "Termina, sans-serif",
+              },
+            }}
           />
           <TextField
             id="email"
@@ -110,18 +128,34 @@ const ContactForm = () => {
             margin="normal"
             value={formData.email}
             onChange={handleChange}
+            sx={{
+              "& .MuiInputBase-root": {
+                fontFamily: "Termina, sans-serif",
+              },
+              "& .MuiInputLabel-root": {
+                fontFamily: "Termina, sans-serif",
+              },
+            }}
           />
           <TextField
             id="message"
             label="Message"
             multiline
-            rows={4}
+            rows={3}
             variant="outlined"
             fullWidth
             required
             margin="normal"
             value={formData.message}
             onChange={handleChange}
+            sx={{
+              "& .MuiInputBase-root": {
+                fontFamily: "Termina, sans-serif",
+              },
+              "& .MuiInputLabel-root": {
+                fontFamily: "Termina, sans-serif",
+              },
+            }}
           />
           <p className={styles.terms}>
             By clicking the button below, you agree to our{" "}
@@ -133,10 +167,10 @@ const ContactForm = () => {
             color="white"
             fullWidth
             sx={{
-              backgroundColor: "#6E63AC",
+              backgroundColor: "#EB3778",
               color: "white",
               "&:hover": {
-                backgroundColor: "#6E63BC",
+                backgroundColor: "#EB3779",
               },
               height: "48px",
             }}
@@ -149,6 +183,11 @@ const ContactForm = () => {
           <a href="mailto:contact@innovationhub.al">contact@innovationhub.al</a>
         </p>
       </div>
+      {/* <img
+        src={"http://35.176.180.59/wp-content/uploads/2025/02/Group-107-1.png"}
+        alt="Contact Us"
+        className={styles.image}
+      /> */}
     </div>
   );
 };

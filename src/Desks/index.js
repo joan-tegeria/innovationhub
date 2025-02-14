@@ -1,3 +1,3 @@
 import DeskBooking from "./Desks";
 
-export default DeskBooking
+export default DeskBooking;

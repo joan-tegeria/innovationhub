@@ -40,9 +40,9 @@ export default function Footer({
         <Button
           variant="contained"
           sx={{
-            backgroundColor: "#6E63AC",
+            backgroundColor: "#EB3778",
             "&:hover": {
-              backgroundColor: "#6E63BC",
+              backgroundColor: "#d62e69",
             },
           }}
           style={{

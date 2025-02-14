@@ -79,56 +79,7 @@ export default function Payment({ loading, setIsLoading }) {
       </div>
       <div className={styles.divider} />
       <div className={styles.sectionTittle}>Payment Information</div>
-      <div className={styles.formRow}>
-        <LabeledInput
-          label={"Card's holder name"}
-          placeholder={"Full Name"}
-          onChange={(event) =>
-            handlePersonalDesk("firstName", event.target.value)
-          }
-        />
-        <LabeledInput
-          label={"Card Number"}
-          placeholder={"XXXXXXXXXXXXXX"}
-          onChange={(event) =>
-            handlePersonalDesk("lastName", event.target.value)
-          }
-        />
-      </div>
-      <div className={styles.formRow}>
-        <LabeledInput
-          label={"CSV"}
-          placeholder={"XXXX"}
-          onChange={(event) =>
-            handlePersonalDesk("idNumber", event.target.value)
-          }
-        />
-        <LabeledInput
-          label={"Expiring date"}
-          placeholder={"mm/yy"}
-          onChange={(event) =>
-            handlePersonalDesk("idNumber", event.target.value)
-          }
-        />
-      </div>
-      <div className={styles.divider} />
-      <div className={styles.sectionTittle}>Address</div>
-      <div className={styles.formRow}>
-        <LabeledInput
-          label={"Street"}
-          placeholder={"Muhamet Gjollesha"}
-          // onChange={(event) =>
-          //   handlePersonalDesk("idNumber", event.target.value)
-          // }
-        />
-        <LabeledInput
-          label={"City"}
-          placeholder={"Tirana"}
-          // onChange={(event) =>
-          //   handlePersonalDesk("idNumber", event.target.value)
-          // }
-        />
-      </div>
+      <iframe src="" frameborder="0"></iframe>
       <div className={styles.divider} />
     </div>
   );

@@ -1,117 +1,34 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./MembershipPlans.module.css";
 import wifiIcon from "../assets/wifi.svg";
 import coffeeIcon from "../assets/coffe.svg";
-import dedicatedIcon from "../assets/coffe.svg";
+import dedicatedIcon from "../assets/dedicated.svg";
 // Import Swiper React components
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import api from "../utility/axiosConfig";
 
 // Import Swiper styles
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
-const MEMBERSHIP_PLANS = [
-  {
-    title: "Private Office",
-    price: "2500",
-    description:
-      "A fully equipped, private space for teams seeking maximum privacy.",
-    features: [
-      { text: "Private, lockable office space", icon: dedicatedIcon },
-      {
-        text: "Flexible seating arrangements for up to 260 people",
-        icon: wifiIcon,
-      },
-      {
-        text: "Access to communal kitchen and lounge area",
-        icon: dedicatedIcon,
-      },
-      {
-        text: "Flexible seating arrangements for up to 260 people",
-        icon: dedicatedIcon,
-      },
-      {
-        text: "Networking opportunities with like-minded individuals",
-        icon: dedicatedIcon,
-      },
-    ],
-    imageUrl: "http://35.176.180.59/wp-content/uploads/2024/11/image-15.png",
-    buttonText: "Get a quote",
-  },
-  {
-    title: "Dedicated Desk",
-    price: "1200",
-    description: "Your personal workspace in a collaborative environment.",
-    features: [
-      { text: "Reserved desk space", icon: dedicatedIcon },
-      { text: "High-speed internet access", icon: wifiIcon },
-      { text: "Free coffee and refreshments", icon: coffeeIcon },
-      { text: "Access to common areas", icon: dedicatedIcon },
-      { text: "Business address service", icon: dedicatedIcon },
-    ],
-    imageUrl: "http://35.176.180.59/wp-content/uploads/2024/11/image-15.png",
-    buttonText: "Get a quote",
-  },
-  {
-    title: "Event Space",
-    price: "15,000",
-    description: "Modern, flexible spaces for your next business event.",
-    features: [
-      { text: "Professional AV equipment", icon: dedicatedIcon },
-      { text: "High-speed WiFi", icon: wifiIcon },
-      { text: "Catering available", icon: coffeeIcon },
-      { text: "Flexible seating layouts", icon: dedicatedIcon },
-      { text: "Event support staff", icon: dedicatedIcon },
-    ],
-    imageUrl: "http://35.176.180.59/wp-content/uploads/2024/11/image-15.png",
-    buttonText: "Book now",
-  },
-  {
-    title: "Private Office",
-    price: "2500",
-    description:
-      "A fully equipped, private space for teams seeking maximum privacy.",
-    features: [
-      { text: "Private, lockable office space", icon: dedicatedIcon },
-      { text: "High-speed internet access", icon: wifiIcon },
-      { text: "24/7 building access", icon: dedicatedIcon },
-      { text: "Meeting room credits included", icon: dedicatedIcon },
-      { text: "Mail and package handling", icon: dedicatedIcon },
-    ],
-    imageUrl: "http://35.176.180.59/wp-content/uploads/2024/11/image-15.png",
-    buttonText: "Get a quote",
-  },
-  {
-    title: "Dedicated Desk",
-    price: "1200",
-    description: "Your personal workspace in a collaborative environment.",
-    features: [
-      { text: "Reserved desk space", icon: dedicatedIcon },
-      { text: "High-speed internet access", icon: wifiIcon },
-      { text: "Free coffee and refreshments", icon: coffeeIcon },
-      { text: "Access to common areas", icon: dedicatedIcon },
-      { text: "Business address service", icon: dedicatedIcon },
-    ],
-    imageUrl: "http://35.176.180.59/wp-content/uploads/2024/11/image-15.png",
-    buttonText: "Get a quote",
-  },
-  {
-    title: "Event Space",
-    price: "15,000",
-    description: "Modern, flexible spaces for your next business event.",
-    features: [
-      { text: "Professional AV equipment", icon: dedicatedIcon },
-      { text: "High-speed WiFi", icon: wifiIcon },
-      { text: "Catering available", icon: coffeeIcon },
-      { text: "Flexible seating layouts", icon: dedicatedIcon },
-      { text: "Event support staff", icon: dedicatedIcon },
-    ],
-    imageUrl: "http://35.176.180.59/wp-content/uploads/2024/11/image-15.png",
-    buttonText: "Book now",
-  },
-];
+const transformApiDataToPlans = (apiData) => {
+  return apiData.map((item) => {
+    const facilities = item.Facilities.split("\n");
+    return {
+      title: item.Name,
+      price: item.Price, // Keep the full price string including currency
+      description: item.Description,
+      features: facilities.map((facility) => ({
+        text: facility,
+        icon: coffeeIcon,
+      })),
+      imageUrl: "http://35.176.180.59/wp-content/uploads/2024/11/image-15.png",
+      buttonText: "Get a quote",
+    };
+  });
+};
 
 const PlanFeature = ({ icon, text }) => (
   <li className={styles.featureItem}>
@@ -124,13 +41,14 @@ const PlanCard = ({ plan }) => (
   <div className={styles.planCard}>
     <div className={styles.planImageContainer}>
       <img src={plan.imageUrl} alt={plan.title} className={styles.planImage} />
+      <h2 className={styles.planTitle}>{plan.title}</h2>
     </div>
     <div className={styles.planContent}>
-      <h2 className={styles.planTitle}>{plan.title}</h2>
       <div className={styles.priceSection}>
         <span className={styles.startingFrom}>Starting from</span>
         <span className={styles.price}>
-          {plan.price} ALL {plan.price !== "15,000" && "/day"}
+          {plan.price}
+          {plan.price.includes("300") ? "" : "/day"}
         </span>
       </div>
       <p className={styles.description}>{plan.description}</p>
@@ -148,6 +66,35 @@ const PlanCard = ({ plan }) => (
 );
 
 export default function MembershipPlans() {
+  const [plans, setPlans] = useState([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await api.get(
+          "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/categories"
+        );
+        const transformedPlans = transformApiDataToPlans(response.data.data);
+        // Duplicate the plans array with new unique keys
+        const duplicatedPlans = [
+          ...transformedPlans.map((plan) => ({
+            ...plan,
+            id: `original-${plan.title}`,
+          })),
+          ...transformedPlans.map((plan) => ({
+            ...plan,
+            id: `duplicate-${plan.title}`,
+          })),
+        ];
+        setPlans(duplicatedPlans);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
   return (
     <section className={styles.membershipPlansContainer}>
       <Swiper
@@ -155,30 +102,31 @@ export default function MembershipPlans() {
         spaceBetween={40}
         slidesPerView={2.5}
         centeredSlides={true}
+        initialSlide={Math.floor(plans.length / 4)}
         navigation
         loop={true}
-        // pagination={{ clickable: true }}
         autoplay={{
           delay: 30000,
           disableOnInteraction: false,
         }}
-        breakpoints={
-          {
-            //   640: {
-            //     slidesPerView: 1,
-            //   },
-            //   768: {
-            //     slidesPerView: 2,
-            //   },
-            //   1024: {
-            //     slidesPerView: 3,
-            //   },
-          }
-        }
+        breakpoints={{
+          640: {
+            slidesPerView: 1,
+            centeredSlides: true,
+          },
+          768: {
+            slidesPerView: 2,
+            centeredSlides: true,
+          },
+          1024: {
+            slidesPerView: 2.5,
+            centeredSlides: true,
+          },
+        }}
         className={styles.plansWrapper}
       >
-        {MEMBERSHIP_PLANS.map((plan, index) => (
-          <SwiperSlide key={index}>
+        {plans.map((plan) => (
+          <SwiperSlide key={plan.id}>
             <PlanCard plan={plan} />
           </SwiperSlide>
         ))}

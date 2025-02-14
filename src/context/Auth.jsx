@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-import axios from "axios";
+import api from "../utility/axiosConfig";
 
 // Create Context
 const AuthContext = createContext();
@@ -11,11 +11,19 @@ export const AuthProvider = ({ children }) => {
   const [tokenLoading, setTokenLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Set tokens globally for axios interceptor
+  useEffect(() => {
+    if (accessToken && tokenType) {
+      window._accessToken = accessToken;
+      window._tokenType = tokenType;
+    }
+  }, [accessToken, tokenType]);
+
   // Fetch the access token and token type
   useEffect(() => {
     const fetchAuthToken = async () => {
       try {
-        const response = await axios.post(
+        const response = await api.post(
           "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/oauth2/token?grant_type=client_credentials",
           null,
           {

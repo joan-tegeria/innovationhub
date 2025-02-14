@@ -1,72 +1,34 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import LogoCarousel from "../components/LogoCarousel/LogoCarousel";
+import styles from "./Home.module.css";
 
-function DebugDevPage() {
+function Home() {
   const navigate = useNavigate();
 
-  const navigateToPersonalDesk = () => {
-    navigate("/pdesk");
-  };
-
-  const navigateToContact = () => {
-    navigate("/contact");
-  };
-  const navigateToOffice = () => {
-    navigate("/fullOffice");
-  };
-
-  const navigateToDesks = () => {
-    navigate("/desks");
-  };
-
-  const navigateToEvents = () => {
-    navigate("/events");
-  };
-
-  const navigateToMembershipPlans = () => {
-    navigate("/membershipplans");
-  };
-
   return (
-    <div style={{ padding: "20px", textAlign: "center" }}>
-      <h1>Debug Development Page</h1>
-      <p>Click a button below to navigate to a different route:</p>
-      <div>
-        <button onClick={navigateToPersonalDesk} style={buttonStyle}>
-          Go to Personal Desk
+    <div className={styles.container}>
+      {/* Other home content will go here */}
+
+      <section className={styles.partnersSection}>
+        <h2 className={styles.sectionTitle}>Our Partners</h2>
+        <LogoCarousel />
+      </section>
+
+      {/* Navigation buttons can be styled and placed appropriately in the layout */}
+      <nav className={styles.navigation}>
+        <button onClick={() => navigate("/pdesk")}>Personal Desk</button>
+        <button onClick={() => navigate("/contact")}>Contact Us</button>
+        <button onClick={() => navigate("/fullOffice")}>Full Office</button>
+        <button onClick={() => navigate("/desks")}>Desks</button>
+        <button onClick={() => navigate("/events")}>Events</button>
+        <button onClick={() => navigate("/membershipplans")}>
+          Membership Plans
         </button>
-        <button onClick={navigateToContact} style={buttonStyle}>
-          Go to Contact Us
-        </button>
-        <button onClick={navigateToOffice} style={buttonStyle}>
-          Go to Full Office
-        </button>
-        <button onClick={navigateToDesks} style={buttonStyle}>
-          Go to Desks
-        </button>
-        <button onClick={navigateToEvents} style={buttonStyle}>
-          Go to Events
-        </button>
-        <button onClick={navigateToMembershipPlans} style={buttonStyle}>
-          Go to Membership Plans
-        </button>
-        {/* <button onClick={navigateToAbout} style={buttonStyle}>
-          Go to Full Office
-        </button> */}
-      </div>
+        <button onClick={() => navigate("/partners")}>Partners</button>
+      </nav>
     </div>
   );
 }
 
-const buttonStyle = {
-  margin: "10px",
-  padding: "10px 20px",
-  fontSize: "16px",
-  cursor: "pointer",
-  backgroundColor: "#4CAF50",
-  color: "white",
-  border: "none",
-  borderRadius: "5px",
-};
-
-export default DebugDevPage;
+export default Home;

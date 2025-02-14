@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styles from "./PersonalDesk.module.css";
-import axios from "axios";
+import api from "../utility/axiosConfig";
 import dayjs from "dayjs";
 import { useLocalStorage } from "../hooks/useLocalStorage/useLocalStorage";
 
@@ -35,19 +35,21 @@ const CustomStepLabel = styled(StepLabel)(({ theme }) => ({
   "& .MuiStepIcon-root": {
     color: "#E0E0E0", // Default color for the step icons
     "&.Mui-active": {
-      color: "#886DDE", // Active step color
+      color: "#EB3778", // Active step color
     },
     "&.Mui-completed": {
-      color: "#886DDE", // Completed step color
+      color: "#EB3778", // Completed step color
     },
   },
   "& .MuiStepLabel-label": {
     color: "#BDBDBD", // Default text color
     "&.Mui-active": {
-      color: "#886DDE", // Active step text color
+      color: "#EB3778", // Active step text color
       fontWeight: 600,
     },
-
+    "&.Mui-completed": {
+      color: "#EB3778", // Completed step text color
+    },
     textAlign: "center", // Center the labels
   },
 }));
@@ -91,7 +93,7 @@ export default function PersonalDesk() {
           setLoading(true);
           const {
             data: { data: allOffices },
-          } = await axios.get(
+          } = await api.get(
             "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/shared",
             {
               headers: {
@@ -125,7 +127,7 @@ export default function PersonalDesk() {
       handlePersonalDesk("selectDate", fromDate.format("YYYY-MM-DD"));
       handlePersonalDesk("endDate", endDate.format("YYYY-MM-DD"));
 
-      const { data: availabilityData } = await axios.get(
+      const { data: availabilityData } = await api.get(
         `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/shared/${
           personalDeskUserInfo.workspace
         }?from=${formatDate(startDate)}&to=${formatDate(toDate)}`,
@@ -171,7 +173,7 @@ export default function PersonalDesk() {
       // Create user
       const {
         data: { data: response },
-      } = await axios.post(
+      } = await api.post(
         "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/account",
         userData,
         {
@@ -184,6 +186,7 @@ export default function PersonalDesk() {
       setLoading(false);
       setUserId(response.id);
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
+      await bookOffice();
     } catch (error) {
       console.error("Error creating user:", error);
     } finally {
@@ -207,7 +210,7 @@ export default function PersonalDesk() {
     console.log("🚀 ~ bookOffice ~ bookingData:", bookingData);
 
     try {
-      const bookingResponse = await axios.post(
+      const bookingResponse = await api.post(
         "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/shared",
         bookingData,
         {
@@ -217,7 +220,7 @@ export default function PersonalDesk() {
         }
       );
       console.log("🚀 ~ bookOffice ~ bookingResponse:", bookingResponse);
-      setActiveStep((prevActiveStep) => prevActiveStep + 1);
+      // setActiveStep((prevActiveStep) => prevActiveStep + 1);
     } catch (error) {
       console.log("🚀 ~ bookOffice ~ error:", error);
     }

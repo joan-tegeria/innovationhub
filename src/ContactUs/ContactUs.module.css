@@ -5,25 +5,29 @@
   border-radius: 3px;
   overflow: hidden;
   color: #000000;
-  box-sizing: border-box;
+  /* box-sizing: border-box; */
   gap: 20px;
+  min-height: 600px;
+  max-height: 1110px;
+  max-width: 700px;
+  margin: 0 auto;
 }
 
 .formSection {
-  border-top: 1px solid #999999;
   padding: 30px;
-  flex: 1;
+  flex: 2;
+  padding-right: 40px;
 }
 
 .formTitle {
   size: 24px;
-  font-weight: 700px;
+  font-weight: 700;
 }
 
 .formSection p {
   margin-bottom: 20px;
   font-size: 14px;
-  color: #666;
+  color: #000000;
 }
 
 .terms {
@@ -40,10 +44,41 @@
 .email {
   font-size: 14px;
   margin-top: 15px;
-  text-align: center;
+  text-align: left;
 }
 
 .email a {
   color: #ed3a7a;
   text-decoration: none;
+}
+
+.imageSection {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 30px;
+  padding-left: 0;
+  background-color: #f8f8f8;
+  min-width: 400px;
+  max-width: 500px;
+  height: 600px;
+}
+
+.imageSection img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  max-height: 500px;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+
+  max-width: 700px;
 }

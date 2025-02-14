@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./Events.module.css";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/Auth";
 import CircularProgress from "@mui/material/CircularProgress";
 import { circularProgressClasses } from "@mui/material/CircularProgress";
 import LabeledInput from "../components/LabeledInput";
-import axios from "axios";
+import api from "../utility/axiosConfig";
 import dayjs from "dayjs";
 import { duration } from "@mui/material";
 
@@ -69,15 +69,11 @@ export default function Events() {
     };
 
     try {
-      const { data: userResponse } = await axios.post(
-        "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/leads",
-        userData,
-        {
-          headers: {
-            Authorization: `${tokenType} ${accessToken}`,
-          },
-        }
-      );
+      const { data: userResponse } = await api.post("/leads", userData, {
+        headers: {
+          Authorization: `${tokenType} ${accessToken}`,
+        },
+      });
 
       const userId = userResponse.data.id;
 
@@ -122,15 +118,11 @@ export default function Events() {
         duration: "Half-Day",
       };
 
-      await axios.post(
-        "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/event",
-        newEvent,
-        {
-          headers: {
-            Authorization: `${tokenType} ${accessToken}`,
-          },
-        }
-      );
+      await api.post("/event", newEvent, {
+        headers: {
+          Authorization: `${tokenType} ${accessToken}`,
+        },
+      });
 
       document.getElementById("eventForm").innerHTML = `
         <div class="${styles.successContainer}">

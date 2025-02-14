@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styles from "./FullOffice.module.css";
-import axios from "axios";
+import api from "../utility/axiosConfig";
 import dayjs from "dayjs";
 import { useLocalStorage } from "../hooks/useLocalStorage/useLocalStorage";
 
@@ -81,7 +81,7 @@ export default function FullOffice() {
         // setLoading(true);
         const {
           data: { data: allOffices },
-        } = await axios.get(
+        } = await api.get(
           "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/private",
           {
             headers: {
@@ -122,7 +122,7 @@ export default function FullOffice() {
     try {
       const {
         data: { data: response },
-      } = await axios.post(
+      } = await api.post(
         "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/leads",
         userData,
         {
@@ -143,7 +143,7 @@ export default function FullOffice() {
         requestedFrom: "Business",
       };
 
-      const bookingResponse = await axios.post(
+      const bookingResponse = await api.post(
         "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/private",
         bookingData,
         {
@@ -173,7 +173,7 @@ export default function FullOffice() {
 
       const {
         data: { data: response },
-      } = await axios.get(
+      } = await api.get(
         `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/private/${fullOfficeInfo.workspace}?from=${formattedStartDate}&to=${formattedEndDate}`,
         {
           headers: {

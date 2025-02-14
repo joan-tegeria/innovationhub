@@ -1,0 +1,21 @@
+.partnersPage {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+
+  background: white;
+}
+
+.title {
+  font-size: 2.5rem;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.description {
+  font-size: 1.1rem;
+  color: #666;
+  max-width: 600px;
+  margin: 0 auto 40px;
+  line-height: 1.6;
+}

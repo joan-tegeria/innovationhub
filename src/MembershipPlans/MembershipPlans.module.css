@@ -21,13 +21,11 @@
 .planCard {
   background: #ffffff;
   cursor: pointer;
-
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   transition: transform 0.3s ease;
-  /* height: 100%; */
   width: 481px;
-  height: 905px;
+  height: 700px;
   display: flex;
   border: "1px solid #DDDDD1";
   flex-direction: column;
@@ -37,7 +35,7 @@
 }
 
 .swiper-slide {
-  background-color: #3182ce;
+  background-color: #eb3778;
 }
 
 :global(.swiper-slide-active) .planCard {
@@ -51,39 +49,66 @@
   color: white;
   border: none;
 }
+:global(.swiper-slide-active) .planButton:hover {
+  background-color: #f06e9e;
+  color: white;
+  border: none;
+}
 
 .planImageContainer {
   width: 100%;
   height: 312px;
-  /* overflow: hidden; */
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.planImageContainer::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 1;
 }
 
 .planImage {
   width: 100%;
-  height: 312px;
+  height: 212px;
   object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.planTitle {
+  position: relative;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+  z-index: 2;
+  text-align: center;
+  padding: 8px 16px;
+  background: none;
+  backdrop-filter: none;
 }
 
 .planContent {
-  padding: 2rem;
+  padding: 1.5rem;
   height: 100%;
-
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  padding-top: 0;
+  justify-content: flex-start;
+  gap: 0.5rem;
 }
 
 /* Typography */
-.planTitle {
-  font-size: 1.75rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: #2d3748;
-}
-
 .priceSection {
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .startingFrom {
@@ -101,21 +126,21 @@
 
 .description {
   color: #4a5568;
-  /* margin-bottom: 1.5rem; */
   margin: 0;
-  line-height: 22px;
+  line-height: 1.4;
   font-size: 1rem;
 }
 
 /* Features */
 .featuresSection {
   flex-direction: column;
+  margin-top: 0.75rem;
 }
 
 .featuresTitle {
   font-size: 1rem;
   font-weight: 600;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   color: #2d3748;
 }
 
@@ -124,13 +149,13 @@
   padding: 0;
   margin: 0;
   flex-grow: 1;
-  max-height: 240px;
+  max-height: 200px;
 }
 
 .featureItem {
   display: flex;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   color: #4a5568;
   font-size: 0.8rem;
 }
@@ -143,8 +168,8 @@
 
 /* Button */
 .planButton {
-  margin-top: 2rem;
-  padding: 1rem 2rem;
+  margin-top: 1rem;
+  padding: 0.875rem 2rem;
   background-color: white;
   border: 1px solid black;
   color: black;
@@ -153,10 +178,6 @@
   cursor: pointer;
   transition: background-color 0.3s ease;
   width: 100%;
-}
-
-.planButton:hover {
-  background-color: #3182ce;
 }
 
 /* Swiper custom styles */
@@ -172,13 +193,13 @@
 }
 
 :global(.swiper-pagination-bullet) {
-  background: #4299e1 !important;
+  background: #eb3778 !important;
   width: 10px;
   height: 10px;
 }
 
 :global(.swiper-pagination-bullet-active) {
-  background: #3182ce !important;
+  background: #eb3778 !important;
 }
 
 /* Responsive Styles */
