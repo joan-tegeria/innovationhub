@@ -104,9 +104,11 @@ export default function Information({
           type="select"
           isRequired={true}
           selectValue={personalDeskUserInfo.workspace}
-          onChange={(event) =>
-            handlePersonalDesk("workspace", event.target.value)
-          }
+          onChange={(event) => {
+            console.log(event.target);
+            handlePersonalDesk("workspace", event.target.value);
+            handlePersonalDesk("product", event.target.label);
+          }}
         />
       </div>
       {/* <div className={styles.sectionTittle}>Time Period</div> */}

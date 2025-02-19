@@ -14,7 +14,7 @@ const timePeriods = [
   { value: "Monthly", label: "Monthly" },
 ];
 
-export default function Payment({ loading, setIsLoading }) {
+export default function Payment({ loading, setIsLoading, payurl }) {
   const { personalDeskUserInfo, handlePersonalDesk, period, setPeriod } =
     useBooking();
 
@@ -22,11 +22,21 @@ export default function Payment({ loading, setIsLoading }) {
   //   console.log("🚀 ~ Payment ~ personalDeskUserInfo:", personalDeskUserInfo);
   // }, [personalDeskUserInfo]);
 
-  const formatDate = (dateObj) => {
-    const formattedDate = dateObj.format("YYYY-MM-DDTHH:mm:ssZ");
+  const [message, setMessage] = useState();
 
-    return formattedDate;
-  };
+  useEffect(() => {
+    const messageHandlerFn = (event) => {
+      console.log(event.data); // Assuming the event data holds the response message.
+      setMessage(event.data);
+    };
+
+    window.addEventListener("message", messageHandlerFn);
+
+    // Cleanup the event listener when the component unmounts
+    return () => {
+      window.removeEventListener("message", messageHandlerFn);
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -79,7 +89,11 @@ export default function Payment({ loading, setIsLoading }) {
       </div>
       <div className={styles.divider} />
       <div className={styles.sectionTittle}>Payment Information</div>
-      <iframe src="" frameborder="0"></iframe>
+      <iframe
+        src={payurl}
+        frameborder="0"
+        style={{ width: "100%", height: 700 }}
+      ></iframe>
       <div className={styles.divider} />
     </div>
   );

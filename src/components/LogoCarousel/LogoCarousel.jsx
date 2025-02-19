@@ -9,22 +9,22 @@ const logos = [
   },
   {
     id: 2,
-    url: "http://35.176.180.59/wp-content/uploads/2025/02/image.png",
+    url: "http://35.176.180.59/wp-content/uploads/2025/02/Bashkia-Tirane.jpg",
     alt: "Partner 2",
   },
   {
     id: 3,
-    url: "http://35.176.180.59/wp-content/uploads/2025/02/image.png",
+    url: "http://35.176.180.59/wp-content/uploads/2025/02/IDEMIA_Smart_Identity_3L_RGB.png",
     alt: "Partner 3",
   },
   {
     id: 4,
-    url: "http://35.176.180.59/wp-content/uploads/2025/02/image.png",
+    url: "http://35.176.180.59/wp-content/uploads/2025/02/Logo-AADF_-Shkrimi-poshte-01.png",
     alt: "Partner 4",
   },
   {
     id: 5,
-    url: "http://35.176.180.59/wp-content/uploads/2025/02/image.png",
+    url: "http://35.176.180.59/wp-content/uploads/2025/02/image-14.png",
     alt: "Partner 5",
   },
 ];

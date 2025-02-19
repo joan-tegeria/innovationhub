@@ -1,5 +1,6 @@
 .formContainer {
-  width: 780px;
+  width: 100%;
+  max-width: 780px;
   min-height: 966px;
   /* height: 1003px; */
   background-color: white;
@@ -35,8 +36,36 @@
 
 .stepper {
   margin-bottom: 26px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .formBody {
   flex: 2;
+}
+
+@media (max-width: 768px) {
+  .stepper {
+    flex-direction: column;
+    margin-bottom: 20px;
+    justify-self: start;
+    justify-content: flex-start;
+    align-items: flex-start;
+  }
+
+  .formContainer {
+    padding-inline: 20px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+
+  .title {
+    font-size: 24px;
+  }
+
+  .desc {
+    font-size: 14px;
+  }
 }

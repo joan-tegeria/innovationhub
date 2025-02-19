@@ -3,22 +3,17 @@ import styles from "./PersonalDesk.module.css";
 import api from "../utility/axiosConfig";
 import dayjs from "dayjs";
 import { useLocalStorage } from "../hooks/useLocalStorage/useLocalStorage";
-
-import { calculateEndDate, formatDate, formatBirthDate } from "../utility";
-
+import { calculateEndDate, formatDate } from "../utility";
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import StepConnector from "@mui/material/StepConnector";
 import { styled } from "@mui/material/styles";
 import { Alert } from "@mui/material";
-
 import { useBooking } from "../context/BookingContext";
-
 import Information from "./Information";
 import Footer from "./Footer";
 import Payment from "./Payment";
-import Modal from "./Modal";
 import Finished from "./Finished";
 import { useAuth } from "../context/Auth";
 
@@ -33,58 +28,58 @@ const CustomStepConnector = styled(StepConnector)(({ theme }) => ({
 
 const CustomStepLabel = styled(StepLabel)(({ theme }) => ({
   "& .MuiStepIcon-root": {
-    color: "#E0E0E0", // Default color for the step icons
+    color: "#E0E0E0",
     "&.Mui-active": {
-      color: "#EB3778", // Active step color
+      color: "#EB3778",
     },
     "&.Mui-completed": {
-      color: "#EB3778", // Completed step color
+      color: "#EB3778",
     },
   },
   "& .MuiStepLabel-label": {
-    color: "#BDBDBD", // Default text color
+    color: "#BDBDBD",
     "&.Mui-active": {
-      color: "#EB3778", // Active step text color
+      color: "#EB3778",
       fontWeight: 600,
     },
     "&.Mui-completed": {
-      color: "#EB3778", // Completed step text color
+      color: "#EB3778",
     },
-    textAlign: "center", // Center the labels
+    textAlign: "center",
   },
 }));
 
 export default function PersonalDesk() {
-  //State
-  const [price, setPrice] = useState(5000);
+  const [price, setPrice] = useState(0);
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [localData, setLocalData] = useLocalStorage("localData", {});
-  const [userId, setUserId] = useState("");
   const [randomSeat, setRandomSeat] = useState("");
-  const [open, setOpen] = useState(false);
-  const [hasError, setHasError] = useState(false);
-  const [isAvaliable, setIsAvaliable] = useState(false);
   const [info, setInfo] = useState("none");
   const [infoMessage, setInfoMessage] = useState("");
   const [workspaces, setWorkspaces] = useState([{ value: "", label: "" }]);
-  //Context
+  const [errorMessage, setErrorMessage] = useState("");
   const {
     personalDeskUserInfo,
     setPersonalDeskUserInfo,
     period,
     handlePersonalDesk,
   } = useBooking();
-
-  const { accessToken, tokenType, tokenLoading, error } = useAuth();
-  console.log("🚀 ~ PersonalDesk ~ accessToken:", accessToken);
+  const [payUrl, setPayUrl] = useState("");
+  const { accessToken, tokenType, tokenLoading } = useAuth();
+  const [stepperOrientation, setStepperOrientation] = useState(
+    window.innerWidth < 768 ? "vertical" : "horizontal"
+  );
 
   useEffect(() => {
-    console.log(
-      "🚀 ~ PersonalDesk ~ personalDeskUserInfo:",
-      personalDeskUserInfo
-    );
-  }, [personalDeskUserInfo]);
+    const handleResize = () => {
+      setStepperOrientation(
+        window.innerWidth < 768 ? "vertical" : "horizontal"
+      );
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     if (!tokenLoading) {
@@ -95,23 +90,26 @@ export default function PersonalDesk() {
             data: { data: allOffices },
           } = await api.get(
             "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/shared",
-            {
-              headers: {
-                Authorization: `${tokenType} ${accessToken}`,
-              },
-            }
+            { headers: { Authorization: `${tokenType} ${accessToken}` } }
           );
 
-          console.log("🚀 ~ checkOfficeAvaliablity ~ allOffices:", allOffices);
-          const transformed = allOffices.map((item) => ({
+          // Check the parent window's endpoint
+          const parentEndpoint = window.parent.location.pathname;
+          let transformed = allOffices.map((item) => ({
             value: item.id,
             label: item.Name,
           }));
+
+          // Reverse the response if the parent endpoint is 'dedicated-desk'
+          if (parentEndpoint.includes("dedicated-desk")) {
+            transformed = transformed.reverse();
+          }
+
           setWorkspaces(transformed);
           setLoading(false);
           handlePersonalDesk("workspace", transformed[0].value);
         } catch (error) {
-          console.log("🚀 ~ getAllOffices ~ error:", error);
+          console.log("Error fetching offices:", error);
         }
       };
       getAllOffices();
@@ -131,11 +129,7 @@ export default function PersonalDesk() {
         `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/shared/${
           personalDeskUserInfo.workspace
         }?from=${formatDate(startDate)}&to=${formatDate(toDate)}`,
-        {
-          headers: {
-            Authorization: `${tokenType} ${accessToken}`,
-          },
-        }
+        { headers: { Authorization: `${tokenType} ${accessToken}` } }
       );
 
       setRandomSeat(
@@ -143,16 +137,23 @@ export default function PersonalDesk() {
           Math.floor(Math.random() * availabilityData.availableSeats.length)
         ]
       );
+
+      const priceResponse = await api.get(
+        `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/prices?product=Flexible Desk&period=${period}`,
+        { headers: { Authorization: `${tokenType} ${accessToken}` } }
+      );
+
+      setPrice(priceResponse.data.data[0].Unit_Price);
       setInfo("info");
-      setInfoMessage("Space is avaliable for " + period);
+      setInfoMessage("Space is available for " + period);
     } catch (error) {
-      console.log("🚀 ~ checkOfficeAvaliablity ~ error:", error);
+      console.log("Error checking availability:", error);
     }
   };
 
   const createUser = async () => {
     if (Object.values(personalDeskUserInfo).some((value) => !value)) {
-      setHasError(true);
+      setErrorMessage("Please fill in all required fields.");
       return;
     }
 
@@ -162,72 +163,55 @@ export default function PersonalDesk() {
       lastName: personalDeskUserInfo.lastName,
       email: personalDeskUserInfo.email,
       birthday: personalDeskUserInfo.birthday,
-      // check: "ERROR",
       id: personalDeskUserInfo.idNumber,
     };
-    console.log("🚀 ~ createUser ~ userData:", userData);
 
     setLocalData(userData);
 
     try {
-      // Create user
       const {
         data: { data: response },
       } = await api.post(
         "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/account",
         userData,
-        {
-          headers: {
-            Authorization: `${tokenType} ${accessToken}`,
-          },
-        }
+        { headers: { Authorization: `${tokenType} ${accessToken}` } }
       );
-      console.log("🚀 ~ createUser ~ response:", response);
-      setLoading(false);
-      setUserId(response.id);
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
-      await bookOffice();
+      await bookOffice(response.id);
     } catch (error) {
       console.error("Error creating user:", error);
+      setErrorMessage("Failed to create user. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  const bookOffice = async () => {
+  const bookOffice = async (userId) => {
     const bookingData = {
-      username:
-        personalDeskUserInfo.firstName + " " + personalDeskUserInfo.lastName,
+      username: `${personalDeskUserInfo.firstName} ${personalDeskUserInfo.lastName}`,
       user: userId,
       room: personalDeskUserInfo.workspace,
-      // phoneNumber: "0682464577",
       from: personalDeskUserInfo.selectDate,
       to: personalDeskUserInfo.endDate,
       seat: randomSeat.toString(),
       referral: "Shared Office Form",
       booked: period,
     };
-    console.log("🚀 ~ bookOffice ~ bookingData:", bookingData);
 
     try {
       const bookingResponse = await api.post(
         "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/shared",
         bookingData,
-        {
-          headers: {
-            Authorization: `${tokenType} ${accessToken}`,
-          },
-        }
+        { headers: { Authorization: `${tokenType} ${accessToken}` } }
       );
-      console.log("🚀 ~ bookOffice ~ bookingResponse:", bookingResponse);
-      // setActiveStep((prevActiveStep) => prevActiveStep + 1);
+      setPayUrl(bookingResponse.data.paymentSession);
     } catch (error) {
-      console.log("🚀 ~ bookOffice ~ error:", error);
+      console.log("Error booking office:", error);
+      setErrorMessage("Failed to book office. Please try again.");
     }
   };
 
   const handleNext = () => {
-    // setActiveStep((prevActiveStep) => prevActiveStep + 1);
     if (activeStep === 0) {
       createUser();
     } else if (activeStep === 1) {
@@ -264,51 +248,57 @@ export default function PersonalDesk() {
         infoMessage={infoMessage}
       />
     ),
-    1: <Payment loading={loading} setIsLoading={setLoading} />,
+    1: <Payment loading={loading} setIsLoading={setLoading} payurl={payUrl} />,
     2: <Finished />,
   };
 
   return (
-    <>
-      {/* <div className={styles.container}> */}
-      <div className={styles.formContainer}>
-        <div className={styles.formBody}>
-          <div className={styles.formTitle}>
-            <span className={styles.title}>Ready to get started</span>
-          </div>
-
-          {/* Stepper */}
-          <div className={styles.stepper}>
-            <Stepper
-              activeStep={activeStep}
-              nonLinear // Ensures the labels are horizontally aligned
-              connector={<CustomStepConnector />}
-            >
-              {steps.map((label, index) => (
-                <Step key={label}>
-                  <CustomStepLabel>{label}</CustomStepLabel>
-                </Step>
-              ))}
-            </Stepper>
-          </div>
-
-          {/* Render step content */}
-          <div className={styles.stepContent}>
-            {stepComponents[activeStep] || stepComponents[0]}
-          </div>
+    <div className={styles.formContainer}>
+      <div className={styles.formBody}>
+        <div className={styles.formTitle}>
+          <span className={styles.title}>Ready to get started</span>
         </div>
-        {!loading && (
-          <Footer
-            price={price}
-            handleNext={handleNext}
-            handleBack={handleBack}
-            isBackDisabled={activeStep === 0}
-            isNextDisabled={false}
-            isLast={activeStep === 2}
-          />
-        )}
+
+        <div className={styles.stepper}>
+          <Stepper
+            activeStep={activeStep}
+            nonLinear
+            connector={<CustomStepConnector />}
+            orientation={stepperOrientation}
+            style={{ width: "100%" }}
+          >
+            {steps.map((label) => (
+              <Step key={label}>
+                <CustomStepLabel>{label}</CustomStepLabel>
+              </Step>
+            ))}
+          </Stepper>
+        </div>
+
+        <div className={styles.stepContent}>
+          {stepComponents[activeStep] || stepComponents[0]}
+        </div>
       </div>
-      {/* </div> */}
-    </>
+
+      {errorMessage && (
+        <Alert
+          severity="error"
+          onClose={() => setErrorMessage("")}
+          style={{ marginBottom: 10 }}
+        >
+          {errorMessage}
+        </Alert>
+      )}
+      {!loading && (
+        <Footer
+          price={price}
+          handleNext={handleNext}
+          handleBack={handleBack}
+          isBackDisabled={activeStep === 0}
+          isNextDisabled={false}
+          isLast={activeStep === 2}
+        />
+      )}
+    </div>
   );
 }

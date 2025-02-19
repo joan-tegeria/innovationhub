@@ -20,6 +20,13 @@ const businessSizes = [
   { value: "3", label: "10+ Employees" },
 ];
 
+// const workspaceOptions = [
+//   { value: "solo", label: "The Solo" },
+//   { value: "duo", label: "The Duo" },
+//   { value: "pod", label: "The Pod" },
+//   { value: "suite", label: "The Suite" },
+// ];
+
 export default function Information({
   loading,
   // setIsLoading,
@@ -66,18 +73,20 @@ export default function Information({
 
   return (
     <div className={styles.formBody}>
-      <div style={{ width: "316px", marginBottom: "25px" }}>
-        <LabeledInput
-          label={"Select space"}
-          // placeholder={"eg. John"}
-          items={workspaces}
-          type="select"
-          isRequired={true}
-          selectValue={fullOfficeInfo.workspace}
-          onChange={(event) =>
-            handleFullOffice("workspace", event.target.value)
-          }
-        />
+      <div className={styles.workspaceButtons}>
+        {workspaces.map((workspace) => (
+          <button
+            key={workspace.value}
+            className={`${styles.workspaceButton} ${
+              fullOfficeInfo.workspace === workspace.value
+                ? styles.selected
+                : ""
+            }`}
+            onClick={() => handleFullOffice("workspace", workspace.value)}
+          >
+            {workspace.label}
+          </button>
+        ))}
       </div>
       {/* <div className={styles.sectionTittle}>Time Period</div> */}
       <div className={styles.formRow}>
@@ -103,9 +112,31 @@ export default function Information({
       </div>
       <div className={styles.divider} />
       <div className={styles.sectionTittle}>Business Information</div>
+      <div className={styles.requestTypeButtons}>
+        <button
+          className={`${styles.requestTypeButton} ${
+            fullOfficeInfo.requestedFrom === "Business" ? styles.selected : ""
+          }`}
+          onClick={() => handleFullOffice("requestedFrom", "Business")}
+        >
+          Business
+        </button>
+        <button
+          className={`${styles.requestTypeButton} ${
+            fullOfficeInfo.requestedFrom === "Individual" ? styles.selected : ""
+          }`}
+          onClick={() => handleFullOffice("requestedFrom", "Individual")}
+        >
+          Individual
+        </button>
+      </div>
       <div className={styles.formRow}>
         <LabeledInput
-          label={"Business Name"}
+          label={
+            fullOfficeInfo.requestedFrom === "Business"
+              ? "Business Name"
+              : "Full Name"
+          }
           isRequired={true}
           value={fullOfficeInfo.businessName}
           placeholder={"eg. John"}
@@ -114,7 +145,9 @@ export default function Information({
           }
         />
         <LabeledInput
-          label={"NIPT"}
+          label={
+            fullOfficeInfo.requestedFrom === "Business" ? "NIPT" : "Personal ID"
+          }
           placeholder={"eg. Doe"}
           value={fullOfficeInfo.nipt}
           onChange={(event) => handleFullOffice("nipt", event.target.value)}

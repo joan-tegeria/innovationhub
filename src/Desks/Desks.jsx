@@ -36,8 +36,11 @@ const DeskBooking = ({ type }) => {
   });
 
   const handleBooking = (deskType) => {
+    console.log(deskType);
     const url =
-      deskType.toLowerCase() === "dedicated"
+      deskType.toLowerCase() === "dedicated desk"
+        ? "http://35.176.180.59/dedicated-desk/"
+        : deskType.toLowerCase() === "flexible desk"
         ? "http://35.176.180.59/flexible-desk/"
         : "http://35.176.180.59/private-offices/";
 
@@ -81,6 +84,10 @@ const DeskBooking = ({ type }) => {
         );
         console.log(response.data.data);
 
+        if (category === "Private") {
+          response.data.data.reverse();
+        }
+
         const currentTabData = transformApiDataToDesks(
           response.data.data || [],
           period
@@ -109,6 +116,7 @@ const DeskBooking = ({ type }) => {
         ) : (
           <span className={styles.title}></span>
         )}
+
         <div className={styles.tabContainer}>
           <motion.div
             className={styles.activeBackground}

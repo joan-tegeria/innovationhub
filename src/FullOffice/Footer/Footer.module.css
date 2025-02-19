@@ -1,7 +1,4 @@
 .formFooter {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
 .title {
@@ -30,7 +27,8 @@
 
 .btnRow {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  gap: 19px;
+  /* gap: 19px; */
+  width: 100%;
 }

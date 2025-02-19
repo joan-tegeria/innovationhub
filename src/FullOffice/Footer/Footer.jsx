@@ -29,7 +29,7 @@ export default function Footer({
         {!isLast && (
           <Button
             variant="outlined"
-            style={{ width: 200, height: 50, marginBottom: isLast ? 32 : 0 }}
+            style={{ width: 250, height: 50, marginBottom: isLast ? 32 : 0 }}
             onClick={handleBack}
             disabled={isBackDisabled}
           >
@@ -46,11 +46,11 @@ export default function Footer({
             },
           }}
           style={{
-            width: isLast ? "100%" : 200,
+            width: isLast ? "100%" : 250,
             height: 50,
           }}
           onClick={handleNext}
-          // disabled={isNextDisabled}
+          disabled={isNextDisabled}
         >
           {isLast ? "Start new booking" : "Request a quote"}
         </Button>

@@ -14,6 +14,8 @@ export default function BookingProvider({ children }) {
     email: "",
     totalToPay: 5000,
     workspace: "",
+    requestedFrom: "Business",
+  
   });
 
   const [fullOfficeInfo, setFullOfficeInfo] = useState({
@@ -27,6 +29,7 @@ export default function BookingProvider({ children }) {
     city: "",
     workspace: "",
     phoneNumber: "",
+    requestedFrom: "Business",
   });
 
   const handleFullOffice = (field, value) => {

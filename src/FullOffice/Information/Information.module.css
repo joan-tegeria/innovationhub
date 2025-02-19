@@ -19,3 +19,65 @@
   background-color: #999999;
   margin-bottom: 20px;
 }
+
+.workspaceButtons {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 25px;
+  width: 100%;
+}
+
+.workspaceButton {
+  flex: 1;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  color: #222222;
+  transition: all 0.2s ease;
+}
+
+.workspaceButton:hover {
+  border-color: #eb3778;
+  background: #fff5f9;
+}
+
+.workspaceButton.selected {
+  border-color: #eb3778;
+  background: #fff5f9;
+  color: #eb3778;
+}
+
+.requestTypeButtons {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.requestTypeButton {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #222222;
+  transition: all 0.2s ease;
+}
+
+.requestTypeButton:hover {
+  border-color: #eb3778;
+  background: #fff5f9;
+}
+
+.requestTypeButton.selected {
+  border-color: #eb3778;
+  background: #fff5f9;
+  color: #eb3778;
+}

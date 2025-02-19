@@ -37,6 +37,25 @@ const PlanFeature = ({ icon, text }) => (
   </li>
 );
 
+const getRedirectUrl = (title) => {
+  switch (title) {
+    case "Dedicated Desk":
+      return "http://35.176.180.59/services/flexible-desk/";
+    case "Event Space":
+      return "http://35.176.180.59/events-info/";
+    case "Private Office":
+      return "http://35.176.180.59/services/private-offices/";
+    default:
+      return "http://35.176.180.59/services"; // Default URL or handle error
+  }
+};
+
+const handleButtonClick = (plan) => {
+  const url = getRedirectUrl(plan.title);
+  console.log("Button is being clicked", plan.title);
+  window.location.href = url;
+};
+
 const PlanCard = ({ plan }) => (
   <div className={styles.planCard}>
     <div className={styles.planImageContainer}>
@@ -60,13 +79,19 @@ const PlanCard = ({ plan }) => (
           ))}
         </ul>
       </div>
-      <button className={styles.planButton}>{plan.buttonText}</button>
+      <button
+        className={styles.planButton}
+        onClick={() => handleButtonClick(plan)}
+      >
+        {plan.buttonText}
+      </button>
     </div>
   </div>
 );
 
 export default function MembershipPlans() {
   const [plans, setPlans] = useState([]);
+  const [slidesPerView, setSlidesPerView] = useState(1);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -97,33 +122,32 @@ export default function MembershipPlans() {
 
   return (
     <section className={styles.membershipPlansContainer}>
+      <div className={styles.gradientLeft}></div>
+      <div className={styles.gradientRight}></div>
       <Swiper
         modules={[Navigation, Pagination, Autoplay]}
         spaceBetween={40}
-        slidesPerView={2.5}
+        slidesPerView={1}
         centeredSlides={true}
         initialSlide={Math.floor(plans.length / 4)}
         navigation
         loop={true}
         autoplay={{
-          delay: 30000,
+          delay: 3000,
           disableOnInteraction: false,
         }}
+        className={styles.plansWrapper}
         breakpoints={{
-          640: {
-            slidesPerView: 1,
-            centeredSlides: true,
-          },
-          768: {
-            slidesPerView: 2,
-            centeredSlides: true,
+          900: {
+            slidesPerView: 1.7,
           },
           1024: {
+            slidesPerView: 1.9,
+          },
+          1280: {
             slidesPerView: 2.5,
-            centeredSlides: true,
           },
         }}
-        className={styles.plansWrapper}
       >
         {plans.map((plan) => (
           <SwiperSlide key={plan.id}>

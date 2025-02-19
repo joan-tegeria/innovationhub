@@ -1,27 +1,55 @@
 .container {
   display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
   width: 100%;
   background: #fff;
-  border-radius: 3px;
+  border-radius: 8px;
   overflow: hidden;
   color: #000000;
   /* box-sizing: border-box; */
-  gap: 20px;
-  min-height: 600px;
-  max-height: 1110px;
-  max-width: 700px;
+  gap: 48px;
+  /* min-height: 600px; */
+  max-width: 920px;
   margin: 0 auto;
+  height: 605px;
+  max-height: 605px;
+  padding-top: 40px;
+  overflow: hidden;
+  border: 1px solid #d9d9d9;
+}
+
+.formTitleContainer {
+  max-width: 350px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.formBody {
+  /* flex: 1; */
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .formSection {
-  padding: 30px;
-  flex: 2;
-  padding-right: 40px;
+  /* padding: 20px; */
+  /* flex: 2;? */
+  text-align: left;
 }
 
 .formTitle {
-  size: 24px;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: bold;
+  text-align: left;
+  line-height: 32px;
+  margin-bottom: 20px;
 }
 
 .formSection p {
@@ -31,25 +59,46 @@
 }
 
 .terms {
-  font-size: 12px;
-  color: #666;
-  margin-bottom: 15px;
+  font-size: 14px;
+  margin-top: 20px;
+  margin-bottom: 32px;
 }
 
 .terms a {
-  color: #ed3a7a;
-  text-decoration: none;
+  color: #876edc;
+  text-decoration: underline;
 }
 
 .email {
   font-size: 14px;
-  margin-top: 15px;
+  margin-top: 20px;
   text-align: left;
+  width: 100%;
 }
 
 .email a {
-  color: #ed3a7a;
-  text-decoration: none;
+  color: #876edc;
+  text-decoration: underline;
+}
+
+.imageContainer {
+  margin-bottom: 40px;
+}
+
+button {
+  background-color: #eb3778;
+  color: white;
+  height: 48px;
+  width: 100%;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #eb3779;
 }
 
 .imageSection {

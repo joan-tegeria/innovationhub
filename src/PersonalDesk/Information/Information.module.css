@@ -60,3 +60,26 @@
   justify-content: center;
   align-items: center;
 }
+
+@media (max-width: 768px) {
+  .formBody {
+    gap: 4px;
+  }
+
+  .formRow {
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 10px;
+  }
+
+  .info,
+  .error {
+    height: auto;
+    padding: 8px;
+    margin-bottom: 16px;
+  }
+
+  .sectionTittle {
+    font-size: 14px;
+  }
+}

@@ -69,11 +69,15 @@ export default function Events() {
     };
 
     try {
-      const { data: userResponse } = await api.post("/leads", userData, {
-        headers: {
-          Authorization: `${tokenType} ${accessToken}`,
-        },
-      });
+      const { data: userResponse } = await api.post(
+        "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/leads",
+        userData,
+        {
+          headers: {
+            Authorization: `${tokenType} ${accessToken}`,
+          },
+        }
+      );
 
       const userId = userResponse.data.id;
 
@@ -118,7 +122,7 @@ export default function Events() {
         duration: "Half-Day",
       };
 
-      await api.post("/event", newEvent, {
+      await api.post("https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/event", newEvent, {
         headers: {
           Authorization: `${tokenType} ${accessToken}`,
         },

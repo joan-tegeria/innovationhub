@@ -62,6 +62,7 @@ export default function FullOffice() {
   const [open, setOpen] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [workspaces, setWorkspaces] = useState([{ value: "", label: "" }]);
+  const [isAvailable, setIsAvailable] = useState("");
   //Context
   const { fullOfficeInfo, period, handleFullOffice, setFullOfficeInfo } =
     useBooking();
@@ -114,7 +115,7 @@ export default function FullOffice() {
       company: fullOfficeInfo.businessName,
       referral: "Private Office Form",
       birthdate: "2003-11-02",
-      id: "123456789123",
+      id: fullOfficeInfo.nipt,
       nipt: fullOfficeInfo.nipt,
       phone: fullOfficeInfo.phoneNumber,
     };
@@ -140,7 +141,7 @@ export default function FullOffice() {
         to: fullOfficeInfo.endDate,
         room: fullOfficeInfo.workspace,
         booking: period,
-        requestedFrom: "Business",
+        requestedFrom: fullOfficeInfo.requestedFrom,
       };
 
       const bookingResponse = await api.post(
@@ -174,13 +175,18 @@ export default function FullOffice() {
       const {
         data: { data: response },
       } = await api.get(
-        `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/private/${fullOfficeInfo.workspace}?from=${formattedStartDate}&to=${formattedEndDate}`,
+        `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/private/${
+          fullOfficeInfo.workspace
+        }?from=${encodeURIComponent(
+          formattedStartDate
+        )}&to=${encodeURIComponent(formattedEndDate)}`,
         {
           headers: {
             Authorization: `${tokenType} ${accessToken}`,
           },
         }
       );
+      setIsAvailable(response);
       console.log("🚀 ~ checkOfficeAvaliablity ~ response:", response);
     } catch (error) {
       console.log("🚀 ~ checkOfficeAvaliablity ~ error:", error);
@@ -273,8 +279,8 @@ export default function FullOffice() {
               activeStep === steps.length - 1 ? resetForm : handleNext
             }
             handleBack={resetForm}
-            isBackDisabled={activeStep === 0}
-            isNextDisabled={activeStep === steps.length - 1}
+            isBackDisabled={isAvailable !== "Available"}
+            isNextDisabled={isAvailable !== "Available"}
             isLast={activeStep === 1}
           />
         )}
