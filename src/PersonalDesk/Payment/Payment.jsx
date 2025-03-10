@@ -12,7 +12,9 @@ export default function Payment({
   payurl,
   selectedWorkspace,
   invoiceId,
+  personalDeskUserInfo,
   validCoupon,
+  price,
 }) {
   const { accessToken, tokenType } = useAuth();
   const [paymentWindow, setPaymentWindow] = useState(null);
@@ -68,6 +70,7 @@ export default function Payment({
       left: 0;
       width: 100%;
       height: 100%;
+      
       background-color: rgba(0, 0, 0, 0.5);
       z-index: 1000;
       display: flex;
@@ -79,7 +82,7 @@ export default function Payment({
     iframe.src = paymentUrl;
     iframe.style.cssText = `
       width: ${window.innerWidth <= 640 ? "360px" : "640px"};
-      height: ${window.innerWidth <= 640 ? "780px" : "680px"};
+      height: ${window.innerWidth <= 640 ? "780px" : "580px"};
       border: none;
       border-radius: 8px;
       background-color: white;
@@ -210,7 +213,7 @@ export default function Payment({
         <div className={styles.orderItem}>
           <div className={styles.itemInfo}>
             <h3>{selectedWorkspace.label || "Flexible desk"}</h3>
-            <p>2 days x 1200 ALL</p>
+            {/* <p>2 days x 1200 ALL</p> */}
           </div>
           <div className={styles.itemPrice}>
             <p className={styles.currentPrice}>2,000 ALL</p>
@@ -221,11 +224,11 @@ export default function Payment({
         <div className={styles.dateInfo}>
           <div className={styles.dateRow}>
             <span>Starting date:</span>
-            <span>24 February 2025</span>
+            <span>{personalDeskUserInfo.selectDate}</span>
           </div>
           <div className={styles.dateRow}>
             <span>Ending date:</span>
-            <span>26 February 2025</span>
+            <span>{personalDeskUserInfo.endDate}</span>
           </div>
         </div>
 
@@ -233,16 +236,17 @@ export default function Payment({
           <div className={styles.discountInfo}>
             <div className={styles.discountRow}>
               <span>Discount code:</span>
-              <span>{validCoupon.code}</span>
+              <span>{validCoupon}</span>
             </div>
             <div className={styles.discountRow}>
               <span>Discount percentage:</span>
-              <span>{validCoupon.percentage}%</span>
+              <span>{validCoupon}%</span>
             </div>
             <div className={styles.subtotalRow}>
               <span>Subtotal:</span>
               <span className={styles.subtotalAmount}>
-                -{validCoupon.discountAmount} ALL
+                -{((price * validCoupon) / 100).toFixed(2)}
+                ALL
               </span>
             </div>
           </div>

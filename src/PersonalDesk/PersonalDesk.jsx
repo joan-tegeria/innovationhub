@@ -367,6 +367,7 @@ export default function PersonalDesk() {
         selectedWorkspace={selectedWorkspace}
         price={price}
         invoiceId={invoiceId}
+        personalDeskUserInfo={personalDeskUserInfo}
       />
     ),
     2: <Finished />,
