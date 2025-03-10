@@ -10,6 +10,7 @@ import FullOffice from "./FullOffice";
 import Events from "./Events";
 import { AuthProvider } from "./context/Auth";
 import DeskBooking from "./Desks";
+import DesksTables from "./Desks/DesksTables";
 import MembershipPlans from "./MembershipPlans";
 import Partners from "./Partners/Partners";
 import "slick-carousel/slick/slick.css";
@@ -62,6 +63,17 @@ function App() {
                 element={<DeskBooking type="dedicated" />}
               />
               <Route path="private" element={<DeskBooking type="private" />} />
+            </Route>
+            <Route path="/desks-table">
+              <Route
+                index
+                element={<Navigate to="/desks-table/dedicated" replace />}
+              />
+              <Route
+                path="dedicated"
+                element={<DesksTables type="dedicated" />}
+              />
+              <Route path="private" element={<DesksTables type="private" />} />
             </Route>
             <Route path="/events" element={<Events />} />
             <Route path="/membershipplans" element={<MembershipPlans />} />

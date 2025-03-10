@@ -14,8 +14,9 @@ export default function BookingProvider({ children }) {
     email: "",
     totalToPay: 5000,
     workspace: "",
+    bookingType: "Single Pass",
     requestedFrom: "Business",
-  
+    passDuration: 1,
   });
 
   const [fullOfficeInfo, setFullOfficeInfo] = useState({
@@ -61,7 +62,7 @@ export default function BookingProvider({ children }) {
         lastName: parsedData.lastName || prevState.lastName,
         email: parsedData.email || prevState.email,
         birthday: parsedData.birthday || prevState.birthday,
-        // idNumber: parsedData.idNumber || prevState.idNumber,
+        idNumber: parsedData.idNumber || prevState.idNumber,
         // You can add other properties if needed, for example:
         // idNumber: parsedData.idNumber || prevState.idNumber,
         // workspace: parsedData.company || prevState.workspace, // Example mapping

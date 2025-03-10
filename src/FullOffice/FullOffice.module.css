@@ -12,7 +12,8 @@
 
 .formContainer {
   width: 780px;
-  height: 1120px;
+  height: auto;
+  min-height: 1120px;
   background-color: white;
   padding-inline: 54px;
   padding-top: 50px;
@@ -27,6 +28,7 @@
   margin: 0;
   padding: 0;
 }
+
 .formTitle {
   display: flex;
   flex-direction: column;
@@ -40,6 +42,48 @@
   font-size: 28px;
 }
 
-.stepper {
-  margin-bottom: 26px;
+.stepContent {
+  width: 100%;
+}
+
+.stepContent {
+  width: 100%;
+}
+
+@media screen and (max-width: 768px) {
+  .formContainer {
+    width: 100%;
+    padding-inline: 20px;
+    min-height: auto;
+  }
+
+  .title {
+    font-size: 24px;
+  }
+
+  .desc {
+    font-size: 14px;
+  }
+
+  /* Make form rows stack vertically on mobile */
+  :global(.formRow) {
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .formContainer {
+    padding-inline: 16px;
+    padding-top: 30px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .formTitle {
+    gap: 12px;
+    margin-bottom: 20px;
+  }
 }

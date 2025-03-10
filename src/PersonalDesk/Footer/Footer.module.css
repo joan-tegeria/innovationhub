@@ -34,3 +34,23 @@
   align-items: center;
   gap: 19px;
 }
+
+@media screen and (max-width: 1280px) {
+  .formFooter {
+    flex-direction: column;
+  }
+
+  .btnRow {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .priceInfo {
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    margin-bottom: 12px;
+  }
+}

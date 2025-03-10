@@ -77,7 +77,7 @@ body {
 }
 
 /* Force all elements to use Termina font */
-button,
+.customButton,
 input,
 select,
 textarea,

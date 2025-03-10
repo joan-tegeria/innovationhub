@@ -7,7 +7,7 @@ import dedicatedIcon from "../assets/dedicated.svg";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import api from "../utility/axiosConfig";
-
+import { CircularProgress } from "@mui/material";
 // Import Swiper styles
 import "swiper/css";
 import "swiper/css/navigation";
@@ -92,10 +92,12 @@ const PlanCard = ({ plan }) => (
 export default function MembershipPlans() {
   const [plans, setPlans] = useState([]);
   const [slidesPerView, setSlidesPerView] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
+        setIsLoading(true);
         const response = await api.get(
           "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/categories"
         );
@@ -112,13 +114,37 @@ export default function MembershipPlans() {
           })),
         ];
         setPlans(duplicatedPlans);
+        setIsLoading(false);
       } catch (error) {
         console.error("Error fetching products:", error);
+        setIsLoading(false);
       }
     };
 
     fetchProducts();
   }, []);
+
+  if (isLoading) {
+    return (
+      <section
+        style={{
+          width: "100%",
+          height: 450,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <CircularProgress
+          size={40}
+          thickness={4}
+          sx={{
+            color: "#EB3778",
+          }}
+        />
+      </section>
+    );
+  }
 
   return (
     <section className={styles.membershipPlansContainer}>

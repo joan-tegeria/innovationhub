@@ -187,7 +187,7 @@
 }
 
 .button:hover {
-  background-color: #eb3778;
+  /* background-color: #eb3778; */
   color: white;
 }
 

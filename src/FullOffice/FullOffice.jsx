@@ -3,53 +3,16 @@ import styles from "./FullOffice.module.css";
 import api from "../utility/axiosConfig";
 import dayjs from "dayjs";
 import { useLocalStorage } from "../hooks/useLocalStorage/useLocalStorage";
-
 import { calculateEndDate, formatDate, formatBirthDate } from "../utility";
-
-import Stepper from "@mui/material/Stepper";
-import Step from "@mui/material/Step";
-import StepLabel from "@mui/material/StepLabel";
-import StepConnector from "@mui/material/StepConnector";
-import { styled } from "@mui/material/styles";
 import { Alert } from "@mui/material";
-
 import { useBooking } from "../context/BookingContext";
 import { useAuth } from "../context/Auth";
-
 import Information from "./Information";
 import Footer from "./Footer";
-
 import Modal from "./Modal";
 import Finished from "./Finished";
 
 const steps = ["Information", "Finished"];
-
-const CustomStepConnector = styled(StepConnector)(({ theme }) => ({
-  "& .MuiStepConnector-line": {
-    borderColor: "#BDBDBD",
-    borderTopWidth: 2,
-  },
-}));
-
-const CustomStepLabel = styled(StepLabel)(({ theme }) => ({
-  "& .MuiStepIcon-root": {
-    color: "#E0E0E0", // Default color for the step icons
-    "&.Mui-active": {
-      color: "#01A9BB", // Active step color
-    },
-    "&.Mui-completed": {
-      color: "#01A9BB", // Completed step color
-    },
-  },
-  "& .MuiStepLabel-label": {
-    color: "#BDBDBD", // Default text color
-    "&.Mui-active": {
-      color: "#000000", // Active step text color
-      fontWeight: 600,
-    },
-    textAlign: "center", // Center the labels
-  },
-}));
 
 export default function FullOffice() {
   //State
@@ -63,6 +26,7 @@ export default function FullOffice() {
   const [hasError, setHasError] = useState(false);
   const [workspaces, setWorkspaces] = useState([{ value: "", label: "" }]);
   const [isAvailable, setIsAvailable] = useState("");
+
   //Context
   const { fullOfficeInfo, period, handleFullOffice, setFullOfficeInfo } =
     useBooking();
@@ -187,7 +151,7 @@ export default function FullOffice() {
         }
       );
       setIsAvailable(response);
-      console.log("🚀 ~ checkOfficeAvaliablity ~ response:", response);
+      console.log("�� ~ checkOfficeAvaliablity ~ response:", response);
     } catch (error) {
       console.log("🚀 ~ checkOfficeAvaliablity ~ error:", error);
     }
@@ -253,22 +217,6 @@ export default function FullOffice() {
           </p>
         </div>
 
-        {/* Stepper */}
-        {/* <div className={styles.stepper}>
-          <Stepper
-            activeStep={activeStep}
-            nonLinear // Ensures the labels are horizontally aligned
-            connector={<CustomStepConnector />}
-          >
-            {steps.map((label, index) => (
-              <Step key={label}>
-                <CustomStepLabel>{label}</CustomStepLabel>
-              </Step>
-            ))}
-          </Stepper>
-        </div> */}
-
-        {/* Render step content */}
         <div className={styles.stepContent}>
           {stepComponents[activeStep] || stepComponents[0]}
         </div>

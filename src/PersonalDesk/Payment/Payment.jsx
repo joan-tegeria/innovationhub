@@ -1,67 +1,186 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import styles from "./Payment.module.css";
-import LabeledInput from "../../components/LabeledInput";
 import { useBooking } from "../../context/BookingContext";
 import CircularProgress, {
   circularProgressClasses,
 } from "@mui/material/CircularProgress";
-import { TextField } from "@mui/material";
-import Calendar from "../../assets/calendar.svg";
+import api from "../../utility/axiosConfig";
+import { useAuth } from "../../context/Auth";
 
-const timePeriods = [
-  { value: "Daily", label: "Daily" },
-  { value: "Weekly", label: "Weekly" },
-  { value: "Monthly", label: "Monthly" },
-];
+export default function Payment({
+  loading,
+  payurl,
+  selectedWorkspace,
+  invoiceId,
+  validCoupon,
+}) {
+  const { accessToken, tokenType } = useAuth();
+  const [paymentWindow, setPaymentWindow] = useState(null);
+  const [paymentStatus, setPaymentStatus] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const iframeContainerRef = useRef(null);
 
-export default function Payment({ loading, setIsLoading, payurl }) {
-  const { personalDeskUserInfo, handlePersonalDesk, period, setPeriod } =
-    useBooking();
+  const updateInvoiceStatus = async (orderIdentification) => {
+    try {
+      const response = await api.put(
+        `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/invoice/${invoiceId}`,
+        { status: "Approved", order: orderIdentification },
+        {
+          headers: {
+            Authorization: `${tokenType} ${accessToken}`,
+          },
+        }
+      );
 
-  // useEffect(() => {
-  //   console.log("🚀 ~ Payment ~ personalDeskUserInfo:", personalDeskUserInfo);
-  // }, [personalDeskUserInfo]);
+      if (response.status !== 200) {
+        throw new Error("Failed to update invoice status");
+      }
+    } catch (error) {
+      console.error("Error updating invoice status:", error);
+    }
+  };
 
-  const [message, setMessage] = useState();
+  const closePaymentWindow = useCallback(() => {
+    if (
+      iframeContainerRef.current &&
+      document.body.contains(iframeContainerRef.current)
+    ) {
+      document.body.removeChild(iframeContainerRef.current);
+      iframeContainerRef.current = null;
+      setPaymentWindow(null);
+    }
+  }, []);
+
+  const handlePayment = (e) => {
+    e.preventDefault();
+    setPaymentStatus(null);
+    setErrorMessage(null);
+
+    const paymentUrl = `${payurl}&mode=frameless`;
+
+    // Close existing payment window if it exists
+    closePaymentWindow();
+
+    const iframeContainer = document.createElement("div");
+    iframeContainer.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    `;
+
+    const iframe = document.createElement("iframe");
+    iframe.src = paymentUrl;
+    iframe.style.cssText = `
+      width: ${window.innerWidth <= 640 ? "360px" : "640px"};
+      height: ${window.innerWidth <= 640 ? "780px" : "680px"};
+      border: none;
+      border-radius: 8px;
+      background-color: white;
+    `;
+
+    iframeContainer.appendChild(iframe);
+    document.body.appendChild(iframeContainer);
+    iframeContainerRef.current = iframeContainer;
+
+    const handleBackgroundClick = (event) => {
+      if (event.target === iframeContainer) {
+        closePaymentWindow();
+        setErrorMessage("Payment was cancelled.");
+      }
+    };
+
+    iframeContainer.addEventListener("click", handleBackgroundClick);
+    setPaymentWindow(iframeContainer);
+  };
+
+  const messageHandler = useCallback(
+    (event) => {
+      if (!event.origin.includes("payment.raiaccept.com")) return;
+
+      try {
+        const data = event.data;
+        if (data?.name !== "orderResult") return;
+
+        const {
+          status,
+          orderIdentification,
+          errorMessage: paymentError,
+        } = data.payload;
+        setPaymentStatus(status);
+
+        closePaymentWindow();
+
+        switch (status) {
+          case "success":
+            updateInvoiceStatus(orderIdentification);
+            break;
+          case "failure":
+            setErrorMessage("Payment failed. Please try again.");
+            break;
+          case "cancel":
+            setErrorMessage("Payment was cancelled.");
+            break;
+          case "exception":
+            setErrorMessage(paymentError || "An unexpected error occurred.");
+            break;
+        }
+      } catch (error) {
+        console.error("Error processing payment message:", error);
+      }
+    },
+    [closePaymentWindow]
+  );
 
   useEffect(() => {
-    const messageHandlerFn = (event) => {
-      console.log(event.data); // Assuming the event data holds the response message.
-      setMessage(event.data);
-    };
+    const currentUrl = window.location.href;
 
-    window.addEventListener("message", messageHandlerFn);
+    if (currentUrl.includes("success") || currentUrl.includes("completed")) {
+      setPaymentStatus("success");
+    } else if (
+      currentUrl.includes("failure") ||
+      currentUrl.includes("failed")
+    ) {
+      setPaymentStatus("failure");
+      setErrorMessage("Payment failed. Please try again.");
+    } else if (
+      currentUrl.includes("cancel") ||
+      currentUrl.includes("cancelled")
+    ) {
+      setPaymentStatus("cancel");
+      setErrorMessage("Payment was cancelled.");
+    }
 
-    // Cleanup the event listener when the component unmounts
-    return () => {
-      window.removeEventListener("message", messageHandlerFn);
-    };
+    localStorage.removeItem("paymentReturnUrl");
   }, []);
+
+  useEffect(() => {
+    window.addEventListener("message", messageHandler);
+    return () => {
+      window.removeEventListener("message", messageHandler);
+      closePaymentWindow();
+    };
+  }, [messageHandler, closePaymentWindow]);
 
   if (loading) {
     return (
-      <div
-        className={styles.formBody}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: 501,
-        }}
-      >
+      <div className={styles.loadingContainer}>
         <CircularProgress
           variant="indeterminate"
           disableShrink
-          sx={(theme) => ({
+          sx={{
             color: "#1a90ff",
             animationDuration: "550ms",
             [`& .${circularProgressClasses.circle}`]: {
               strokeLinecap: "round",
             },
-            ...theme.applyStyles("dark", {
-              color: "#308fe8",
-            }),
-          })}
+          }}
           size={40}
           thickness={4}
         />
@@ -71,29 +190,89 @@ export default function Payment({ loading, setIsLoading, payurl }) {
 
   return (
     <div className={styles.formBody}>
-      <div className={styles.sectionTittle}>Service Details</div>
-      <div className={styles.serviceDetails}>
-        <div className={styles.infoCol}>
-          <div className={styles.row}>
-            <img src={Calendar} alt="calendar icon" />
-            <span>Flexible desk</span>
+      <h1 className={styles.mainTitle}>Payment</h1>
+      <p className={styles.subtitle}>Complete payment information</p>
+
+      {paymentStatus === "success" && (
+        <div className={`${styles.statusMessage} ${styles.successMessage}`}>
+          Payment completed successfully!
+        </div>
+      )}
+
+      {errorMessage && (
+        <div className={`${styles.statusMessage} ${styles.errorMessage}`}>
+          {errorMessage}
+        </div>
+      )}
+
+      <h2 className={styles.sectionTitle}>Order details</h2>
+      <div className={styles.orderDetails}>
+        <div className={styles.orderItem}>
+          <div className={styles.itemInfo}>
+            <h3>{selectedWorkspace.label || "Flexible desk"}</h3>
+            <p>2 days x 1200 ALL</p>
           </div>
-          <div className={styles.row}>
-            <img src={Calendar} alt="calendar icon" />
-            <span>12 - 13 November 2024</span>
+          <div className={styles.itemPrice}>
+            <p className={styles.currentPrice}>2,000 ALL</p>
+            <p className={styles.originalPrice}>2,400 ALL</p>
           </div>
         </div>
-        <div className={styles.period}>
-          <span>Daily</span>
+
+        <div className={styles.dateInfo}>
+          <div className={styles.dateRow}>
+            <span>Starting date:</span>
+            <span>24 February 2025</span>
+          </div>
+          <div className={styles.dateRow}>
+            <span>Ending date:</span>
+            <span>26 February 2025</span>
+          </div>
+        </div>
+
+        {validCoupon && (
+          <div className={styles.discountInfo}>
+            <div className={styles.discountRow}>
+              <span>Discount code:</span>
+              <span>{validCoupon.code}</span>
+            </div>
+            <div className={styles.discountRow}>
+              <span>Discount percentage:</span>
+              <span>{validCoupon.percentage}%</span>
+            </div>
+            <div className={styles.subtotalRow}>
+              <span>Subtotal:</span>
+              <span className={styles.subtotalAmount}>
+                -{validCoupon.discountAmount} ALL
+              </span>
+            </div>
+          </div>
+        )}
+
+        <div className={styles.totalSection}>
+          <div className={styles.totalRow}>
+            <span>TOTAL:</span>
+            <span className={styles.totalAmount}>1760 ALL</span>
+          </div>
         </div>
       </div>
+
       <div className={styles.divider} />
-      <div className={styles.sectionTittle}>Payment Information</div>
-      <iframe
-        src={payurl}
-        frameborder="0"
-        style={{ width: "100%", height: 700 }}
-      ></iframe>
+
+      <div className={styles.paymentSection}>
+        <p className={styles.paymentQuestion}>
+          Do you wish to proceed with the payment?
+        </p>
+        <button
+          onClick={handlePayment}
+          className={styles.paymentButton}
+          disabled={paymentStatus === "success"}
+        >
+          {paymentStatus === "success"
+            ? "Payment Completed"
+            : "Proceed to Payment"}
+        </button>
+      </div>
+
       <div className={styles.divider} />
     </div>
   );

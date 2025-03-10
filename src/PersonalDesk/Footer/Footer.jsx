@@ -22,7 +22,7 @@ export default function Footer({
         </div>
       )}
       <div className={styles.btnRow}>
-        {!isLast && (
+        {/* {!isLast && (
           <Button
             variant="outlined"
             style={{ width: 150, height: 42 }}
@@ -31,7 +31,7 @@ export default function Footer({
           >
             Cancel
           </Button>
-        )}
+        )} */}
         <Button
           variant="contained"
           sx={{
@@ -39,12 +39,15 @@ export default function Footer({
             "&:hover": {
               backgroundColor: "#d62e69",
             },
+            fontFamily: "Termina Test",
+            textTransform: "none",
           }}
-          style={{ width: isLast ? 671 : 150, height: 42 }}
+          style={{ width: 220, height: 42, flex: 1 }}
           onClick={handleNext}
           disabled={isNextDisabled}
+          autoCapitalize={false}
         >
-          {isLast ? "Start new booking" : "Next"}
+          Continue
         </Button>
       </div>
     </div>

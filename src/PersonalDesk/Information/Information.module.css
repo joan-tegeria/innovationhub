@@ -39,6 +39,37 @@
   gap: 8px;
 }
 
+.workspaceButtons {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 25px;
+  width: 100%;
+}
+
+.workspaceButton {
+  flex: 1;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  color: #222222;
+  transition: all 0.2s ease;
+}
+
+.workspaceButton:hover {
+  border-color: #eb3778;
+  background: #fff5f9;
+}
+
+.workspaceButton.selected {
+  border-color: #eb3778;
+  background: #fff5f9;
+  color: #eb3778;
+}
+
 .error {
   width: 100%;
   height: 42px;
@@ -59,6 +90,63 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.formTitle {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 26px;
+}
+
+.title {
+  color: #222222;
+  font-weight: 700;
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+.couponInput {
+  margin-top: 16px;
+  height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.couponinput input {
+  border: 1px solid #999999 !important;
+}
+
+.couponInput input:focus {
+  border: 1px solid #999999 !important;
+  outline: none;
+}
+.couponButton {
+  height: 100%;
+  background-color: white;
+  width: 135px;
+  border: 1px solid #000000;
+  cursor: pointer;
+}
+
+.couponButton:hover {
+  background-color: #eb3778;
+  color: white;
+  border: 1px solid #0000001e;
+}
+
+.couponChip {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 8px;
+}
+
+.couponChip > div {
+  width: fit-content;
+  max-width: 100%;
 }
 
 @media (max-width: 768px) {

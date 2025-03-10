@@ -24,7 +24,7 @@ export default function LabeledInput({
   const handleChange = (e) => {
     const newValue = e;
     if (typeof onChange === "function") {
-      onChange(newValue); 
+      onChange(newValue);
     } else {
       console.warn("setValue is not a function");
     }
@@ -40,7 +40,10 @@ export default function LabeledInput({
   const handleBlur = () => {
     if (regex && !regex.test(value)) {
       setError(true);
-    } else if (isRequired && value.trim() === "") {
+    } else if (
+      isRequired &&
+      (typeof value === "string" ? value.trim() === "" : !value)
+    ) {
       setError(true);
     } else {
       setError(false);
@@ -55,7 +58,8 @@ export default function LabeledInput({
       onBlur={handleBlur}
       placeholder={placeholder || "Placeholder"}
       error={error}
-      // helperText={error ? "This field is required" : ""}
+      type={type === "number" ? "number" : "text"}
+      inputProps={type === "number" ? { min: 1 } : {}}
     />
   );
   switch (type) {
