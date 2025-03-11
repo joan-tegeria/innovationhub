@@ -160,6 +160,7 @@
   color: #4b5563;
   margin-bottom: 1.5rem;
   font-size: 14px;
+  line-height: 20px;
 }
 
 .rateLabel {
@@ -178,16 +179,19 @@
 .button {
   margin-top: 24px;
   width: 100%;
+  font-family: 'Termina Test';
+  font-size: 16px;
   padding: 0.75rem;
   color: black;
   background-color: white;
   border: 1px solid #000000;
   border-radius: 3px;
-  transition: all 0.3s ease;
+  transition: all 0.1s ease;
+  cursor: pointer;
 }
 
 .button:hover {
-  /* background-color: #eb3778; */
+  background-color: #eb3778;
   color: white;
 }
 

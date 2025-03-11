@@ -11,6 +11,7 @@ import Footer from "./Footer";
 import Payment from "./Payment";
 import Finished from "./Finished";
 import { useAuth } from "../context/Auth";
+import { use } from "react";
 
 const steps = ["Information", "Payment", "Finished"];
 
@@ -29,6 +30,9 @@ export default function PersonalDesk() {
   const [couponLoading, setCouponLoading] = useState(false);
   const [validCoupon, setValidCoupon] = useState(null);
   const [invoiceId, setInvoiceId] = useState("");
+  const [singlePrice, setSinglePrice] = useState(0);
+  const [currentPrice, setCurrentPrice] = useState(0);
+
   const {
     personalDeskUserInfo,
     setPersonalDeskUserInfo,
@@ -166,6 +170,10 @@ export default function PersonalDesk() {
     setPrice(
       priceResponse.data.data[0].Unit_Price * personalDeskUserInfo.passDuration
     );
+    setCurrentPrice(
+      priceResponse.data.data[0].Unit_Price * personalDeskUserInfo.passDuration
+    );
+    setSinglePrice(priceResponse.data.data[0].Unit_Price);
     setInfo("info");
     setInfoMessage("Space is available for " + period);
   };
@@ -206,6 +214,7 @@ export default function PersonalDesk() {
         priceResponse.data.data[0].Unit_Price -
           (priceResponse.data.data[0].Unit_Price * validCoupon) / 100
       );
+      setCurrentPrice(priceResponse.data.data[0].Unit_Price);
       setInfo("info");
       setInfoMessage("Space is available for " + period);
     } catch (error) {
@@ -273,6 +282,7 @@ export default function PersonalDesk() {
         { headers: { Authorization: `${tokenType} ${accessToken}` } }
       );
       setPayUrl(bookingResponse.data.paymentSession);
+      console.log(bookingResponse.data);
       setInvoiceId(bookingResponse.data.invoiceId);
       // window.location.href = bookingResponse.data.paymentSession;
     } catch (error) {
@@ -322,6 +332,10 @@ export default function PersonalDesk() {
       // Handle successful coupon application here
       console.log("Coupon response:", response.data);
       setValidCoupon(response.data.couponData.Coupon_Value);
+      setPrice(
+        (prev) => prev - (prev * response.data.couponData.Coupon_Value) / 100
+      );
+
       setInfo("info");
       setInfoMessage("Coupon applied successfully!");
     } catch (error) {
@@ -338,6 +352,12 @@ export default function PersonalDesk() {
     setValidCoupon(null);
     setCouponCode("");
     setInfo("none");
+    setPrice(currentPrice);
+  };
+
+  const finishPayment = () => {
+    console.log("UPDATINGGG ");
+    setActiveStep(2);
   };
 
   const stepComponents = {
@@ -368,9 +388,20 @@ export default function PersonalDesk() {
         price={price}
         invoiceId={invoiceId}
         personalDeskUserInfo={personalDeskUserInfo}
+        singlePrice={singlePrice}
+        currentPrice={currentPrice}
+        couponCode={couponCode}
+        finishPayment={finishPayment}
+        period={period}
       />
     ),
-    2: <Finished />,
+    2: (
+      <Finished
+        loading={loading}
+        selectedWorkspace={selectedWorkspace}
+        price={price}
+      />
+    ),
   };
 
   return (

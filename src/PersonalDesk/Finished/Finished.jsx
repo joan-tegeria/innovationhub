@@ -9,7 +9,7 @@ import CircularProgress, {
 import { TextField } from "@mui/material";
 import dayjs from "dayjs";
 
-export default function Finished({ loading, setIsLoading }) {
+export default function Finished({ loading, selectedWorkspace, price }) {
   const { personalDeskUserInfo, handlePersonalDesk, period, setPeriod } =
     useBooking();
 
@@ -57,19 +57,23 @@ export default function Finished({ loading, setIsLoading }) {
         </div>
         <div className={styles.formRow}>
           <div>Workspace:</div>
-          <div>{personalDeskUserInfo.workspace}</div>
+          <div>{selectedWorkspace.label}</div>
         </div>
-        <div className={styles.formRow}>
-          <div>Starting date:</div>
-          <div>{personalDeskUserInfo.selectDate}</div>
-        </div>
-        <div className={styles.formRow}>
-          <div>Ending date:</div>
-          <div>{personalDeskUserInfo.endDate}</div>
-        </div>
+        {personalDeskUserInfo.bookingType === "Single Pass" ? (
+          <>
+            <div className={styles.formRow}>
+              <div>Starting date:</div>
+              <div>{personalDeskUserInfo.selectDate}</div>
+            </div>
+            <div className={styles.formRow}>
+              <div>Ending date:</div>
+              <div>{personalDeskUserInfo.endDate}</div>
+            </div>
+          </>
+        ) : null}
         <div className={styles.formRow}>
           <div>Total payment:</div>
-          <div>{personalDeskUserInfo.totalToPay}</div>
+          <div>{price}</div>
         </div>
       </div>
       {/* <div className={styles.divider} /> */}

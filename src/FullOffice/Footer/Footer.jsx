@@ -13,30 +13,25 @@ export default function Footer({
   return (
     <div
       className={styles.formFooter}
-      style={{
-        // flexDirection: "row-reverse",
-        justifyContent: isLast ? "center" : "flex-end",
-      }}
+      style={{ flexDirection: isLast && "row-reverse" }}
     >
-      <div
-        className={styles.btnRow}
-        style={{
-          display: "flex",
-          gap: "1rem",
-          width: isLast ? "100%" : "auto",
-        }}
-      >
-        {!isLast && (
+      {!isLast && (
+        <div className={styles.priceInfo}>
+          <span className={styles.totalPay}>Total to pay</span>
+          <span className={styles.price}>{price} ALL</span>
+        </div>
+      )}
+      <div className={styles.btnRow}>
+        {/* {!isLast && (
           <Button
             variant="outlined"
-            style={{ width: 250, height: 50, marginBottom: isLast ? 32 : 0 }}
+            style={{ width: 150, height: 42 }}
             onClick={handleBack}
             disabled={isBackDisabled}
           >
             Cancel
           </Button>
-        )}
-
+        )} */}
         <Button
           variant="contained"
           sx={{
@@ -44,15 +39,15 @@ export default function Footer({
             "&:hover": {
               backgroundColor: "#d62e69",
             },
+            fontFamily: "Termina Test",
+            textTransform: "none",
           }}
-          style={{
-            width: isLast ? "100%" : 250,
-            height: 50,
-          }}
+          style={{ width: 220, height: 42, flex: 1 }}
           onClick={handleNext}
           disabled={isNextDisabled}
+          autoCapitalize={false}
         >
-          {isLast ? "Start new booking" : "Request a quote"}
+          Continue
         </Button>
       </div>
     </div>

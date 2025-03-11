@@ -134,6 +134,7 @@ const DeskBooking = ({ type }) => {
             <motion.button
               key={tab}
               onClick={() => setActiveTab(tab)}
+              style={{ fontFamily: "Termina Test" }}
               className={`${styles.tab} ${
                 activeTab === tab ? styles.activeTab : ""
               }`}

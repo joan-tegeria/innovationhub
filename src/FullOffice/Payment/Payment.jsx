@@ -204,35 +204,29 @@ export default function Payment({
       <p className={styles.subtitle}>Complete payment information</p>
 
       <h2 className={styles.sectionTitle}>Order details</h2>
-      {/* <div className={styles.orderDetails}> */}
       <div className={styles.orderItem}>
         <div className={styles.itemInfo}>
           <h3>{selectedWorkspace.label || "Flexible desk"}</h3>
-          {personalDeskUserInfo.bookingType === "Multi Pass" ? (
-            <p>
-              {personalDeskUserInfo.passDuration} x {singlePrice} ALL
-            </p>
-          ) : (
-            <p>{period}</p>
-          )}
+          <p>{period}</p>
         </div>
         <div className={styles.itemPrice}>
           <p className={styles.currentPrice}>{currentPrice} ALL</p>
-          {/* <p className={styles.originalPrice}>2,400 ALL</p> */}
         </div>
       </div>
-      {personalDeskUserInfo.bookingType === "Single Pass" && (
-        <div className={styles.dateInfo}>
-          <div className={styles.dateRow}>
-            <span>Starting date:</span>
-            <span>{personalDeskUserInfo.selectDate}</span>
+      {personalDeskUserInfo &&
+        personalDeskUserInfo.selectDate &&
+        personalDeskUserInfo.endDate && (
+          <div className={styles.dateInfo}>
+            <div className={styles.dateRow}>
+              <span>Starting date:</span>
+              <span>{personalDeskUserInfo.selectDate}</span>
+            </div>
+            <div className={styles.dateRow}>
+              <span>Ending date:</span>
+              <span>{personalDeskUserInfo.endDate}</span>
+            </div>
           </div>
-          <div className={styles.dateRow}>
-            <span>Ending date:</span>
-            <span>{personalDeskUserInfo.endDate}</span>
-          </div>
-        </div>
-      )}
+        )}
 
       {validCoupon && (
         <div className={styles.discountInfo}>
@@ -270,7 +264,6 @@ export default function Payment({
           ? "Payment Completed"
           : "Proceed to Payment"}
       </button>
-      {/* </div> */}
     </div>
   );
 }

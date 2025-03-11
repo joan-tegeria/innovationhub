@@ -278,6 +278,7 @@ const ContactForm = () => {
               height: "48px",
               textTransform: "none",
               boxShadow: "none",
+              fontFamily: 'Termina Test'
             }}
           >
             Send message

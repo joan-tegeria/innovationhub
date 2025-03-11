@@ -8,11 +8,12 @@ import { Alert } from "@mui/material";
 import { useBooking } from "../context/BookingContext";
 import { useAuth } from "../context/Auth";
 import Information from "./Information";
-import Footer from "./Footer";
+import Footer from "./Footer/Footer";
 import Modal from "./Modal";
 import Finished from "./Finished";
+import Payment from "./Payment";
 
-const steps = ["Information", "Finished"];
+const steps = ["Information", "Payment", "Finished"];
 
 export default function FullOffice() {
   //State
@@ -26,6 +27,18 @@ export default function FullOffice() {
   const [hasError, setHasError] = useState(false);
   const [workspaces, setWorkspaces] = useState([{ value: "", label: "" }]);
   const [isAvailable, setIsAvailable] = useState("");
+  const [info, setInfo] = useState("none");
+  const [infoMessage, setInfoMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [selectedWorkspace, setSelectedWorkspace] = useState("");
+  const [couponCode, setCouponCode] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [validCoupon, setValidCoupon] = useState(null);
+  const [invoiceId, setInvoiceId] = useState("");
+  const [singlePrice, setSinglePrice] = useState(0);
+  const [currentPrice, setCurrentPrice] = useState(0);
+  const [payUrl, setPayUrl] = useState("");
+  const [isFormValid, setIsFormValid] = useState(false);
 
   //Context
   const { fullOfficeInfo, period, handleFullOffice, setFullOfficeInfo } =
@@ -70,8 +83,65 @@ export default function FullOffice() {
     getAllOffices();
   }, []);
 
+  useEffect(() => {
+    const validateForm = () => {
+      const requiredFields = {
+        businessName: fullOfficeInfo.businessName,
+        nipt: fullOfficeInfo.nipt,
+        email: fullOfficeInfo.email,
+        workspace: fullOfficeInfo.workspace,
+        phoneNumber: fullOfficeInfo.phoneNumber,
+        selectDate: fullOfficeInfo.selectDate,
+      };
+
+      return Object.values(requiredFields).every(
+        (field) => field && field !== ""
+      );
+    };
+
+    setIsFormValid(validateForm());
+  }, [fullOfficeInfo]);
+
+  const handleApplyCoupon = async (code) => {
+    if (!code) return;
+
+    setCouponLoading(true);
+    try {
+      const response = await api.get(
+        `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/coupon?coupon=${code}`,
+        {
+          headers: { Authorization: `${tokenType} ${accessToken}` },
+        }
+      );
+      setValidCoupon(response.data.couponData.Coupon_Value);
+      setPrice(
+        (prev) => prev - (prev * response.data.couponData.Coupon_Value) / 100
+      );
+      setInfo("info");
+      setInfoMessage("Coupon applied successfully!");
+    } catch (error) {
+      console.error("Error applying coupon:", error);
+      setValidCoupon(null);
+      setInfo("error");
+      setInfoMessage("Invalid coupon code");
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setValidCoupon(null);
+    setCouponCode("");
+    setInfo("none");
+    setPrice(currentPrice);
+  };
+
+  const finishPayment = () => {
+    setActiveStep(2);
+  };
+
   const sendBookRequest = async () => {
-    // setLoading(true);
+    setLoading(true);
     const userData = {
       name: fullOfficeInfo.businessName,
       lastName: fullOfficeInfo.businessName,
@@ -96,8 +166,7 @@ export default function FullOffice() {
           },
         }
       );
-      console.log("🚀 ~ sendBookRequest ~ response:", response);
-      console.log("fullOfficeInfo", fullOfficeInfo);
+
       const bookingData = {
         username: fullOfficeInfo.businessName + " " + fullOfficeInfo.nipt,
         user: response.id,
@@ -106,6 +175,7 @@ export default function FullOffice() {
         room: fullOfficeInfo.workspace,
         booking: period,
         requestedFrom: fullOfficeInfo.requestedFrom,
+        discount: validCoupon ? validCoupon : 0,
       };
 
       const bookingResponse = await api.post(
@@ -117,11 +187,15 @@ export default function FullOffice() {
           },
         }
       );
-      console.log("🚀 ~ sendBookRequest ~ bookingResponse:", bookingResponse);
+
+      setPayUrl(bookingResponse.data.paymentSession);
+      setInvoiceId(bookingResponse.data.invoiceId);
       setLoading(false);
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
     } catch (error) {
       console.log("🚀 ~ sendBookRequest ~ error:", error);
+      setErrorMessage("Failed to process booking. Please try again.");
+      setLoading(false);
     }
   };
 
@@ -151,7 +225,7 @@ export default function FullOffice() {
         }
       );
       setIsAvailable(response);
-      console.log("�� ~ checkOfficeAvaliablity ~ response:", response);
+      console.log("🚀 ~ checkOfficeAvaliablity ~ response:", response);
     } catch (error) {
       console.log("🚀 ~ checkOfficeAvaliablity ~ error:", error);
     }
@@ -187,13 +261,42 @@ export default function FullOffice() {
     0: (
       <Information
         loading={loading}
-        // setIsLoading={setLoading}
         checkOffice={checkOfficeAvaliablity}
         workspaces={workspaces}
+        info={info}
+        infoMessage={infoMessage}
+        couponCode={couponCode}
+        setCouponCode={setCouponCode}
+        couponLoading={couponLoading}
+        onApplyCoupon={handleApplyCoupon}
+        validCoupon={validCoupon}
+        onRemoveCoupon={removeCoupon}
       />
     ),
-
-    1: <Finished />,
+    1: (
+      <Payment
+        loading={loading}
+        setIsLoading={setLoading}
+        validCoupon={validCoupon}
+        payurl={payUrl}
+        selectedWorkspace={selectedWorkspace}
+        price={price}
+        invoiceId={invoiceId}
+        fullOfficeInfo={fullOfficeInfo}
+        singlePrice={singlePrice}
+        currentPrice={currentPrice}
+        couponCode={couponCode}
+        finishPayment={finishPayment}
+        period={period}
+      />
+    ),
+    2: (
+      <Finished
+        loading={loading}
+        selectedWorkspace={selectedWorkspace}
+        price={price}
+      />
+    ),
   };
 
   if (!accessToken) {
@@ -220,6 +323,17 @@ export default function FullOffice() {
         <div className={styles.stepContent}>
           {stepComponents[activeStep] || stepComponents[0]}
         </div>
+
+        {errorMessage && (
+          <Alert
+            severity="error"
+            onClose={() => setErrorMessage("")}
+            style={{ marginBottom: 10 }}
+          >
+            {errorMessage}
+          </Alert>
+        )}
+
         {!loading && (
           <Footer
             price={price}
@@ -227,9 +341,13 @@ export default function FullOffice() {
               activeStep === steps.length - 1 ? resetForm : handleNext
             }
             handleBack={resetForm}
-            isBackDisabled={isAvailable !== "Available"}
-            isNextDisabled={isAvailable !== "Available"}
-            isLast={activeStep === 1}
+            isBackDisabled={activeStep === 0}
+            isNextDisabled={!isFormValid || isAvailable !== "Available"}
+            isLast={activeStep === 2}
+            currentPrice={currentPrice}
+            singlePrice={singlePrice}
+            validCoupon={validCoupon}
+            period={period}
           />
         )}
       </div>
