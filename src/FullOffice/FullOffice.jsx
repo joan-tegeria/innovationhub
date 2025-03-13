@@ -17,7 +17,7 @@ const steps = ["Information", "Payment", "Finished"];
 
 export default function FullOffice() {
   //State
-  const [price, setPrice] = useState(5000);
+  const [price, setPrice] = useState(0);
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [localData, setLocalData] = useLocalStorage("localData", {});
@@ -175,7 +175,7 @@ export default function FullOffice() {
         room: fullOfficeInfo.workspace,
         booking: period,
         requestedFrom: fullOfficeInfo.requestedFrom,
-        discount: validCoupon ? validCoupon : 0,
+        // discount: validCoupon ? validCoupon : 0,
       };
 
       const bookingResponse = await api.post(
@@ -191,7 +191,19 @@ export default function FullOffice() {
       setPayUrl(bookingResponse.data.paymentSession);
       setInvoiceId(bookingResponse.data.invoiceId);
       setLoading(false);
-      setActiveStep((prevActiveStep) => prevActiveStep + 1);
+
+      // Get the selected workspace label
+      const selectedWorkspaceObj = workspaces.find(
+        (ws) => ws.value === fullOfficeInfo.workspace
+      );
+      const workspaceLabel = selectedWorkspaceObj?.label;
+      console.log("🚀 ~ sendBookRequest ~ workspaceLabel:", workspaceLabel);
+      // Skip payment step for The Suite and The Pod
+      if (workspaceLabel === "The Suite" || workspaceLabel === "The Pod") {
+        setActiveStep(2); // Go directly to Finished step
+      } else {
+        setActiveStep((prevActiveStep) => prevActiveStep + 1); // Go to Payment step
+      }
     } catch (error) {
       console.log("🚀 ~ sendBookRequest ~ error:", error);
       setErrorMessage("Failed to process booking. Please try again.");
@@ -225,9 +237,38 @@ export default function FullOffice() {
         }
       );
       setIsAvailable(response);
+
+      // Get the selected workspace label
+      const selectedWorkspaceObj = workspaces.find(
+        (ws) => ws.value === fullOfficeInfo.workspace
+      );
+      if (selectedWorkspaceObj) {
+        // Fetch price for the selected workspace
+        const priceResponse = await api.get(
+          `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/prices?product=${selectedWorkspaceObj.label}&period=${period}`,
+          {
+            headers: {
+              Authorization: `${tokenType} ${accessToken}`,
+            },
+          }
+        );
+
+        const basePrice = priceResponse.data.data[0].Unit_Price;
+        setPrice(basePrice - (basePrice * (validCoupon || 0)) / 100);
+        setCurrentPrice(basePrice);
+        setSinglePrice(basePrice);
+
+        if (response === "Available") {
+          setInfo("info");
+          setInfoMessage("Space is available for " + period);
+        }
+      }
+
       console.log("🚀 ~ checkOfficeAvaliablity ~ response:", response);
     } catch (error) {
       console.log("🚀 ~ checkOfficeAvaliablity ~ error:", error);
+      setInfo("error");
+      setInfoMessage("Error checking availability");
     }
   };
 
@@ -334,7 +375,7 @@ export default function FullOffice() {
           </Alert>
         )}
 
-        {!loading && (
+        {!loading && activeStep !== 2 && (
           <Footer
             price={price}
             handleNext={

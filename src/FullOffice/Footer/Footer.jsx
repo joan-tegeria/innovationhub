@@ -32,8 +32,9 @@ export default function Footer({
             Cancel
           </Button>
         )} */}
-        <Button
-          variant="contained"
+        {!isLast && (
+          <Button
+            variant="contained"
           sx={{
             backgroundColor: "#EB3778",
             "&:hover": {
@@ -47,8 +48,9 @@ export default function Footer({
           disabled={isNextDisabled}
           autoCapitalize={false}
         >
-          Continue
-        </Button>
+            Continue
+          </Button>
+        )}
       </div>
     </div>
   );

@@ -206,7 +206,7 @@ export default function Payment({
       <h2 className={styles.sectionTitle}>Order details</h2>
       <div className={styles.orderItem}>
         <div className={styles.itemInfo}>
-          <h3>{selectedWorkspace.label || "Flexible desk"}</h3>
+          <h3>{selectedWorkspace.label || "Private Office"}</h3>
           <p>{period}</p>
         </div>
         <div className={styles.itemPrice}>
