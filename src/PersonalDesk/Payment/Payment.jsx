@@ -6,26 +6,33 @@ import CircularProgress, {
 } from "@mui/material/CircularProgress";
 import api from "../../utility/axiosConfig";
 import { useAuth } from "../../context/Auth";
+import { Chip } from "@mui/material";
 
 export default function Payment({
   loading,
-  payurl,
   selectedWorkspace,
-  invoiceId,
+  // invoiceId,
   personalDeskUserInfo,
   validCoupon,
   price,
   singlePrice,
   currentPrice,
   couponCode,
+  setCouponCode,
+  couponLoading,
+  onApplyCoupon,
+  onRemoveCoupon,
   finishPayment,
   period,
+  userId,
+  bookOffice,
 }) {
   const { accessToken, tokenType } = useAuth();
   const [paymentWindow, setPaymentWindow] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
   const iframeContainerRef = useRef(null);
+  const [invoiceId, setInvoiceId] = useState(null);
 
   const updateInvoiceStatus = async (orderIdentification) => {
     console.log(invoiceId);
@@ -40,6 +47,7 @@ export default function Payment({
         }
       );
 
+      finishPayment();
       if (response.status !== 200) {
         throw new Error("Failed to update invoice status");
       }
@@ -59,12 +67,22 @@ export default function Payment({
     }
   }, []);
 
-  const handlePayment = (e) => {
+  const _bookOffice = async (e) => {
+    try {
+      const bookingResponse = await bookOffice(userId);
+      handlePayment(e, bookingResponse);
+      setInvoiceId(bookingResponse.data.invoiceId);
+    } catch (error) {
+      console.error("Error booking office:", error);
+    }
+  };
+
+  const handlePayment = (e, bookingResponse) => {
     e.preventDefault();
     setPaymentStatus(null);
     setErrorMessage(null);
 
-    const paymentUrl = `${payurl}&mode=frameless`;
+    const paymentUrl = `${bookingResponse.data.paymentSession}&mode=frameless`;
 
     // Close existing payment window if it exists
     closePaymentWindow();
@@ -129,7 +147,7 @@ export default function Payment({
         switch (status) {
           case "success":
             updateInvoiceStatus(orderIdentification);
-            finishPayment();
+           
             break;
           case "failure":
             setErrorMessage("Payment failed. Please try again.");
@@ -234,6 +252,43 @@ export default function Payment({
         </div>
       )}
 
+      <div className={styles.couponSection}>
+        <h2 className={styles.sectionTitle}>Do you have a discount code?</h2>
+        <span style={{ fontSize: 14 }}>
+          Apply it at checkout to get a special discount on your order.
+          <div className={styles.couponInputContainer}>
+            {validCoupon ? (
+              <div className={styles.couponChip}>
+                <Chip
+                  label={couponCode}
+                  onDelete={onRemoveCoupon}
+                  color="primary"
+                  variant="outlined"
+                  style={{ height: 48, fontSize: 16 }}
+                />
+              </div>
+            ) : (
+              <>
+                <input
+                  type="text"
+                  placeholder="Code"
+                  className={styles.couponInputField}
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value)}
+                />
+                <button
+                  className={styles.couponButton}
+                  onClick={() => onApplyCoupon(couponCode)}
+                  disabled={couponLoading}
+                >
+                  {couponLoading ? "Applying..." : "Apply"}
+                </button>
+              </>
+            )}
+          </div>
+        </span>
+      </div>
+
       {validCoupon && (
         <div className={styles.discountInfo}>
           <div className={styles.discountRow}>
@@ -242,14 +297,11 @@ export default function Payment({
           </div>
           <div className={styles.discountRow}>
             <span>Discount percentage:</span>
-            <span>{validCoupon}%</span>
+            <span>{((validCoupon / currentPrice) * 100).toFixed(0)}%</span>
           </div>
           <div className={styles.subtotalRow}>
             <span>Subtotal:</span>
-            <span className={styles.subtotalAmount}>
-              -{((price * validCoupon) / 100).toFixed(2)}
-              ALL
-            </span>
+            <span className={styles.subtotalAmount}>-{validCoupon} ALL</span>
           </div>
         </div>
       )}
@@ -262,7 +314,7 @@ export default function Payment({
       </div>
 
       <button
-        onClick={handlePayment}
+        onClick={_bookOffice}
         className={styles.paymentButton}
         disabled={paymentStatus === "success"}
       >

@@ -32,14 +32,16 @@ export default function PersonalDesk() {
   const [invoiceId, setInvoiceId] = useState("");
   const [singlePrice, setSinglePrice] = useState(0);
   const [currentPrice, setCurrentPrice] = useState(0);
-
+  const [isPriceFilled, setIsPriceFilled] = useState(false);
+  const [userId, setUserId] = useState("");
+  const [priceId, setPriceId] = useState("");
   const {
     personalDeskUserInfo,
     setPersonalDeskUserInfo,
     period,
     handlePersonalDesk,
   } = useBooking();
-  const [payUrl, setPayUrl] = useState("");
+
   const { accessToken, tokenType, tokenLoading } = useAuth();
   const [isFormValid, setIsFormValid] = useState(false);
 
@@ -139,14 +141,30 @@ export default function PersonalDesk() {
         return areCommonFieldsValid && personalDeskUserInfo.passDuration > 0;
       } else {
         // Single Pass validation
+        console.log(areCommonFieldsValid);
+        console.log(personalDeskUserInfo.selectDate);
+        console.log(period);
+        console.log(price);
+        console.log(isPriceFilled);
+
         return (
-          areCommonFieldsValid && personalDeskUserInfo.selectDate && period
+          areCommonFieldsValid &&
+          personalDeskUserInfo.selectDate &&
+          period &&
+          price > 0 &&
+          isPriceFilled
         );
       }
     };
 
     setIsFormValid(validateForm());
   }, [personalDeskUserInfo, period]);
+
+  useEffect(() => {
+    getPrice();
+    console.log(price);
+    console.log(personalDeskUserInfo.workspace);
+  }, [personalDeskUserInfo.workspace]);
 
   const getPrice = async () => {
     // Find the selected workspace object by matching the ID
@@ -174,19 +192,39 @@ export default function PersonalDesk() {
       priceResponse.data.data[0].Unit_Price * personalDeskUserInfo.passDuration
     );
     setSinglePrice(priceResponse.data.data[0].Unit_Price);
-    setInfo("info");
-    setInfoMessage("Space is available for " + period);
+    setIsPriceFilled(true);
+    setPriceId(priceResponse.data.data[0].id);
+
+    // Only set info message if we have the required data
+    if (personalDeskUserInfo.bookingType === "Multi Pass") {
+      if (personalDeskUserInfo.passDuration > 0) {
+        setInfo("info");
+        setInfoMessage(
+          "Space is available for " +
+            personalDeskUserInfo.passDuration +
+            " passes"
+        );
+      } else {
+        setInfo("none");
+      }
+    } else {
+      // For Single Pass, info message is handled by checkOfficeAvaliablity function
+      if (!personalDeskUserInfo.selectDate) {
+        setInfo("none");
+      }
+    }
   };
 
-  const checkOfficeAvaliablity = async (startDate) => {
+  const checkOfficeAvaliablity = async (startDate, periodToUse) => {
     try {
       const fromDate = dayjs(startDate);
-      const toDate = calculateEndDate(fromDate, period);
-      const endDate = dayjs(personalDeskUserInfo.toDate);
+      const toDate = calculateEndDate(fromDate, periodToUse || period);
+      const endDate = dayjs(toDate);
 
       handlePersonalDesk("selectDate", fromDate.format("YYYY-MM-DD"));
       handlePersonalDesk("endDate", endDate.format("YYYY-MM-DD"));
 
+      // First check availability
       const { data: availabilityData } = await api.get(
         `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/shared/${
           personalDeskUserInfo.workspace[1]
@@ -203,22 +241,15 @@ export default function PersonalDesk() {
         ]
       );
 
-      const priceResponse = await api.get(
-        `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/prices?product=Flexible Desk&period=${period}`,
-        { headers: { Authorization: `${tokenType} ${accessToken}` } }
-      );
+      // Get price using the main getPrice function to avoid duplication
+      await getPrice();
 
-      console.log(priceResponse.data.data[0].Unit_Price);
-
-      setPrice(
-        priceResponse.data.data[0].Unit_Price -
-          (priceResponse.data.data[0].Unit_Price * validCoupon) / 100
-      );
-      setCurrentPrice(priceResponse.data.data[0].Unit_Price);
       setInfo("info");
-      setInfoMessage("Space is available for " + period);
+      setInfoMessage("Space is available for " + (periodToUse || period));
     } catch (error) {
       console.log("Error checking availability:", error);
+      setInfo("error");
+      setInfoMessage("Error checking availability");
     }
   };
 
@@ -248,7 +279,9 @@ export default function PersonalDesk() {
         { headers: { Authorization: `${tokenType} ${accessToken}` } }
       );
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
-      await bookOffice(response.id);
+      setUserId(response.id);
+      // await bookOffice(response.id);
+      setActiveStep(1);
     } catch (error) {
       console.error("Error creating user:", error);
       setErrorMessage("Failed to create user. Please try again.");
@@ -276,18 +309,20 @@ export default function PersonalDesk() {
     };
 
     try {
+      setLoading(true);
       const bookingResponse = await api.post(
         "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/shared",
         bookingData,
         { headers: { Authorization: `${tokenType} ${accessToken}` } }
       );
-      setPayUrl(bookingResponse.data.paymentSession);
-      console.log(bookingResponse.data);
-      setInvoiceId(bookingResponse.data.invoiceId);
+
       // window.location.href = bookingResponse.data.paymentSession;
+      return bookingResponse;
     } catch (error) {
       console.log("Error booking office:", error);
       setErrorMessage("Failed to book office. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -322,19 +357,18 @@ export default function PersonalDesk() {
     if (!code) return;
 
     setCouponLoading(true);
+
     try {
       const response = await api.get(
-        `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/coupon?coupon=${code}`,
+        `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/coupon?coupon=${code}&id=${priceId}`,
         {
           headers: { Authorization: `${tokenType} ${accessToken}` },
         }
       );
       // Handle successful coupon application here
       console.log("Coupon response:", response.data);
-      setValidCoupon(response.data.couponData.Coupon_Value);
-      setPrice(
-        (prev) => prev - (prev * response.data.couponData.Coupon_Value) / 100
-      );
+      setValidCoupon(response.data.discount);
+      setPrice(response.data.value);
 
       setInfo("info");
       setInfoMessage("Coupon applied successfully!");
@@ -370,12 +404,8 @@ export default function PersonalDesk() {
         info={info}
         infoMessage={infoMessage}
         getPrice={getPrice}
-        couponCode={couponCode}
-        setCouponCode={setCouponCode}
-        couponLoading={couponLoading}
-        onApplyCoupon={handleApplyCoupon}
-        validCoupon={validCoupon}
-        onRemoveCoupon={removeCoupon}
+        setIsFormValid={setIsFormValid}
+        setIsPriceFilled={setIsPriceFilled}
       />
     ),
     1: (
@@ -383,7 +413,6 @@ export default function PersonalDesk() {
         loading={loading}
         setIsLoading={setLoading}
         validCoupon={validCoupon}
-        payurl={payUrl}
         selectedWorkspace={selectedWorkspace}
         price={price}
         invoiceId={invoiceId}
@@ -391,8 +420,15 @@ export default function PersonalDesk() {
         singlePrice={singlePrice}
         currentPrice={currentPrice}
         couponCode={couponCode}
+        setCouponCode={setCouponCode}
+        couponLoading={couponLoading}
+        onApplyCoupon={handleApplyCoupon}
+        onRemoveCoupon={removeCoupon}
         finishPayment={finishPayment}
         period={period}
+        userId={userId}
+        bookOffice={bookOffice}
+        onPreviousStep={() => setActiveStep(0)}
       />
     ),
     2: (

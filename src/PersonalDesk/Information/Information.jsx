@@ -10,7 +10,7 @@ import CircularProgress, {
 } from "@mui/material/CircularProgress";
 import { formatBirthDate } from "../../utility";
 import { TextField, Chip } from "@mui/material";
-import { label } from "framer-motion/client";
+import { label, tr } from "framer-motion/client";
 import api from "../../utility/axiosConfig";
 
 const timePeriods = [
@@ -38,10 +38,12 @@ export default function Information({
   onApplyCoupon,
   validCoupon,
   onRemoveCoupon,
+  setIsPriceFilled,
 }) {
   const { personalDeskUserInfo, handlePersonalDesk, period, setPeriod } =
     useBooking();
   const { accessToken, tokenType } = useAuth();
+  const [selectDate, setSelectDate] = useState(null);
 
   // Add debounced price update
   useEffect(() => {
@@ -56,13 +58,6 @@ export default function Information({
       return () => clearTimeout(timer);
     }
   }, [personalDeskUserInfo.passDuration, personalDeskUserInfo.bookingType]);
-
-  // useEffect(() => {
-  //   console.log(
-  //     "🚀 ~ Information ~ personalDeskUserInfo:",
-  //     personalDeskUserInfo
-  //   );
-  // }, [personalDeskUserInfo]);
 
   if (loading) {
     return (
@@ -125,6 +120,52 @@ export default function Information({
       break;
   }
 
+  const handleWorkspaceSelect = async (workspace) => {
+    try {
+      console.log("WORKSPACE SELECTED", workspace);
+      setIsPriceFilled(false);
+      handlePersonalDesk("workspace", workspace);
+      await getPrice();
+      setIsPriceFilled(true);
+    } catch (error) {
+      console.log("ERROR", error);
+    }
+  };
+
+  const handleBookingTypeSelect = async (event) => {
+    try {
+      setIsPriceFilled(false);
+      handlePersonalDesk("bookingType", event.target.value);
+      await getPrice();
+      setIsPriceFilled(true);
+    } catch (error) {
+      console.log("ERROR", error);
+    }
+  };
+
+  const handlePeriodChange = async (event) => {
+    try {
+      setIsPriceFilled(false);
+      const newPeriod = event.target.value;
+      setPeriod(newPeriod);
+      console.log("PERIOD CHANGED", newPeriod);
+
+      // Check office availability if a date is selected, using the new period value
+      if (newPeriod) {
+        // Only call checkOffice which will handle both availability and price
+        await checkOffice(selectDate, newPeriod);
+      } else {
+        // If no date selected, only get price
+        await getPrice();
+      }
+
+      setIsPriceFilled(true);
+    } catch (error) {
+      console.error("Error handling period change:", error);
+      setIsPriceFilled(false);
+    }
+  };
+
   return (
     <>
       <div className={styles.formTitle}>
@@ -143,8 +184,7 @@ export default function Information({
                   : ""
               }`}
               onClick={() => {
-                console.log(workspace.value);
-                handlePersonalDesk("workspace", workspace.value);
+                handleWorkspaceSelect(workspace.value);
               }}
             >
               {workspace.label}
@@ -160,7 +200,7 @@ export default function Information({
             isRequired={true}
             selectValue={personalDeskUserInfo.bookingType}
             onChange={(event) => {
-              handlePersonalDesk("bookingType", event.target.value);
+              handleBookingTypeSelect(event);
             }}
           />
         </div>
@@ -194,16 +234,17 @@ export default function Information({
               type="select"
               isRequired={true}
               selectValue={period}
-              onChange={(event) => setPeriod(event.target.value)}
+              onChange={(event) => handlePeriodChange(event)}
             />
             <LabeledInput
               type="date"
               label={"Select Date"}
               isRequired={true}
               onChange={(value) => {
+                setSelectDate(value);
                 handlePersonalDesk("selectDate", value);
                 console.log(value);
-                checkOffice(value);
+                checkOffice(value, period); // Pass current period here as well
               }}
             />
           </div>
@@ -260,47 +301,6 @@ export default function Information({
             }
           />
         </div>
-        <div className={styles.divider} />
-        <span style={{ fontSize: 16, fontWeight: 700 }}>
-          Do you have a discround code?
-        </span>
-        <span style={{ fontSize: 14 }}>
-          Apply it at checkout to get a special discount on your order. If not
-          <a style={{ textDecoration: "underline", cursor: "pointer" }}>
-            {" "}
-            click here
-          </a>
-          <div className={styles.couponInput}>
-            {validCoupon ? (
-              <div className={styles.couponChip}>
-                <Chip
-                  label={validCoupon.name || couponCode}
-                  onDelete={onRemoveCoupon}
-                  color="#eb3778"
-                  variant="outlined"
-                  style={{ height: 48, fontSize: 16 }}
-                />
-              </div>
-            ) : (
-              <>
-                <input
-                  type="text"
-                  placeholder="Code"
-                  style={{ height: 48, width: "100%" }}
-                  value={couponCode}
-                  onChange={(e) => setCouponCode(e.target.value)}
-                />
-                <button
-                  className={styles.couponButton}
-                  onClick={() => onApplyCoupon(couponCode)}
-                  disabled={couponLoading}
-                >
-                  {couponLoading ? "Applying..." : "Apply"}
-                </button>
-              </>
-            )}
-          </div>
-        </span>
         <div className={styles.divider} />
       </div>
     </>

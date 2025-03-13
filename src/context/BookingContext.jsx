@@ -58,11 +58,11 @@ export default function BookingProvider({ children }) {
       // Set the state based on the localStorage data
       setPersonalDeskUserInfo((prevState) => ({
         ...prevState,
-        firstName: parsedData.name || prevState.firstName,
-        lastName: parsedData.lastName || prevState.lastName,
-        email: parsedData.email || prevState.email,
-        birthday: parsedData.birthday || prevState.birthday,
-        idNumber: parsedData.idNumber || prevState.idNumber,
+        // firstName: parsedData.name || prevState.firstName,
+        // lastName: parsedData.lastName || prevState.lastName,
+        // email: parsedData.email || prevState.email,
+        // birthday: parsedData.birthday || prevState.birthday,
+        // idNumber: parsedData.idNumber || prevState.idNumber,
         // You can add other properties if needed, for example:
         // idNumber: parsedData.idNumber || prevState.idNumber,
         // workspace: parsedData.company || prevState.workspace, // Example mapping

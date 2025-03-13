@@ -105,36 +105,7 @@
   font-size: 28px;
   margin-bottom: 20px;
 }
-.couponInput {
-  margin-top: 16px;
-  height: 48px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 24px;
-}
 
-.couponinput input {
-  border: 1px solid #999999 !important;
-}
-
-.couponInput input:focus {
-  border: 1px solid #999999 !important;
-  outline: none;
-}
-.couponButton {
-  height: 100%;
-  background-color: white;
-  width: 135px;
-  border: 1px solid #000000;
-  cursor: pointer;
-}
-
-.couponButton:hover {
-  background-color: #eb3778;
-  color: white;
-  border: 1px solid #0000001e;
-}
 
 .couponChip {
   width: 100%;

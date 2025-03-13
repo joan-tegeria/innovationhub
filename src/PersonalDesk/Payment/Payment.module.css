@@ -257,3 +257,60 @@
 .paymentButton:disabled:hover {
   background-color: #cccccc;
 }
+
+.couponSection {
+  margin: 24px 0;
+}
+
+.couponInputContainer {
+  display: flex;
+  margin-top: 16px;
+}
+
+.couponInputField {
+  flex: 1;
+  height: 48px;
+  padding: 0 16px;
+  border: 1px solid #999999;
+  border-radius: 4px;
+  font-size: 16px;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.couponInputField:focus {
+  outline: none;
+  border-color: #999999;
+}
+
+.couponButton {
+  padding: 0 24px;
+  height: 48px;
+  background-color: white;
+  color: black;
+  border: 1px solid #000000;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 135px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.couponButton:hover {
+  background-color: #eb3778;
+  color: white;
+  border: 1px solid #0000001e;
+}
+
+.couponButton:disabled {
+  background-color: #cccccc;
+  border-color: #cccccc;
+  color: white;
+  cursor: not-allowed;
+}
+
+.couponChip {
+  margin-top: 16px;
+}
