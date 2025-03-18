@@ -21,35 +21,46 @@ const eventTypeOptions = [
   { value: "Private", label: "Private" },
 ];
 
+// Initial form state for reuse
+const initialFormState = {
+  fullName: "",
+  companyName: "",
+  email: "",
+  phoneNumber: "",
+  eventName: "",
+  eventType: "Public",
+  startDate: "",
+  startTime: "",
+  endDate: "",
+  endTime: "",
+  eventPurpose: "Conference",
+  numberOfGuests: "",
+  notes: "",
+};
+
 export default function Events() {
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    fullName: "",
-    companyName: "",
-    email: "",
-    phoneNumber: "",
-    eventName: "",
-    eventType: "Public",
-    startDate: "",
-    startTime: "",
-    endDate: "",
-    endTime: "",
-    eventPurpose: "Conference",
-    numberOfGuests: "",
-    notes: "",
-  });
+  const [success, setSuccess] = useState(false);
+  const [formData, setFormData] = useState(initialFormState);
 
   const { accessToken, tokenType, tokenLoading } = useAuth();
   const navigate = useNavigate();
+
   if (tokenLoading) {
     return null;
   }
+
   const handleChange = (field) => (event) => {
     const value = event?.target?.value ?? event;
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
+  };
+
+  const handleReset = () => {
+    setFormData(initialFormState);
+    setSuccess(false);
   };
 
   const handleSubmit = async (event) => {
@@ -122,18 +133,17 @@ export default function Events() {
         duration: "Half-Day",
       };
 
-      await api.post("https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/event", newEvent, {
-        headers: {
-          Authorization: `${tokenType} ${accessToken}`,
-        },
-      });
+      await api.post(
+        "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/event",
+        newEvent,
+        {
+          headers: {
+            Authorization: `${tokenType} ${accessToken}`,
+          },
+        }
+      );
 
-      document.getElementById("eventForm").innerHTML = `
-        <div class="${styles.successContainer}">
-          <img src="http://35.176.180.59/wp-content/uploads/2024/11/undraw_mail_sent_re_0ofv-1.png" alt="Success"/>
-          <h3>Your request was sent successfully</h3>
-          <p>Check your email for further details.</p>
-        </div>`;
+      setSuccess(true);
     } catch (error) {
       console.error("Error:", error);
     } finally {
@@ -160,6 +170,28 @@ export default function Events() {
           size={40}
           thickness={4}
         />
+      </div>
+    );
+  }
+
+  if (success) {
+    return (
+      <div className={styles.formContainer}>
+        <div className={styles.successContainer}>
+          <img
+            src="http://35.176.180.59/wp-content/uploads/2024/11/undraw_mail_sent_re_0ofv-1.png"
+            alt="Success"
+          />
+          <h3>Your request was sent successfully</h3>
+          <p>Check your email for further details.</p>
+          <button
+            className={styles.submit}
+            style={{ marginTop: "24px" }}
+            onClick={handleReset}
+          >
+            Submit New Request
+          </button>
+        </div>
       </div>
     );
   }
@@ -295,7 +327,7 @@ export default function Events() {
 
         {/* Buttons */}
         <div className={styles.actions}>
-          <button type="reset" className={styles.cancel}>
+          <button type="button" className={styles.cancel} onClick={handleReset}>
             Cancel
           </button>
           <button type="submit" className={styles.submit}>
