@@ -56,6 +56,16 @@ const ContactForm = () => {
     setOpen(false);
   };
 
+  // Handle email link click for iframe parent window
+  const handleEmailClick = (e) => {
+    e.preventDefault();
+    if (window.parent) {
+      window.parent.href("mailto:info@hubitat.al", "_blank");
+    } else {
+      window.open("mailto:info@hubitat.al", "_blank");
+    }
+  };
+
   if (!accessToken) {
     return null;
   }
@@ -278,7 +288,7 @@ const ContactForm = () => {
               height: "48px",
               textTransform: "none",
               boxShadow: "none",
-              fontFamily: 'Termina Test'
+              fontFamily: "Termina Test",
             }}
           >
             Send message
@@ -286,7 +296,9 @@ const ContactForm = () => {
         </form>
         <p className={styles.email}>
           Or send us an email at{" "}
-          <a href="mailto:info@hubitat.al">info@hubitat.al</a>
+          <a href="#" onClick={handleEmailClick}>
+            info@hubitat.al
+          </a>
         </p>
       </div>
     </div>

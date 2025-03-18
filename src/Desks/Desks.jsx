@@ -7,11 +7,26 @@ import Dedicated from "../assets/dedicated.svg";
 import Flexible from "../assets/flexible.svg";
 import api from "../utility/axiosConfig";
 
+// Add a currency formatter function
+const formatCurrency = (value, currencySymbol) => {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: currencySymbol,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  })
+    .format(value)
+    .replace(
+      currencySymbol === "ALL" ? "$" : currencySymbol,
+      currencySymbol + " "
+    );
+};
+
 const transformApiDataToDesks = (data, period) => {
   return data.map((item) => ({
     type: item.Product_Name.split("-")[0].trim(),
     description: item.Description,
-    price: `${item.Unit_Price} ${item.$currency_symbol}`,
+    price: formatCurrency(item.Unit_Price, item.$currency_symbol),
     Capacity: item.Capacity,
     access:
       period === "Daily"

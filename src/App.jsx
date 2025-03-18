@@ -15,6 +15,7 @@ import MembershipPlans from "./MembershipPlans";
 import Partners from "./Partners/Partners";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import EventTable from "./Desks/EventTable";
 
 function App() {
   // Function to send the current height to the parent
@@ -33,11 +34,30 @@ function App() {
       sendHeightToParent();
     };
 
-    window.addEventListener("resize", handleResize);
+    // Prevent scroll position from changing when date picker opens
+    const preventAutoScroll = (event) => {
+      // Save current scroll position
+      const scrollPos = window.scrollY;
 
-    // Cleanup the event listener on unmount
+      // Check if this is a date picker event by inspecting DOM
+      setTimeout(() => {
+        const datePickerOpen = document.querySelector(".MuiPickersPopper-root");
+        if (datePickerOpen) {
+          // If scrolled, restore position
+          if (window.scrollY !== scrollPos) {
+            window.scrollTo(0, scrollPos);
+          }
+        }
+      }, 10);
+    };
+
+    window.addEventListener("resize", handleResize);
+    document.addEventListener("click", preventAutoScroll, true);
+
+    // Cleanup the event listeners on unmount
     return () => {
       window.removeEventListener("resize", handleResize);
+      document.removeEventListener("click", preventAutoScroll, true);
     };
   }, []); // Empty dependency array ensures this runs only on mount
 
@@ -78,6 +98,7 @@ function App() {
             <Route path="/events" element={<Events />} />
             <Route path="/membershipplans" element={<MembershipPlans />} />
             <Route path="/partners" element={<Partners />} />
+            <Route path="/eventslist" element={<EventTable />} />
           </Routes>
         </BrowserRouter>
       </BookingProvider>

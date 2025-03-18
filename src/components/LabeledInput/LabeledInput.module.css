@@ -3,10 +3,21 @@
   flex-direction: column;
   gap: 8px;
   width: 100%;
+  position: relative;
 }
 
 .label {
   font-weight: 400;
   color: #222222;
   font-size: 16px;
+}
+
+/* Prevent date picker from causing scrolling */
+:global(.MuiPickersPopper-root) {
+  position: absolute !important;
+  z-index: 1500 !important;
+}
+
+:global(.MuiDateCalendar-root) {
+  transform: none !important;
 }

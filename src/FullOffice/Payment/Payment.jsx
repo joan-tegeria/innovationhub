@@ -6,6 +6,7 @@ import CircularProgress, {
 } from "@mui/material/CircularProgress";
 import api from "../../utility/axiosConfig";
 import { useAuth } from "../../context/Auth";
+import { Chip } from "@mui/material";
 
 export default function Payment({
   loading,
@@ -18,6 +19,10 @@ export default function Payment({
   singlePrice,
   currentPrice,
   couponCode,
+  setCouponCode,
+  couponLoading,
+  onApplyCoupon,
+  onRemoveCoupon,
   finishPayment,
   period,
 }) {
@@ -26,6 +31,16 @@ export default function Payment({
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
   const iframeContainerRef = useRef(null);
+
+  // Format price as currency
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "ALL",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(value);
+  };
 
   const updateInvoiceStatus = async (orderIdentification) => {
     console.log(invoiceId);
@@ -43,6 +58,8 @@ export default function Payment({
       if (response.status !== 200) {
         throw new Error("Failed to update invoice status");
       }
+
+      finishPayment();
     } catch (error) {
       console.error("Error updating invoice status:", error);
     }
@@ -129,7 +146,6 @@ export default function Payment({
         switch (status) {
           case "success":
             updateInvoiceStatus(orderIdentification);
-            finishPayment();
             break;
           case "failure":
             setErrorMessage("Payment failed. Please try again.");
@@ -145,7 +161,7 @@ export default function Payment({
         console.error("Error processing payment message:", error);
       }
     },
-    [closePaymentWindow]
+    [closePaymentWindow, finishPayment]
   );
 
   useEffect(() => {
@@ -206,11 +222,11 @@ export default function Payment({
       <h2 className={styles.sectionTitle}>Order details</h2>
       <div className={styles.orderItem}>
         <div className={styles.itemInfo}>
-          <h3>{selectedWorkspace.label || "Private Office"}</h3>
+          <h3>{selectedWorkspace?.label || "Private Office"}</h3>
           <p>{period}</p>
         </div>
         <div className={styles.itemPrice}>
-          <p className={styles.currentPrice}>{currentPrice} ALL</p>
+          <p className={styles.currentPrice}>{formatCurrency(currentPrice)}</p>
         </div>
       </div>
       {personalDeskUserInfo &&
@@ -228,6 +244,44 @@ export default function Payment({
           </div>
         )}
 
+      {/* Coupon Section */}
+      <div className={styles.couponSection}>
+        <h2 className={styles.sectionTitle}>Do you have a discount code?</h2>
+        <span style={{ fontSize: 14 }}>
+          Apply it at checkout to get a special discount on your order.
+          <div className={styles.couponInputContainer}>
+            {validCoupon ? (
+              <div className={styles.couponChip}>
+                <Chip
+                  label={couponCode}
+                  onDelete={onRemoveCoupon}
+                  color="primary"
+                  variant="outlined"
+                  style={{ height: 48, fontSize: 16 }}
+                />
+              </div>
+            ) : (
+              <>
+                <input
+                  type="text"
+                  placeholder="Code"
+                  className={styles.couponInputField}
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value)}
+                />
+                <button
+                  className={styles.couponButton}
+                  onClick={() => onApplyCoupon(couponCode)}
+                  disabled={couponLoading}
+                >
+                  {couponLoading ? "Applying..." : "Apply"}
+                </button>
+              </>
+            )}
+          </div>
+        </span>
+      </div>
+
       {validCoupon && (
         <div className={styles.discountInfo}>
           <div className={styles.discountRow}>
@@ -241,8 +295,7 @@ export default function Payment({
           <div className={styles.subtotalRow}>
             <span>Subtotal:</span>
             <span className={styles.subtotalAmount}>
-              -{((price * validCoupon) / 100).toFixed(2)}
-              ALL
+              -{formatCurrency((currentPrice * validCoupon) / 100)}
             </span>
           </div>
         </div>
@@ -251,7 +304,7 @@ export default function Payment({
       <div className={styles.totalSection}>
         <div className={styles.totalRow}>
           <span>TOTAL:</span>
-          <span className={styles.totalAmount}>{price} ALL</span>
+          <span className={styles.totalAmount}>{formatCurrency(price)}</span>
         </div>
       </div>
 

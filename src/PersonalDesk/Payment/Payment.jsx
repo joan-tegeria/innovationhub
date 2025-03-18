@@ -11,8 +11,9 @@ import { Chip } from "@mui/material";
 export default function Payment({
   loading,
   selectedWorkspace,
-  // invoiceId,
+  invoiceId,
   personalDeskUserInfo,
+  setInvoiceId,
   validCoupon,
   price,
   singlePrice,
@@ -32,7 +33,17 @@ export default function Payment({
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
   const iframeContainerRef = useRef(null);
-  const [invoiceId, setInvoiceId] = useState(null);
+  // const [invoiceId, setInvoiceId] = useState(null);
+
+  // Format price as currency
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "ALL",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(value);
+  };
 
   const updateInvoiceStatus = async (orderIdentification) => {
     console.log(invoiceId);
@@ -71,7 +82,6 @@ export default function Payment({
     try {
       const bookingResponse = await bookOffice(userId);
       handlePayment(e, bookingResponse);
-      setInvoiceId(bookingResponse.data.invoiceId);
     } catch (error) {
       console.error("Error booking office:", error);
     }
@@ -147,7 +157,7 @@ export default function Payment({
         switch (status) {
           case "success":
             updateInvoiceStatus(orderIdentification);
-           
+
             break;
           case "failure":
             setErrorMessage("Payment failed. Please try again.");
@@ -228,14 +238,15 @@ export default function Payment({
           <h3>{selectedWorkspace.label || "Flexible desk"}</h3>
           {personalDeskUserInfo.bookingType === "Multi Pass" ? (
             <p>
-              {personalDeskUserInfo.passDuration} x {singlePrice} ALL
+              {personalDeskUserInfo.passDuration} x{" "}
+              {formatCurrency(singlePrice)}
             </p>
           ) : (
             <p>{period}</p>
           )}
         </div>
         <div className={styles.itemPrice}>
-          <p className={styles.currentPrice}>{currentPrice} ALL</p>
+          <p className={styles.currentPrice}>{formatCurrency(currentPrice)}</p>
           {/* <p className={styles.originalPrice}>2,400 ALL</p> */}
         </div>
       </div>
@@ -301,7 +312,9 @@ export default function Payment({
           </div>
           <div className={styles.subtotalRow}>
             <span>Subtotal:</span>
-            <span className={styles.subtotalAmount}>-{validCoupon} ALL</span>
+            <span className={styles.subtotalAmount}>
+              -{formatCurrency(validCoupon)}
+            </span>
           </div>
         </div>
       )}
@@ -309,7 +322,7 @@ export default function Payment({
       <div className={styles.totalSection}>
         <div className={styles.totalRow}>
           <span>TOTAL:</span>
-          <span className={styles.totalAmount}>{price} ALL</span>
+          <span className={styles.totalAmount}>{formatCurrency(price)}</span>
         </div>
       </div>
 

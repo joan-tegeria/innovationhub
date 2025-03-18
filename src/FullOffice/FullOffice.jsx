@@ -49,6 +49,36 @@ export default function FullOffice() {
     console.log("🚀 ~ PersonalDesk ~ fullOfficeInfo:", fullOfficeInfo);
   }, [fullOfficeInfo]);
 
+  // Update price when workspace changes
+  useEffect(() => {
+    // Skip this effect during initial render with empty workspace
+    if (
+      fullOfficeInfo.workspace &&
+      workspaces.length > 0 &&
+      workspaces[0].value !== ""
+    ) {
+      // If a date is already selected, call checkOffice with the date
+      if (fullOfficeInfo.selectDate) {
+        // If selectDate appears to be an ISO string from a previous check, we can use it directly
+        // Otherwise, we'll just call checkOfficeAvaliablity without a date to get the price
+        const isISOString =
+          typeof fullOfficeInfo.selectDate === "string" &&
+          fullOfficeInfo.selectDate.includes("T");
+
+        if (isISOString) {
+          // For formatted dates, we just need to get the price
+          checkOfficeAvaliablity();
+        } else {
+          // For date objects, we need to check availability
+          checkOfficeAvaliablity(fullOfficeInfo.selectDate);
+        }
+      } else {
+        // Otherwise just get the price
+        checkOfficeAvaliablity();
+      }
+    }
+  }, [fullOfficeInfo.workspace]);
+
   //Handlers
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -75,7 +105,18 @@ export default function FullOffice() {
         }));
         setWorkspaces(transformed);
         setLoading(false);
-        handleFullOffice("workspace", transformed[0].value);
+
+        // Select the first workspace and update the context
+        if (transformed.length > 0) {
+          const initialWorkspace = transformed[0].value;
+          handleFullOffice("workspace", initialWorkspace);
+          setSelectedWorkspace(transformed[0]);
+
+          // Call checkOfficeAvaliablity with no date to just get the price
+          setTimeout(() => {
+            checkOfficeAvaliablity();
+          }, 100);
+        }
       } catch (error) {
         console.log("🚀 ~ getAllOffices ~ error:", error);
       }
@@ -175,7 +216,7 @@ export default function FullOffice() {
         room: fullOfficeInfo.workspace,
         booking: period,
         requestedFrom: fullOfficeInfo.requestedFrom,
-        // discount: validCoupon ? validCoupon : 0,
+        discount: validCoupon ? validCoupon : 0,
       };
 
       const bookingResponse = await api.post(
@@ -197,12 +238,20 @@ export default function FullOffice() {
         (ws) => ws.value === fullOfficeInfo.workspace
       );
       const workspaceLabel = selectedWorkspaceObj?.label;
+      setSelectedWorkspace(selectedWorkspaceObj || {});
       console.log("🚀 ~ sendBookRequest ~ workspaceLabel:", workspaceLabel);
+
       // Skip payment step for The Suite and The Pod
+      // Go to payment step for The Solo and The Duo
       if (workspaceLabel === "The Suite" || workspaceLabel === "The Pod") {
         setActiveStep(2); // Go directly to Finished step
+      } else if (
+        workspaceLabel === "The Solo" ||
+        workspaceLabel === "The Duo"
+      ) {
+        setActiveStep(1); // Go to Payment step
       } else {
-        setActiveStep((prevActiveStep) => prevActiveStep + 1); // Go to Payment step
+        setActiveStep(1); // Default: Go to Payment step
       }
     } catch (error) {
       console.log("🚀 ~ sendBookRequest ~ error:", error);
@@ -213,11 +262,51 @@ export default function FullOffice() {
 
   const checkOfficeAvaliablity = async (startDate) => {
     try {
+      // If no start date provided, just check for pricing but not availability
+      if (!startDate) {
+        const selectedWorkspaceObj = workspaces.find(
+          (ws) => ws.value === fullOfficeInfo.workspace
+        );
+
+        if (selectedWorkspaceObj) {
+          setSelectedWorkspace(selectedWorkspaceObj);
+          // Fetch price for the selected workspace
+          try {
+            const priceResponse = await api.get(
+              `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/prices?product=${selectedWorkspaceObj.label}&period=${period}`,
+              {
+                headers: {
+                  Authorization: `${tokenType} ${accessToken}`,
+                },
+              }
+            );
+
+            const basePrice = priceResponse.data.data[0].Unit_Price;
+            setPrice(basePrice - (basePrice * (validCoupon || 0)) / 100);
+            setCurrentPrice(basePrice);
+            setSinglePrice(basePrice);
+
+            // Don't update availability status since we're just checking price
+          } catch (error) {
+            console.log("Error fetching price:", error);
+            setInfo("error");
+            setInfoMessage("Error retrieving price information");
+          }
+          return;
+        }
+      }
+
+      // Normal availability check with date
       const fromDate = dayjs(startDate);
       const toDate = calculateEndDate(fromDate, period);
 
-      const formattedStartDate = formatDate(startDate).replace(/\+/g, "+");
-      const formattedEndDate = formatDate(toDate).replace(/\+/g, "+");
+      // Make sure we're using the correct date format with dayjs
+      const formattedStartDate = fromDate
+        .format("YYYY-MM-DDTHH:mm:ssZ")
+        .replace(/\+/g, "+");
+      const formattedEndDate = toDate
+        .format("YYYY-MM-DDTHH:mm:ssZ")
+        .replace(/\+/g, "+");
 
       handleFullOffice("selectDate", formattedStartDate);
       handleFullOffice("endDate", formattedEndDate);
@@ -243,6 +332,7 @@ export default function FullOffice() {
         (ws) => ws.value === fullOfficeInfo.workspace
       );
       if (selectedWorkspaceObj) {
+        setSelectedWorkspace(selectedWorkspaceObj);
         // Fetch price for the selected workspace
         const priceResponse = await api.get(
           `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/prices?product=${selectedWorkspaceObj.label}&period=${period}`,
@@ -306,12 +396,6 @@ export default function FullOffice() {
         workspaces={workspaces}
         info={info}
         infoMessage={infoMessage}
-        couponCode={couponCode}
-        setCouponCode={setCouponCode}
-        couponLoading={couponLoading}
-        onApplyCoupon={handleApplyCoupon}
-        validCoupon={validCoupon}
-        onRemoveCoupon={removeCoupon}
       />
     ),
     1: (
@@ -327,6 +411,10 @@ export default function FullOffice() {
         singlePrice={singlePrice}
         currentPrice={currentPrice}
         couponCode={couponCode}
+        setCouponCode={setCouponCode}
+        couponLoading={couponLoading}
+        onApplyCoupon={handleApplyCoupon}
+        onRemoveCoupon={removeCoupon}
         finishPayment={finishPayment}
         period={period}
       />

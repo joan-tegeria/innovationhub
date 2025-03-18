@@ -101,6 +101,12 @@ textarea {
   background: transparent;
   color: #000;
   border: 1px solid #e5e7eb;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .cancel:hover {
@@ -111,6 +117,12 @@ textarea {
   background: #ff4d8d;
   color: white;
   border: none;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .submit:hover {

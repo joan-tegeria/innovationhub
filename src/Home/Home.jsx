@@ -88,6 +88,7 @@ function Home() {
           Membership Plans
         </button>
         <button onClick={() => navigate("/partners")}>Partners</button>
+        <button onClick={() => navigate("/eventslist")}>Event List</button>
       </nav>
     </div>
   );

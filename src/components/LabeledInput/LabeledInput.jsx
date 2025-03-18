@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import styles from "./LabeledInput.module.css";
 import TextField from "@mui/material/TextField";
 import { DatePicker } from "@mui/x-date-pickers";
+import dayjs from "dayjs";
 // import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
@@ -17,9 +18,14 @@ export default function LabeledInput({
   selectValue,
   regex,
   value = "",
+  minDate,
+  maxDate,
   // setValue,
 }) {
   const [error, setError] = useState(false);
+
+  const formattedMinDate = minDate ? dayjs(minDate) : null;
+  const formattedMaxDate = maxDate ? dayjs(maxDate) : null;
 
   const handleChange = (e) => {
     const newValue = e;
@@ -64,7 +70,30 @@ export default function LabeledInput({
   );
   switch (type) {
     case "date":
-      input = <DatePicker onChange={onChange} />;
+      input = (
+        <DatePicker
+          onChange={onChange}
+          disableScrollLock={true}
+          minDate={formattedMinDate}
+          maxDate={formattedMaxDate}
+          PopperProps={{
+            disablePortal: true,
+            modifiers: [
+              {
+                name: "preventOverflow",
+                enabled: true,
+                options: {
+                  altAxis: true,
+                  altBoundary: true,
+                  tether: false,
+                  rootBoundary: "document",
+                  padding: 8,
+                },
+              },
+            ],
+          }}
+        />
+      );
       break;
     case "select":
       input = (

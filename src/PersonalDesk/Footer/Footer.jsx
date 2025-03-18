@@ -10,6 +10,16 @@ export default function Footer({
   isNextDisabled,
   isLast,
 }) {
+  // Format price as currency
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "ALL",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(value);
+  };
+
   return (
     <div
       className={styles.formFooter}
@@ -18,7 +28,7 @@ export default function Footer({
       {!isLast && (
         <div className={styles.priceInfo}>
           <span className={styles.totalPay}>Total to pay</span>
-          <span className={styles.price}>{price} ALL</span>
+          <span className={styles.price}>{formatCurrency(price)}</span>
         </div>
       )}
       <div className={styles.btnRow}>

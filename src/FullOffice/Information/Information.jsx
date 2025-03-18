@@ -5,6 +5,7 @@ import { useBooking } from "../../context/BookingContext";
 import infowhite from "../../assets/infowhite.svg";
 import infoico from "../../assets/info.svg";
 import { Chip } from "@mui/material";
+import dayjs from "dayjs";
 
 import CircularProgress, {
   circularProgressClasses,
@@ -37,12 +38,6 @@ export default function Information({
   workspaces,
   info,
   infoMessage,
-  couponCode,
-  setCouponCode,
-  couponLoading,
-  onApplyCoupon,
-  validCoupon,
-  onRemoveCoupon,
 }) {
   const { fullOfficeInfo, handleFullOffice, period, setPeriod } = useBooking();
   const [teamSize, setTeamSize] = useState("1");
@@ -119,7 +114,10 @@ export default function Information({
                 ? styles.selected
                 : ""
             }`}
-            onClick={() => handleFullOffice("workspace", workspace.value)}
+            onClick={() => {
+              handleFullOffice("workspace", workspace.value);
+              handleFullOffice("selectDate", "");
+            }}
           >
             {workspace.label}
           </button>
@@ -140,6 +138,9 @@ export default function Information({
           type="date"
           label={"Select Date"}
           isRequired={true}
+          value={
+            fullOfficeInfo.selectDate ? dayjs(fullOfficeInfo.selectDate) : null
+          }
           onChange={(value) => {
             handleFullOffice("selectDate", value);
             console.log(value);
@@ -236,49 +237,8 @@ export default function Information({
           onChange={(event) => handleFullOffice("city", event.target.value)}
         />
       </div>
-      <div className={styles.divider} />
+     
 
-      {/* Coupon Section */}
-      <span style={{ fontSize: 16, fontWeight: 700 }}>
-        Do you have a discround code?
-      </span>
-      <span style={{ fontSize: 14 }}>
-        Apply it at checkout to get a special discount on your order. If not
-        <a style={{ textDecoration: "underline", cursor: "pointer" }}>
-          {" "}
-          click here
-        </a>
-        <div className={styles.couponInput}>
-          {validCoupon ? (
-            <div className={styles.couponChip}>
-              <Chip
-                label={validCoupon.name || couponCode}
-                onDelete={onRemoveCoupon}
-                color="#eb3778"
-                variant="outlined"
-                style={{ height: 48, fontSize: 16 }}
-              />
-            </div>
-          ) : (
-            <>
-              <input
-                type="text"
-                placeholder="Code"
-                style={{ height: 48, width: "100%" }}
-                value={couponCode}
-                onChange={(e) => setCouponCode(e.target.value)}
-              />
-              <button
-                className={styles.couponButton}
-                onClick={() => onApplyCoupon(couponCode)}
-                disabled={couponLoading}
-              >
-                {couponLoading ? "Applying..." : "Apply"}
-              </button>
-            </>
-          )}
-        </div>
-      </span>
       <div className={styles.divider} />
     </div>
   );

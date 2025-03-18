@@ -12,7 +12,8 @@ import dayjs from "dayjs";
 export default function Finished({ loading, selectedWorkspace, price }) {
   const { personalDeskUserInfo, handlePersonalDesk, period, setPeriod } =
     useBooking();
-
+  //TODO ADD BACK TO HOMEPAGE SCREEN
+  
   if (loading) {
     return (
       <div

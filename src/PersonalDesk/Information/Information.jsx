@@ -5,6 +5,7 @@ import { useBooking } from "../../context/BookingContext";
 import { useAuth } from "../../context/Auth";
 import infowhite from "../../assets/infowhite.svg";
 import infoico from "../../assets/info.svg";
+import dayjs from "dayjs";
 import CircularProgress, {
   circularProgressClasses,
 } from "@mui/material/CircularProgress";
@@ -240,6 +241,7 @@ export default function Information({
               type="date"
               label={"Select Date"}
               isRequired={true}
+              minDate={new Date()}
               onChange={(value) => {
                 setSelectDate(value);
                 handlePersonalDesk("selectDate", value);
@@ -276,6 +278,9 @@ export default function Information({
           <LabeledInput
             type="date"
             label={"Birthday"}
+            maxDate={
+              new Date(new Date().setFullYear(new Date().getFullYear() - 18))
+            }
             onChange={(value) =>
               handlePersonalDesk("birthday", formatBirthDate(value))
             }

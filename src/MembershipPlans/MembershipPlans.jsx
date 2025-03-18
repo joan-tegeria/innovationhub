@@ -53,7 +53,11 @@ const getRedirectUrl = (title) => {
 const handleButtonClick = (plan) => {
   const url = getRedirectUrl(plan.title);
   console.log("Button is being clicked", plan.title);
-  window.location.href = url;
+  if (window.self !== window.top) {
+    window.parent.location.href = url;
+  } else {
+    window.location.href = url;
+  }
 };
 
 const PlanCard = ({ plan }) => (

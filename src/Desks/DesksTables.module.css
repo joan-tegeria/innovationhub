@@ -6,7 +6,6 @@
 
 .titleContainer {
   display: flex;
-
   width: 100%;
   justify-content: space-between !important;
   align-items: center;
@@ -62,6 +61,17 @@
   z-index: 1;
 }
 
+.activeBackground2 {
+  background-color: #eb3778;
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  bottom: 4px;
+  width: calc((100% - 8px) / 2);
+  border-radius: 9999px;
+  z-index: 1;
+}
+
 .tableContainer {
   width: 100%;
   overflow-x: auto;
@@ -109,7 +119,6 @@
   font-size: 0.9rem;
   line-height: 1.5;
   padding: 1.5rem 0;
-
   margin: 0;
 }
 
@@ -165,7 +174,78 @@
   border-radius: 8px;
 }
 
-/* @media (max-width: 768px) {
+/* Mobile card view styles */
+.cardContainer {
+  display: none;
+  width: 100%;
+  margin-top: 1.5rem;
+}
+
+.card {
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e8e6de;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.cardTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #333;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 0.5rem;
+}
+
+.cardSection {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.cardSection:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.cardLabel {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+}
+
+.cardValue {
+  font-size: 1rem;
+  color: #333;
+  line-height: 1.5;
+}
+
+/* Large screens (desktops) */
+@media (max-width: 1200px) {
+  .titleContainer {
+    min-width: 800px;
+  }
+}
+
+/* Medium screens (tablets) */
+@media (max-width: 992px) {
+  .titleContainer {
+    min-width: 600px;
+  }
+
+  .pricingTable th,
+  .pricingTable td {
+    width: 180px;
+    padding: 1.25rem;
+  }
+}
+
+/* Small screens (tablets and large phones) */
+@media (max-width: 768px) {
   .container {
     padding: 1rem;
   }
@@ -173,38 +253,139 @@
   .titleContainer {
     flex-direction: column;
     align-items: flex-start;
-    min-width: 360px;
+    min-width: 320px;
+    gap: 1rem;
+    width: 100%;
   }
 
   .tabContainer {
     width: 100%;
-    max-width: 360px;
+    max-width: 100%;
   }
 
   .tab {
-    width: 100%;
     padding: 0.75rem;
+    font-size: 13px;
   }
 
   .tableContainer {
     margin-top: 1rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .pricingTable {
     border-spacing: 0.5rem 0;
+    min-width: 600px; /* Ensure table is scrollable on small screens */
   }
 
   .pricingTable th,
   .pricingTable td {
     padding: 1rem;
     font-size: 0.9rem;
+    width: 150px;
   }
 
   .description {
-    padding: 0 0.5rem;
+    padding: 0.75rem 0;
   }
 
   .price {
     font-size: 1.25rem;
   }
-} */
+
+  .title {
+    font-size: 22px;
+  }
+
+  /* Add horizontal scroll indicator */
+  .tableContainer:after {
+    content: "← Swipe →";
+    display: block;
+    text-align: center;
+    padding: 0.5rem;
+    color: #666;
+    font-size: 0.75rem;
+    pointer-events: none;
+  }
+
+  /* Card styles for mobile */
+  .cardContainer {
+    display: block;
+  }
+
+  .card {
+    padding: 1.25rem;
+  }
+
+  .cardTitle {
+    font-size: 1.2rem;
+  }
+}
+
+/* Extra small screens (phones) */
+@media (max-width: 480px) {
+  .container {
+    padding: 0.75rem;
+  }
+
+  .titleContainer {
+    min-width: 280px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .tabContainer {
+    max-width: 100%;
+  }
+
+  .tab {
+    padding: 0.5rem;
+    font-size: 12px;
+  }
+
+  .pricingTable th,
+  .pricingTable td {
+    padding: 0.75rem;
+    font-size: 0.8rem;
+    width: 140px;
+  }
+
+  .description {
+    font-size: 0.8rem;
+  }
+
+  .price {
+    font-size: 1.1rem;
+  }
+
+  .bookButton {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+
+  .cardTitle {
+    font-size: 1.1rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .cardSection {
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .cardLabel {
+    font-size: 0.8rem;
+  }
+
+  .cardValue {
+    font-size: 0.9rem;
+  }
+}

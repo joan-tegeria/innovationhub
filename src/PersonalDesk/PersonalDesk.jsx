@@ -315,7 +315,8 @@ export default function PersonalDesk() {
         bookingData,
         { headers: { Authorization: `${tokenType} ${accessToken}` } }
       );
-
+      console.log("bookingResponse", bookingResponse.data);
+      setInvoiceId(bookingResponse.data.invoiceId);
       // window.location.href = bookingResponse.data.paymentSession;
       return bookingResponse;
     } catch (error) {
