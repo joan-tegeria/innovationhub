@@ -4,18 +4,20 @@ import api from "../utility/axiosConfig";
 import dayjs from "dayjs";
 import { useLocalStorage } from "../hooks/useLocalStorage/useLocalStorage";
 import { calculateEndDate, formatDate } from "../utility";
-import { Alert, duration } from "@mui/material";
+import { Alert } from "@mui/material";
 import { useBooking } from "../context/BookingContext";
 import Information from "./Information";
 import Footer from "./Footer";
 import Payment from "./Payment";
 import Finished from "./Finished";
 import { useAuth } from "../context/Auth";
-import { use } from "react";
 
-const steps = ["Information", "Payment", "Finished"];
+const STEPS = ["Information", "Payment", "Finished"];
+const API_BASE_URL =
+  "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod";
 
 export default function PersonalDesk() {
+  // State management
   const [price, setPrice] = useState(0);
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -35,19 +37,19 @@ export default function PersonalDesk() {
   const [isPriceFilled, setIsPriceFilled] = useState(false);
   const [userId, setUserId] = useState("");
   const [priceId, setPriceId] = useState("");
+  const [isFormValid, setIsFormValid] = useState(false);
+
+  // Context hooks
   const {
     personalDeskUserInfo,
     setPersonalDeskUserInfo,
     period,
     handlePersonalDesk,
   } = useBooking();
-
   const { accessToken, tokenType, tokenLoading } = useAuth();
-  const [isFormValid, setIsFormValid] = useState(false);
 
-  function transformData(inputData) {
-    // Check if inputData is an array, if not, try to access the correct property
-    // or return an empty array
+  // Helper functions
+  const transformData = (inputData) => {
     if (!Array.isArray(inputData)) {
       console.warn("Input data is not an array:", inputData);
       return [];
@@ -56,16 +58,14 @@ export default function PersonalDesk() {
     const result = {};
 
     inputData.forEach((item) => {
-      // Check if item.Name is defined
       if (!item.Name) {
         console.warn("Item Name is undefined:", item);
-        return; // Skip this iteration if Name is undefined
+        return;
       }
 
-      const nameParts = item.Name.split(" - "); // Split the name to separate the type and the pass type
-      const name = nameParts[0]; // Get the desk type (e.g., "Dedicated Desk")
+      const nameParts = item.Name.split(" - ");
+      const name = nameParts[0];
 
-      // Initialize the desk type in the result if it doesn't exist
       if (!result[name]) {
         result[name] = {
           label: name,
@@ -73,29 +73,30 @@ export default function PersonalDesk() {
         };
       }
 
-      // Assign the ID based on the pass type
       if (nameParts.length > 1 && nameParts[1] === "Multi Pass") {
-        // Insert Multi Pass ID at the beginning
         result[name].value.unshift(item.id);
       } else {
-        // Push Single Pass ID to the end
         result[name].value.push(item.id);
       }
     });
 
-    // Convert the result object to an array
     return Object.values(result);
-  }
+  };
 
+  const setNotification = (type, message) => {
+    setInfo(type);
+    setInfoMessage(message);
+  };
+
+  // DO NOT MODIFY USEEFFECTS AS PER REQUIREMENTS
   useEffect(() => {
     if (!tokenLoading) {
       const getAllOffices = async () => {
         try {
           setLoading(true);
-          const response = await api.get(
-            "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/shared",
-            { headers: { Authorization: `${tokenType} ${accessToken}` } }
-          );
+          const response = await api.get(`${API_BASE_URL}/shared`, {
+            headers: { Authorization: `${tokenType} ${accessToken}` },
+          });
 
           // Log the response to see its structure
           console.log("API Response:", response.data);
@@ -166,6 +167,7 @@ export default function PersonalDesk() {
     console.log(personalDeskUserInfo.workspace);
   }, [personalDeskUserInfo.workspace]);
 
+  // Main functionality callbacks
   const getPrice = useCallback(
     async (periodToUse) => {
       // Find the selected workspace object by matching the ID
@@ -181,41 +183,36 @@ export default function PersonalDesk() {
       setSelectedWorkspace(_selectedWorkspace);
 
       const priceResponse = await api.get(
-        `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/prices?product=${
-          _selectedWorkspace.label
-        }&period=${periodToUse || period}`,
+        `${API_BASE_URL}/prices?product=${_selectedWorkspace.label}&period=${
+          periodToUse || period
+        }`,
         { headers: { Authorization: `${tokenType} ${accessToken}` } }
       );
       console.log(priceResponse.data.data[0].Unit_Price);
 
-      setPrice(
-        priceResponse.data.data[0].Unit_Price *
-          personalDeskUserInfo.passDuration
-      );
-      setCurrentPrice(
-        priceResponse.data.data[0].Unit_Price *
-          personalDeskUserInfo.passDuration
-      );
-      setSinglePrice(priceResponse.data.data[0].Unit_Price);
+      const unitPrice = priceResponse.data.data[0].Unit_Price;
+      const calculatedPrice = unitPrice * personalDeskUserInfo.passDuration;
+
+      setPrice(calculatedPrice);
+      setCurrentPrice(calculatedPrice);
+      setSinglePrice(unitPrice);
       setIsPriceFilled(true);
       setPriceId(priceResponse.data.data[0].id);
 
       // Only set info message if we have the required data
       if (personalDeskUserInfo.bookingType === "Multi Pass") {
         if (personalDeskUserInfo.passDuration > 0) {
-          setInfo("info");
-          setInfoMessage(
-            "Space is available for " +
-              personalDeskUserInfo.passDuration +
-              " passes"
+          setNotification(
+            "info",
+            `Space is available for ${personalDeskUserInfo.passDuration} passes`
           );
         } else {
-          setInfo("none");
+          setNotification("none", "");
         }
       } else {
         // For Single Pass, info message is handled by checkOfficeAvaliablity function
         if (!personalDeskUserInfo.selectDate) {
-          setInfo("none");
+          setNotification("none", "");
         }
       }
     },
@@ -245,8 +242,7 @@ export default function PersonalDesk() {
       // Validate that fromDate is a valid date
       if (!fromDate.isValid()) {
         console.log("Invalid start date:", startDate);
-        setInfo("error");
-        setInfoMessage("Invalid date selected");
+        setNotification("error", "Invalid date selected");
         return;
       }
 
@@ -263,14 +259,13 @@ export default function PersonalDesk() {
       // Validate formatted dates
       if (!formattedFromDate || !formattedToDate) {
         console.error("Failed to format dates properly", { fromDate, toDate });
-        setInfo("error");
-        setInfoMessage("Error with date formatting");
+        setNotification("error", "Error with date formatting");
         return;
       }
 
       // First check availability
       const { data: availabilityData } = await api.get(
-        `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/shared/${
+        `${API_BASE_URL}/shared/${
           personalDeskUserInfo.workspace[1]
         }?from=${encodeURIComponent(formattedFromDate)}&to=${encodeURIComponent(
           formattedToDate
@@ -293,22 +288,19 @@ export default function PersonalDesk() {
         await getPrice(period);
       }
 
-      setInfo("info");
-      setInfoMessage("Space is available for " + (periodToUse || period));
+      setNotification(
+        "info",
+        `Space is available for ${periodToUse || period}`
+      );
     } catch (error) {
       console.log("Error checking availability:", error);
-      setInfo("error");
-      setInfoMessage("Error checking availability");
+      setNotification("error", "Error checking availability");
     }
   };
 
   const createUser = async () => {
-    // if (Object.values(personalDeskUserInfo).some((value) => !value)) {
-    //   setErrorMessage("Please fill in all required fields.");
-    //   return;
-    // }
-
     setLoading(true);
+
     const userData = {
       name: personalDeskUserInfo.firstName,
       lastName: personalDeskUserInfo.lastName,
@@ -322,15 +314,13 @@ export default function PersonalDesk() {
     try {
       const {
         data: { data: response },
-      } = await api.post(
-        "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/account",
-        userData,
-        { headers: { Authorization: `${tokenType} ${accessToken}` } }
-      );
+      } = await api.post(`${API_BASE_URL}/account`, userData, {
+        headers: { Authorization: `${tokenType} ${accessToken}` },
+      });
+
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
       setUserId(response.id);
       handlePersonalDesk("userId", response.id);
-      // await bookOffice(response.id);
       setActiveStep(1);
     } catch (error) {
       console.error("Error creating user:", error);
@@ -361,7 +351,7 @@ export default function PersonalDesk() {
     try {
       setLoading(true);
       const bookingResponse = await api.post(
-        "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/shared",
+        `${API_BASE_URL}/shared`,
         bookingData,
         { headers: { Authorization: `${tokenType} ${accessToken}` } }
       );
@@ -377,17 +367,9 @@ export default function PersonalDesk() {
     }
   };
 
+  // Event handlers
   const handleNext = () => {
     createUser();
-    // if (activeStep === 0) {
-    //   createUser();
-    // } else if (activeStep === 1) {
-    //   bookOffice();
-    // } else if (activeStep === 2) {
-    //   handleBack();
-    // } else {
-    //   setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    // }
   };
 
   const handleBack = () => {
@@ -400,7 +382,7 @@ export default function PersonalDesk() {
       email: "",
       totalToPay: 5000,
     });
-    setInfo("none");
+    setNotification("none", "");
     setActiveStep(0);
   };
 
@@ -411,23 +393,20 @@ export default function PersonalDesk() {
 
     try {
       const response = await api.get(
-        `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/coupon?coupon=${code}&id=${priceId}&booking=${period}&quantity=1`,
+        `${API_BASE_URL}/coupon?coupon=${code}&id=${priceId}&booking=${period}&quantity=1`,
         {
           headers: { Authorization: `${tokenType} ${accessToken}` },
         }
       );
-      // Handle successful coupon application here
+
       console.log("Coupon response:", response.data);
       setValidCoupon(response.data.discount);
       setPrice(response.data.value);
-
-      setInfo("info");
-      setInfoMessage("Coupon applied successfully!");
+      setNotification("info", "Coupon applied successfully!");
     } catch (error) {
       console.error("Error applying coupon:", error);
       setValidCoupon(null);
-      setInfo("error");
-      setInfoMessage("Invalid coupon code");
+      setNotification("error", "Invalid coupon code");
     } finally {
       setCouponLoading(false);
     }
@@ -436,7 +415,7 @@ export default function PersonalDesk() {
   const removeCoupon = () => {
     setValidCoupon(null);
     setCouponCode("");
-    setInfo("none");
+    setNotification("none", "");
     setPrice(currentPrice);
   };
 
@@ -445,6 +424,7 @@ export default function PersonalDesk() {
     setActiveStep(2);
   };
 
+  // Component rendering based on active step
   const stepComponents = {
     0: (
       <Information
