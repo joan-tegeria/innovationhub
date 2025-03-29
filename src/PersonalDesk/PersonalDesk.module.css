@@ -11,6 +11,9 @@
   display: flex;
   justify-content: center;
   flex-direction: column;
+  border: 1px solid #cccccc;
+  margin-top: 5px;
+  border-radius: 6px;
 }
 
 .desc {

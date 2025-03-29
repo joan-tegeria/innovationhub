@@ -11,35 +11,26 @@ import Information from "./Information";
 import Footer from "./Footer/Footer";
 import Modal from "./Modal";
 import Finished from "./Finished";
-import Payment from "./Payment";
 
-const steps = ["Information", "Payment", "Finished"];
+const steps = ["Information", "Finished"];
 
 export default function FullOffice() {
   //State
   const [price, setPrice] = useState(0);
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [localData, setLocalData] = useLocalStorage("localData", {});
-  const [userId, setUserId] = useState("");
-  const [randomSeat, setRandomSeat] = useState("");
+
   const [open, setOpen] = useState(false);
-  const [hasError, setHasError] = useState(false);
+  
   const [workspaces, setWorkspaces] = useState([{ value: "", label: "" }]);
   const [isAvailable, setIsAvailable] = useState("");
   const [info, setInfo] = useState("none");
   const [infoMessage, setInfoMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [selectedWorkspace, setSelectedWorkspace] = useState("");
-  const [couponCode, setCouponCode] = useState("");
-  const [couponLoading, setCouponLoading] = useState(false);
-  const [validCoupon, setValidCoupon] = useState(null);
-  const [invoiceId, setInvoiceId] = useState("");
   const [singlePrice, setSinglePrice] = useState(0);
   const [currentPrice, setCurrentPrice] = useState(0);
-  const [payUrl, setPayUrl] = useState("");
   const [isFormValid, setIsFormValid] = useState(false);
-  const [priceId, setPriceId] = useState("");
   //Context
   const { fullOfficeInfo, period, handleFullOffice, setFullOfficeInfo } =
     useBooking();
@@ -86,7 +77,6 @@ export default function FullOffice() {
   useEffect(() => {
     const getAllOffices = async () => {
       try {
-        // setLoading(true);
         const {
           data: { data: allOffices },
         } = await api.get(
@@ -143,116 +133,27 @@ export default function FullOffice() {
     setIsFormValid(validateForm());
   }, [fullOfficeInfo]);
 
-  const handleApplyCoupon = async (code) => {
-    if (!code) return;
+  const sendBookRequest = async () => {
+    setLoading(true);
 
-    const selectedWorkspaceObj = workspaces.find(
-      (ws) => ws.value === fullOfficeInfo.workspace
-    );
-    const workspaceLabel = selectedWorkspaceObj?.label;
-    setSelectedWorkspace(selectedWorkspaceObj || {});
-
-    setCouponLoading(true);
     try {
-      const response = await api.get(
-        `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/coupon?coupon=${code}&product=${priceId}&booking=${period}&quantity=1`,
-        {
-          headers: { Authorization: `${tokenType} ${accessToken}` },
-        }
-      );
-      setValidCoupon(response.data.couponData.Coupon_Value);
-      setPrice(
-        (prev) => prev - (prev * response.data.couponData.Coupon_Value) / 100
-      );
-
-      setInfo("info");
-      setInfoMessage("Coupon applied successfully!");
-    } catch (error) {
-      console.error("Error applying coupon:", error);
-      setValidCoupon(null);
-      setInfo("error");
-      setInfoMessage("Invalid coupon code");
-    } finally {
-      setCouponLoading(false);
-    }
-  };
-
-  const removeCoupon = () => {
-    setValidCoupon(null);
-    setCouponCode("");
-    setInfo("none");
-    setPrice(currentPrice);
-  };
-
-  const finishPayment = () => {
-    setActiveStep(2);
-  };
-
-  const proceedToPayment = async () => {
-    try {
-      setLoading(true);
-
-      // Get the selected workspace label
-      const selectedWorkspaceObj = workspaces.find(
-        (ws) => ws.value === fullOfficeInfo.workspace
-      );
-      const workspaceLabel = selectedWorkspaceObj?.label;
-
-      // For The Solo and The Duo workspaces
-      if (workspaceLabel === "The Solo" || workspaceLabel === "The Duo") {
-        const bookingData = {
-          username: fullOfficeInfo.businessName + " " + fullOfficeInfo.nipt,
-          user: fullOfficeInfo.userId, // Use the userId from account creation
-          from: fullOfficeInfo.selectDate,
-          to: fullOfficeInfo.endDate,
-          room: fullOfficeInfo.workspace,
-          booking: period,
-          requestedFrom: fullOfficeInfo.requestedFrom,
-          discount: validCoupon ? validCoupon : 0,
-        };
-
-        const bookingResponse = await api.post(
-          "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/private",
-          bookingData,
-          {
-            headers: {
-              Authorization: `${tokenType} ${accessToken}`,
-            },
-          }
-        );
-
-        // Get payment URL from response
-        const paymentUrl = bookingResponse.data.paymentSession;
-        setInvoiceId(bookingResponse.data.invoice);
-        setPayUrl(paymentUrl);
-        // Return the payment URL
-        return paymentUrl;
-      }
-      return null;
-    } catch (error) {
-      console.log("🚀 ~ proceedToPayment ~ error:", error);
-      setErrorMessage("Failed to process payment. Please try again.");
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const createContact = async () => {
-    try {
-      setLoading(true);
+      // Create leads for all workspace types
       const userData = {
         name: fullOfficeInfo.businessName,
         lastName: fullOfficeInfo.businessName,
         email: fullOfficeInfo.email,
-        birthday: "2003-11-02", // Default birthdate
+        company: fullOfficeInfo.businessName,
+        referral: "Private Office Form",
+        birthdate: "2003-11-02",
         id: fullOfficeInfo.nipt,
+        nipt: fullOfficeInfo.nipt,
+        phone: fullOfficeInfo.phoneNumber,
       };
 
       const {
         data: { data: response },
       } = await api.post(
-        "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/account",
+        "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/leads",
         userData,
         {
           headers: {
@@ -261,74 +162,20 @@ export default function FullOffice() {
         }
       );
 
-      // Store the user ID for later use in proceedToPayment
-      setUserId(response.id);
-      await handleFullOffice("userId", response.id);
-
-      // Move to the Payment step
-      setActiveStep(1);
-      setLoading(false);
-    } catch (error) {
-      console.log("🚀 ~ createContact ~ error:", error);
-      setErrorMessage("Failed to create account. Please try again.");
-      setLoading(false);
-    }
-  };
-
-  const sendBookRequest = async (userId) => {
-    setLoading(true);
-    let _userId = userId;
-
-    // Get the selected workspace label
-    const selectedWorkspaceObj = workspaces.find(
-      (ws) => ws.value === fullOfficeInfo.workspace
-    );
-    const workspaceLabel = selectedWorkspaceObj?.label;
-    setSelectedWorkspace(selectedWorkspaceObj || {});
-    console.log("🚀 ~ sendBookRequest ~ workspaceLabel:", workspaceLabel);
-    try {
-      // Use different APIs based on workspace type
-      if (workspaceLabel === "The Suite" || workspaceLabel === "The Pod") {
-        // Use leads API for other workspaces (The Suite and The Pod)
-        const userData = {
-          name: fullOfficeInfo.businessName,
-          lastName: fullOfficeInfo.businessName,
-          email: fullOfficeInfo.email,
-          company: fullOfficeInfo.businessName,
-          referral: "Private Office Form",
-          birthdate: "2003-11-02",
-          id: fullOfficeInfo.nipt,
-          nipt: fullOfficeInfo.nipt,
-          phone: fullOfficeInfo.phoneNumber,
-        };
-
-        const {
-          data: { data: response },
-        } = await api.post(
-          "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/leads",
-          userData,
-          {
-            headers: {
-              Authorization: `${tokenType} ${accessToken}`,
-            },
-          }
-        );
-
-        _userId = response.id;
-      }
+      const userId = response.id;
 
       const bookingData = {
         username: fullOfficeInfo.businessName + " " + fullOfficeInfo.nipt,
-        user: fullOfficeInfo.userId,
+        user: userId,
         from: fullOfficeInfo.selectDate,
         to: fullOfficeInfo.endDate,
         room: fullOfficeInfo.workspace,
         booking: period,
         requestedFrom: fullOfficeInfo.requestedFrom,
-        discount: validCoupon ? validCoupon : 0,
+  
       };
 
-      const bookingResponse = await api.post(
+      await api.post(
         "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/private",
         bookingData,
         {
@@ -338,19 +185,12 @@ export default function FullOffice() {
         }
       );
 
-      setPayUrl(bookingResponse.data.paymentSession);
-      setInvoiceId(bookingResponse.data.invoice);
-      setLoading(false);
-
-      // Determine the next step based on workspace type
-      if (workspaceLabel === "The Suite" || workspaceLabel === "The Pod") {
-        setActiveStep(2); // Skip payment and go directly to Finished step
-      } else {
-        setActiveStep(1); // Go to Payment step for The Solo and The Duo
-      }
+      // Go directly to the Finished step
+      setActiveStep(1);
     } catch (error) {
       console.log("🚀 ~ sendBookRequest ~ error:", error);
       setErrorMessage("Failed to process booking. Please try again.");
+    } finally {
       setLoading(false);
     }
   };
@@ -377,7 +217,7 @@ export default function FullOffice() {
             );
 
             const basePrice = priceResponse.data.data[0].Unit_Price;
-            setPrice(basePrice - (basePrice * (validCoupon || 0)) / 100);
+            setPrice(basePrice);
             setCurrentPrice(basePrice);
             setSinglePrice(basePrice);
 
@@ -439,22 +279,15 @@ export default function FullOffice() {
         );
 
         const basePrice = priceResponse.data.data[0].Unit_Price;
-        setPrice(basePrice - (basePrice * (validCoupon || 0)) / 100);
+        setPrice(basePrice);
         setCurrentPrice(basePrice);
         setSinglePrice(basePrice);
-        console.log("🚀 ~ priceResponse ~ response:", priceResponse.data);
-        setPriceId(response.data[0].id);
-        localStorage.setItem("priceId", priceResponse.data[0].id);
+
         if (response === "Available") {
           setInfo("info");
           setInfoMessage("Space is available for " + period);
         }
       }
-
-      console.log(
-        "🚀 ~ checkOfficeAvaliablity ~ response:",
-        response.data[0].id
-      );
     } catch (error) {
       console.log("🚀 ~ checkOfficeAvaliablity ~ error:", error);
       setInfo("error");
@@ -463,23 +296,9 @@ export default function FullOffice() {
   };
 
   const handleNext = () => {
-    const selectedWorkspaceObj = workspaces.find(
-      (ws) => ws.value === fullOfficeInfo.workspace
-    );
-    const workspaceLabel = selectedWorkspaceObj?.label;
-    setSelectedWorkspace(selectedWorkspaceObj || {});
-
     if (activeStep === 0) {
-      if (workspaceLabel === "The Suite" || workspaceLabel === "The Pod") {
-        // For The Suite and The Pod, use leads API and book directly
-        sendBookRequest();
-      } else if (
-        workspaceLabel === "The Solo" ||
-        workspaceLabel === "The Duo"
-      ) {
-        // For The Solo and The Duo, create account first
-        createContact();
-      }
+      // For all workspace types, use the same booking flow
+      sendBookRequest();
     } else {
       // For other steps, just move forward
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -514,29 +333,6 @@ export default function FullOffice() {
       />
     ),
     1: (
-      <Payment
-        loading={loading}
-        setIsLoading={setLoading}
-        validCoupon={validCoupon}
-        payurl={payUrl}
-        selectedWorkspace={selectedWorkspace}
-        price={price}
-        invoiceId={invoiceId}
-        fullOfficeInfo={fullOfficeInfo}
-        singlePrice={singlePrice}
-        currentPrice={currentPrice}
-        couponCode={couponCode}
-        setCouponCode={setCouponCode}
-        couponLoading={couponLoading}
-        onApplyCoupon={handleApplyCoupon}
-        onRemoveCoupon={removeCoupon}
-        finishPayment={finishPayment}
-        proceedToPayment={proceedToPayment}
-        period={period}
-        priceId={localStorage.getItem("priceId")}
-      />
-    ),
-    2: (
       <Finished
         loading={loading}
         selectedWorkspace={selectedWorkspace}
@@ -551,10 +347,6 @@ export default function FullOffice() {
 
   return (
     <>
-      {/* <Modal open={open} onClose={handleClose} title={"Error"} isError={true}>
-        <div>Hello Wolrd</div>
-      </Modal> */}
-      {/* <div className={styles.container}> */}
       <div className={styles.formContainer}>
         <div className={styles.formTitle}>
           <span className={styles.title}>Ready to get started</span>
@@ -589,15 +381,13 @@ export default function FullOffice() {
             handleBack={resetForm}
             isBackDisabled={activeStep === 0}
             isNextDisabled={!isFormValid || isAvailable !== "Available"}
-            isLast={activeStep === 2}
+            isLast={activeStep === 1}
             currentPrice={currentPrice}
             singlePrice={singlePrice}
-            validCoupon={validCoupon}
             period={period}
           />
         )}
       </div>
-      {/* </div> */}
     </>
   );
 }

@@ -19,11 +19,10 @@ export default function Footer({
       minimumFractionDigits: 0,
       maximumFractionDigits: 2,
     }).format(value);
-  
+
     // Remove the 'ALL' part and add it manually at the end
     return formattedValue.replace("ALL", "").trim() + " ALL";
   };
-  
 
   return (
     <div
