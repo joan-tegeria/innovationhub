@@ -138,6 +138,7 @@ export default function Information({
           type="date"
           label={"Select Date"}
           isRequired={true}
+          minDate={new Date()}
           value={
             fullOfficeInfo.selectDate ? dayjs(fullOfficeInfo.selectDate) : null
           }
@@ -232,12 +233,11 @@ export default function Information({
         />
         <LabeledInput
           label={"City"}
-          placeholder={"Tirna"}
+          placeholder={"Tirana"}
           value={fullOfficeInfo.city}
           onChange={(event) => handleFullOffice("city", event.target.value)}
         />
       </div>
-     
 
       <div className={styles.divider} />
     </div>

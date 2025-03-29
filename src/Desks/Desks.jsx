@@ -8,19 +8,19 @@ import Flexible from "../assets/flexible.svg";
 import api from "../utility/axiosConfig";
 
 // Add a currency formatter function
-const formatCurrency = (value, currencySymbol) => {
-  return new Intl.NumberFormat("en-US", {
+const formatCurrency = (value) => {
+  // Format the number using the 'ALL' currency code
+  const formattedValue = new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: currencySymbol,
+    currency: "ALL",
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
-  })
-    .format(value)
-    .replace(
-      currencySymbol === "ALL" ? "$" : currencySymbol,
-      currencySymbol + " "
-    );
+  }).format(value);
+
+  // Remove the 'ALL' part and add it manually at the end
+  return formattedValue.replace("ALL", "").trim() + " ALL";
 };
+
 
 const transformApiDataToDesks = (data, period) => {
   return data.map((item) => ({

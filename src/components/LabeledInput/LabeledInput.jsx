@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import styles from "./LabeledInput.module.css";
 import TextField from "@mui/material/TextField";
-import { DatePicker } from "@mui/x-date-pickers";
+import { DatePicker, TimePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 // import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
@@ -72,10 +72,44 @@ export default function LabeledInput({
     case "date":
       input = (
         <DatePicker
-          onChange={onChange}
+          onChange={(date) => {
+            if (date && dayjs(date).isValid()) {
+              onChange(dayjs(date));
+            } else {
+              console.warn("Invalid date selected:", date);
+              onChange(null);
+            }
+          }}
           disableScrollLock={true}
           minDate={formattedMinDate}
           maxDate={formattedMaxDate}
+          PopperProps={{
+            disablePortal: true,
+            modifiers: [
+              {
+                name: "preventOverflow",
+                enabled: true,
+                options: {
+                  altAxis: true,
+                  altBoundary: true,
+                  tether: false,
+                  rootBoundary: "document",
+                  padding: 8,
+                },
+              },
+            ],
+          }}
+        />
+      );
+      break;
+    case "time":
+      input = (
+        <TimePicker
+          value={value ? dayjs(value, "HH:mm") : null}
+          onChange={onChange}
+          ampm={false}
+          format="HH:mm"
+          disableScrollLock={true}
           PopperProps={{
             disablePortal: true,
             modifiers: [

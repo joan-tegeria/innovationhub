@@ -6,7 +6,7 @@ import Success from "../../assets/form_success.svg";
 import CircularProgress, {
   circularProgressClasses,
 } from "@mui/material/CircularProgress";
-import { TextField } from "@mui/material";
+import { TextField, Button } from "@mui/material";
 import dayjs from "dayjs";
 
 export default function Finished({ loading, setIsLoading }) {
@@ -60,6 +60,23 @@ export default function Finished({ loading, setIsLoading }) {
           Your request is made successfully.
         </div>
         <span>Check your email for further details.</span>
+
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: "#EB3778",
+            "&:hover": {
+              backgroundColor: "#d62e69",
+            },
+            fontFamily: "Termina Test",
+            textTransform: "none",
+            marginTop: "25px",
+          }}
+          style={{ width: 220, height: 42 }}
+          onClick={() => window.parent.open("http://35.176.180.59/", "_self")}
+        >
+          Back to Home
+        </Button>
       </div>
 
       <div className={styles.divider} />

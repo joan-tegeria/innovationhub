@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import styles from "./PersonalDesk.module.css";
 import api from "../utility/axiosConfig";
 import dayjs from "dayjs";
@@ -166,71 +166,115 @@ export default function PersonalDesk() {
     console.log(personalDeskUserInfo.workspace);
   }, [personalDeskUserInfo.workspace]);
 
-  const getPrice = async () => {
-    // Find the selected workspace object by matching the ID
-    const _selectedWorkspace = workspaces.find((workspace) =>
-      workspace.value.includes(personalDeskUserInfo.workspace[0])
-    );
+  const getPrice = useCallback(
+    async (periodToUse) => {
+      // Find the selected workspace object by matching the ID
+      const _selectedWorkspace = workspaces.find((workspace) =>
+        workspace.value.includes(personalDeskUserInfo.workspace[0])
+      );
 
-    if (!_selectedWorkspace) {
-      console.error("Selected workspace not found");
-      return;
-    }
+      if (!_selectedWorkspace) {
+        console.error("Selected workspace not found");
+        return;
+      }
 
-    setSelectedWorkspace(_selectedWorkspace);
+      setSelectedWorkspace(_selectedWorkspace);
 
-    const priceResponse = await api.get(
-      `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/prices?product=${_selectedWorkspace.label}&period=${period}`,
-      { headers: { Authorization: `${tokenType} ${accessToken}` } }
-    );
-    console.log(priceResponse.data.data[0].Unit_Price);
+      const priceResponse = await api.get(
+        `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/prices?product=${
+          _selectedWorkspace.label
+        }&period=${periodToUse || period}`,
+        { headers: { Authorization: `${tokenType} ${accessToken}` } }
+      );
+      console.log(priceResponse.data.data[0].Unit_Price);
 
-    setPrice(
-      priceResponse.data.data[0].Unit_Price * personalDeskUserInfo.passDuration
-    );
-    setCurrentPrice(
-      priceResponse.data.data[0].Unit_Price * personalDeskUserInfo.passDuration
-    );
-    setSinglePrice(priceResponse.data.data[0].Unit_Price);
-    setIsPriceFilled(true);
-    setPriceId(priceResponse.data.data[0].id);
+      setPrice(
+        priceResponse.data.data[0].Unit_Price *
+          personalDeskUserInfo.passDuration
+      );
+      setCurrentPrice(
+        priceResponse.data.data[0].Unit_Price *
+          personalDeskUserInfo.passDuration
+      );
+      setSinglePrice(priceResponse.data.data[0].Unit_Price);
+      setIsPriceFilled(true);
+      setPriceId(priceResponse.data.data[0].id);
 
-    // Only set info message if we have the required data
-    if (personalDeskUserInfo.bookingType === "Multi Pass") {
-      if (personalDeskUserInfo.passDuration > 0) {
-        setInfo("info");
-        setInfoMessage(
-          "Space is available for " +
-            personalDeskUserInfo.passDuration +
-            " passes"
-        );
+      // Only set info message if we have the required data
+      if (personalDeskUserInfo.bookingType === "Multi Pass") {
+        if (personalDeskUserInfo.passDuration > 0) {
+          setInfo("info");
+          setInfoMessage(
+            "Space is available for " +
+              personalDeskUserInfo.passDuration +
+              " passes"
+          );
+        } else {
+          setInfo("none");
+        }
       } else {
-        setInfo("none");
+        // For Single Pass, info message is handled by checkOfficeAvaliablity function
+        if (!personalDeskUserInfo.selectDate) {
+          setInfo("none");
+        }
       }
-    } else {
-      // For Single Pass, info message is handled by checkOfficeAvaliablity function
-      if (!personalDeskUserInfo.selectDate) {
-        setInfo("none");
-      }
-    }
-  };
+    },
+    [
+      personalDeskUserInfo.workspace,
+      personalDeskUserInfo.bookingType,
+      personalDeskUserInfo.passDuration,
+      personalDeskUserInfo.selectDate,
+      period,
+      accessToken,
+      tokenType,
+      workspaces,
+    ]
+  );
 
   const checkOfficeAvaliablity = async (startDate, periodToUse) => {
     try {
+      // Check if startDate is valid
+      if (!startDate) {
+        console.log("No start date provided, only updating price");
+        await getPrice(periodToUse);
+        return;
+      }
+
       const fromDate = dayjs(startDate);
+
+      // Validate that fromDate is a valid date
+      if (!fromDate.isValid()) {
+        console.log("Invalid start date:", startDate);
+        setInfo("error");
+        setInfoMessage("Invalid date selected");
+        return;
+      }
+
       const toDate = calculateEndDate(fromDate, periodToUse || period);
       const endDate = dayjs(toDate);
 
       handlePersonalDesk("selectDate", fromDate.format("YYYY-MM-DD"));
       handlePersonalDesk("endDate", endDate.format("YYYY-MM-DD"));
 
+      // Format dates for API call
+      const formattedFromDate = formatDate(fromDate);
+      const formattedToDate = formatDate(toDate);
+
+      // Validate formatted dates
+      if (!formattedFromDate || !formattedToDate) {
+        console.error("Failed to format dates properly", { fromDate, toDate });
+        setInfo("error");
+        setInfoMessage("Error with date formatting");
+        return;
+      }
+
       // First check availability
       const { data: availabilityData } = await api.get(
         `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/shared/${
           personalDeskUserInfo.workspace[1]
-        }?from=${encodeURIComponent(
-          formatDate(startDate)
-        )}&to=${encodeURIComponent(formatDate(toDate))}`,
+        }?from=${encodeURIComponent(formattedFromDate)}&to=${encodeURIComponent(
+          formattedToDate
+        )}`,
         { type: "Single Pass" },
         { headers: { Authorization: `${tokenType} ${accessToken}` } }
       );
@@ -241,8 +285,13 @@ export default function PersonalDesk() {
         ]
       );
 
-      // Get price using the main getPrice function to avoid duplication
-      await getPrice();
+      // Since we have a periodToUse, let's pass it to getPrice to ensure consistent pricing
+      if (periodToUse) {
+        await getPrice(periodToUse);
+      } else {
+        // If no periodToUse is provided, just use the current period
+        await getPrice(period);
+      }
 
       setInfo("info");
       setInfoMessage("Space is available for " + (periodToUse || period));
@@ -280,6 +329,7 @@ export default function PersonalDesk() {
       );
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
       setUserId(response.id);
+      handlePersonalDesk("userId", response.id);
       // await bookOffice(response.id);
       setActiveStep(1);
     } catch (error) {
@@ -361,7 +411,7 @@ export default function PersonalDesk() {
 
     try {
       const response = await api.get(
-        `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/coupon?coupon=${code}&id=${priceId}`,
+        `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/coupon?coupon=${code}&id=${priceId}&booking=${period}&quantity=1`,
         {
           headers: { Authorization: `${tokenType} ${accessToken}` },
         }
@@ -430,6 +480,10 @@ export default function PersonalDesk() {
         userId={userId}
         bookOffice={bookOffice}
         onPreviousStep={() => setActiveStep(0)}
+        setInvoiceId={(id) => {
+          console.log("Setting invoice ID in parent:", id);
+          setInvoiceId(id);
+        }}
       />
     ),
     2: (

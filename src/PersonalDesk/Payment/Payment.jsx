@@ -34,22 +34,37 @@ export default function Payment({
   const [errorMessage, setErrorMessage] = useState(null);
   const iframeContainerRef = useRef(null);
   // const [invoiceId, setInvoiceId] = useState(null);
-
+  const [idvoice, setIdVoice] = useState("");
   // Format price as currency
   const formatCurrency = (value) => {
-    return new Intl.NumberFormat("en-US", {
+    // Format the number using the 'ALL' currency code
+    const formattedValue = new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "ALL",
       minimumFractionDigits: 0,
       maximumFractionDigits: 2,
     }).format(value);
+
+    // Remove the 'ALL' part and add it manually at the end
+    return formattedValue.replace("ALL", "").trim() + " ALL";
   };
 
+  // Update localStorage whenever invoiceId changes
+  useEffect(() => {
+    if (invoiceId) {
+      localStorage.setItem("tempInvoiceId", invoiceId);
+    } else {
+      localStorage.removeItem("tempInvoiceId");
+    }
+  }, [invoiceId]);
+
   const updateInvoiceStatus = async (orderIdentification) => {
-    console.log(invoiceId);
+    console.log("Updating invoice status for ID:", invoiceId);
     try {
       const response = await api.put(
-        `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/invoice/${invoiceId}`,
+        `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/invoice/${localStorage.getItem(
+          "tempInvoiceId"
+        )}`,
         { status: "Approved", order: orderIdentification },
         {
           headers: {
@@ -58,10 +73,12 @@ export default function Payment({
         }
       );
 
-      finishPayment();
       if (response.status !== 200) {
         throw new Error("Failed to update invoice status");
       }
+
+      console.log("Successfully updated invoice status");
+      finishPayment();
     } catch (error) {
       console.error("Error updating invoice status:", error);
     }
@@ -81,18 +98,56 @@ export default function Payment({
   const _bookOffice = async (e) => {
     try {
       const bookingResponse = await bookOffice(userId);
-      handlePayment(e, bookingResponse);
+      console.log("Booking response received:", bookingResponse);
+
+      if (!bookingResponse?.data?.invoiceId) {
+        throw new Error("No invoice ID received from booking");
+      }
+
+      if (!bookingResponse?.data?.paymentSession) {
+        throw new Error("No payment session URL received");
+      }
+
+      const newInvoiceId = bookingResponse.data.invoiceId;
+      console.log("Setting invoice ID:", newInvoiceId);
+
+      // Set invoice ID in parent component first
+      if (typeof setInvoiceId === "function") {
+        setInvoiceId(newInvoiceId);
+        console.log("Invoice ID set in parent component");
+      } else {
+        console.error("setInvoiceId is not a function", setInvoiceId);
+      }
+
+      // Set local state
+      setIdVoice(newInvoiceId);
+
+      // Proceed with payment
+      console.log(
+        "Initializing payment with session URL:",
+        bookingResponse.data.paymentSession
+      );
+      await handlePayment(e, bookingResponse);
     } catch (error) {
-      console.error("Error booking office:", error);
+      console.error("Error during booking process:", error);
+      setErrorMessage(error.message || "Failed to process booking");
     }
   };
 
-  const handlePayment = (e, bookingResponse) => {
+  const handlePayment = async (e, bookingResponse) => {
     e.preventDefault();
     setPaymentStatus(null);
     setErrorMessage(null);
 
+    // Make sure we have a valid payment session URL
+    if (!bookingResponse?.data?.paymentSession) {
+      console.error("No payment session URL provided");
+      setErrorMessage("Failed to initialize payment session");
+      return;
+    }
+
     const paymentUrl = `${bookingResponse.data.paymentSession}&mode=frameless`;
+    console.log("Opening payment URL:", paymentUrl);
 
     // Close existing payment window if it exists
     closePaymentWindow();
@@ -104,7 +159,6 @@ export default function Payment({
       left: 0;
       width: 100%;
       height: 100%;
-      
       background-color: rgba(0, 0, 0, 0.5);
       z-index: 1000;
       display: flex;
@@ -120,7 +174,36 @@ export default function Payment({
       border: none;
       border-radius: 8px;
       background-color: white;
+      overflow: hidden;
+      -webkit-overflow-scrolling: touch;
     `;
+
+    // Add sandbox attributes to make it more secure and frameless
+    iframe.setAttribute(
+      "sandbox",
+      "allow-forms allow-scripts allow-same-origin allow-top-navigation allow-popups"
+    );
+    iframe.setAttribute("frameborder", "0");
+    iframe.setAttribute("scrolling", "no");
+
+    // Add load event listener to check if iframe loads successfully
+    iframe.onload = () => {
+      console.log("Payment iframe loaded successfully");
+      // Attempt to make the iframe content fit without scrolling
+      try {
+        iframe.contentWindow.document.body.style.overflow = "hidden";
+      } catch (e) {
+        console.log(
+          "Could not modify iframe content directly due to same-origin policy"
+        );
+      }
+    };
+
+    iframe.onerror = () => {
+      console.error("Failed to load payment iframe");
+      setErrorMessage("Failed to load payment interface");
+      closePaymentWindow();
+    };
 
     iframeContainer.appendChild(iframe);
     document.body.appendChild(iframeContainer);
@@ -208,7 +291,21 @@ export default function Payment({
 
   if (loading) {
     return (
-      <div className={styles.loadingContainer}>
+      <div
+        className={styles.loadingContainer}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(255, 255, 255, 0.8)",
+          zIndex: 9999,
+        }}
+      >
         <CircularProgress
           variant="indeterminate"
           disableShrink

@@ -23,8 +23,14 @@ const ContactForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const nameParts = formData.name.trim().split(/\s+/);
+    const name = nameParts[0];
+    const lastName = nameParts.slice(1).join(" ");
+
     const submitData = {
       ...formData,
+      name,
+      lastName,
       referral: "Contact Us Form",
     };
 

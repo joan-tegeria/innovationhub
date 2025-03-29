@@ -8,6 +8,7 @@ import LabeledInput from "../components/LabeledInput";
 import api from "../utility/axiosConfig";
 import dayjs from "dayjs";
 import { duration } from "@mui/material";
+import Success from "../assets/form_success.svg";
 
 const eventPurposeOptions = [
   { value: "Conference", label: "Conference" },
@@ -42,6 +43,7 @@ export default function Events() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [formData, setFormData] = useState(initialFormState);
+  const [validationError, setValidationError] = useState("");
 
   const { accessToken, tokenType, tokenLoading } = useAuth();
   const navigate = useNavigate();
@@ -52,19 +54,111 @@ export default function Events() {
 
   const handleChange = (field) => (event) => {
     const value = event?.target?.value ?? event;
-    setFormData((prev) => ({
-      ...prev,
+    let updatedFormData;
+
+    // Special handling for time values from TimePicker
+    if (field === "startTime" || field === "endTime") {
+      if (value && typeof value.format === "function") {
+        const timeString = value.format("HH:mm");
+        updatedFormData = {
+          ...formData,
+          [field]: timeString,
+        };
+        setFormData(updatedFormData);
+
+        // Validate dates and times when they change
+        if (
+          updatedFormData.startDate &&
+          updatedFormData.startTime &&
+          updatedFormData.endDate &&
+          updatedFormData.endTime
+        ) {
+          validateDateTimes(updatedFormData);
+        }
+        return;
+      }
+    }
+
+    updatedFormData = {
+      ...formData,
       [field]: value,
-    }));
+    };
+
+    setFormData(updatedFormData);
+
+    // Validate dates and times when they change
+    if (
+      field === "startDate" ||
+      field === "startTime" ||
+      field === "endDate" ||
+      field === "endTime"
+    ) {
+      if (
+        updatedFormData.startDate &&
+        updatedFormData.startTime &&
+        updatedFormData.endDate &&
+        updatedFormData.endTime
+      ) {
+        validateDateTimes(updatedFormData);
+      }
+    }
+  };
+
+  // Function to validate date and time inputs
+  const validateDateTimes = (data) => {
+    setValidationError("");
+
+    // Only validate if we have all date/time fields filled
+    if (data.startDate && data.startTime && data.endDate && data.endTime) {
+      const now = dayjs();
+      const startDateTime = dayjs(`${data.startDate}T${data.startTime}`);
+      const endDateTime = dayjs(`${data.endDate}T${data.endTime}`);
+
+      // Check if start date/time is in the past
+      if (startDateTime.isBefore(now)) {
+        setValidationError(
+          "Event cannot be scheduled in the past. Please choose a future date and time."
+        );
+        return false;
+      }
+
+      // Check if end date/time is before start date/time
+      if (endDateTime.isBefore(startDateTime)) {
+        setValidationError(
+          "End date and time cannot be before start date and time."
+        );
+        return false;
+      }
+    }
+
+    return true;
   };
 
   const handleReset = () => {
     setFormData(initialFormState);
     setSuccess(false);
+    setValidationError("");
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setValidationError("");
+
+    // Get current date and time for validation
+    const now = dayjs();
+
+    // Validate dates and times
+    if (
+      formData.startDate &&
+      formData.startTime &&
+      formData.endDate &&
+      formData.endTime
+    ) {
+      if (!validateDateTimes(formData)) {
+        return; // Stop submission if validation fails
+      }
+    }
+
     setLoading(true);
 
     let [firstName, ...lastNameParts] = formData.fullName.trim().split(" ");
@@ -175,15 +269,51 @@ export default function Events() {
   }
 
   if (success) {
+    // Format dates for display
+    const formattedStartDate = formData.startDate
+      ? dayjs(formData.startDate).format("YYYY-MM-DD")
+      : "";
+    const formattedEndDate = formData.endDate
+      ? dayjs(formData.endDate).format("YYYY-MM-DD")
+      : "";
+
     return (
       <div className={styles.formContainer}>
-        <div className={styles.successContainer}>
-          <img
-            src="http://35.176.180.59/wp-content/uploads/2024/11/undraw_mail_sent_re_0ofv-1.png"
-            alt="Success"
-          />
-          <h3>Your request was sent successfully</h3>
-          <p>Check your email for further details.</p>
+        <div className={styles.formBody}>
+          <img src={Success} className={styles.successImage} />
+          <div className={styles.sectionTittle}>
+            Your request was sent successfully.
+          </div>
+          <span>Check your email for further details.</span>
+          <div className={styles.purchaseInfo}>
+            <div className={styles.infoTitle}>
+              <span>Event details</span>
+            </div>
+            <div className={styles.formRow}>
+              <div>Event name:</div>
+              <div>{formData.eventName}</div>
+            </div>
+            <div className={styles.formRow}>
+              <div>Date:</div>
+              <div>
+                {formattedStartDate} to {formattedEndDate}
+              </div>
+            </div>
+            <div className={styles.formRow}>
+              <div>Time:</div>
+              <div>
+                {formData.startTime} - {formData.endTime}
+              </div>
+            </div>
+            <div className={styles.formRow}>
+              <div>Event purpose:</div>
+              <div>{formData.eventPurpose}</div>
+            </div>
+            <div className={styles.formRow}>
+              <div>Number of guests:</div>
+              <div>{formData.numberOfGuests}</div>
+            </div>
+          </div>
           <button
             className={styles.submit}
             style={{ marginTop: "24px" }}
@@ -202,6 +332,10 @@ export default function Events() {
       <p className={styles.subtitle}>
         Discover the perfect workspace or event venue for your needs.
       </p>
+
+      {validationError && (
+        <div className={styles.validationError}>{validationError}</div>
+      )}
 
       <form id="eventForm" onSubmit={handleSubmit} autoComplete="on">
         {/* Your Information */}
@@ -253,6 +387,7 @@ export default function Events() {
               value={formData.startDate}
               onChange={handleChange("startDate")}
               isRequired={true}
+              min={dayjs().format("YYYY-MM-DD")}
             />
             <LabeledInput
               label="Start time"
@@ -270,6 +405,8 @@ export default function Events() {
               value={formData.endDate}
               onChange={handleChange("endDate")}
               isRequired={true}
+              min={formData.startDate || dayjs().format("YYYY-MM-DD")}
+              disabled={!formData.startDate}
             />
             <LabeledInput
               label="End time"
@@ -278,6 +415,7 @@ export default function Events() {
               onChange={handleChange("endTime")}
               placeholder="18:00"
               isRequired={true}
+              disabled={!formData.startDate || !formData.endDate}
             />
           </div>
           <div className={styles.row}>

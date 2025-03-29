@@ -17,6 +17,7 @@ export default function BookingProvider({ children }) {
     bookingType: "Single Pass",
     requestedFrom: "Business",
     passDuration: 1,
+    userId: "",
   });
 
   const [fullOfficeInfo, setFullOfficeInfo] = useState({
@@ -31,6 +32,7 @@ export default function BookingProvider({ children }) {
     workspace: "",
     phoneNumber: "",
     requestedFrom: "Business",
+    userId: "",
   });
 
   const handleFullOffice = (field, value) => {

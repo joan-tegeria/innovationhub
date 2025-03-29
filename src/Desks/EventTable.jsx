@@ -6,19 +6,19 @@ import styles from "./DesksTables.module.css";
 import api from "../utility/axiosConfig";
 
 // Add a currency formatter function
-const formatCurrency = (value, currencySymbol) => {
-  return new Intl.NumberFormat("en-US", {
+const formatCurrency = (value) => {
+  // Format the number using the 'ALL' currency code
+  const formattedValue = new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: 'All',
+    currency: "ALL",
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
-  })
-    .format(value)
-    .replace(
-      currencySymbol === "ALL" ? "$" : currencySymbol,
-      currencySymbol + " "
-    );
+  }).format(value);
+
+  // Remove the 'ALL' part and add it manually at the end
+  return formattedValue.replace("ALL", "").trim() + " ALL";
 };
+
 
 const transformApiDataToDesks = (data, period) => {
   // First, group items by their base name (without numbers)
@@ -66,7 +66,7 @@ const transformApiDataToDesks = (data, period) => {
       );
       const minPrice = Math.min(...sortedItems.map((item) => item.Unit_Price));
       const maxPrice = Math.max(...sortedItems.map((item) => item.Unit_Price));
-      const currencySymbol = 'All';
+      const currencySymbol = "All";
 
       desks.push({
         type: baseName,
@@ -366,7 +366,9 @@ const EventTable = ({ type }) => {
             {deskData[activeTab].map((desk, index) => (
               <td key={index}>
                 <div className={styles.rateLabel}>Daily rate</div>
-                <div className={styles.price}>{desk.price}</div>
+                <div className={styles.price} style={{ fontSize: 18 }}>
+                  {desk.price}
+                </div>
                 <div className={styles.access}>{desk.access}</div>
               </td>
             ))}

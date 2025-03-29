@@ -25,7 +25,7 @@ const transformApiDataToDesks = (data, period) => {
   return data.map((item) => ({
     type: item.Product_Name.split("-")[0].trim(),
     description: item.Description,
-    price: formatCurrency(item.Unit_Price, item.$currency_symbol),
+    price: `${item.Unit_Price} All`,
     capacity: item.Capacity,
     access:
       period === "Daily"

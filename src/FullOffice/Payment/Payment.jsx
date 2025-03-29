@@ -25,25 +25,33 @@ export default function Payment({
   onRemoveCoupon,
   finishPayment,
   period,
+  proceedToPayment,
+  priceId,
 }) {
   const { accessToken, tokenType } = useAuth();
-  const [paymentWindow, setPaymentWindow] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
-  const iframeContainerRef = useRef(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentUrl, setPaymentUrl] = useState("");
+  const [isIframeLoaded, setIsIframeLoaded] = useState(false);
+  const iframeRef = useRef(null);
 
   // Format price as currency
   const formatCurrency = (value) => {
-    return new Intl.NumberFormat("en-US", {
+    // Format the number using the 'ALL' currency code
+    const formattedValue = new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "ALL",
       minimumFractionDigits: 0,
       maximumFractionDigits: 2,
     }).format(value);
+
+    // Remove the 'ALL' part and add it manually at the end
+    return formattedValue.replace("ALL", "").trim() + " ALL";
   };
 
   const updateInvoiceStatus = async (orderIdentification) => {
-    console.log(invoiceId);
+    console.log("Updating invoice status for ID:", invoiceId);
     try {
       const response = await api.put(
         `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/invoice/${invoiceId}`,
@@ -65,106 +73,172 @@ export default function Payment({
     }
   };
 
-  const closePaymentWindow = useCallback(() => {
-    if (
-      iframeContainerRef.current &&
-      document.body.contains(iframeContainerRef.current)
-    ) {
-      document.body.removeChild(iframeContainerRef.current);
-      iframeContainerRef.current = null;
-      setPaymentWindow(null);
-    }
-  }, []);
-
-  const handlePayment = (e) => {
+  const handlePayment = async (e) => {
     e.preventDefault();
     setPaymentStatus(null);
     setErrorMessage(null);
+    setIsIframeLoaded(false);
 
-    const paymentUrl = `${payurl}&mode=frameless`;
+    try {
+      // Call proceedToPayment and get the result directly
+      const directPayUrl = await proceedToPayment();
 
-    // Close existing payment window if it exists
-    closePaymentWindow();
+      // Log both URLs for debugging
+      console.log("🚀 ~ handlePayment ~ payurl prop:", payurl);
+      console.log("🚀 ~ handlePayment ~ direct payurl:", directPayUrl);
 
-    const iframeContainer = document.createElement("div");
-    iframeContainer.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      
-      background-color: rgba(0, 0, 0, 0.5);
-      z-index: 1000;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    `;
+      // Use the direct payment URL if available, otherwise fall back to the prop
+      const effectivePayUrl = directPayUrl || payurl;
 
-    const iframe = document.createElement("iframe");
-    iframe.src = paymentUrl;
-    iframe.style.cssText = `
-      width: ${window.innerWidth <= 640 ? "360px" : "640px"};
-      height: ${window.innerWidth <= 640 ? "780px" : "580px"};
-      border: none;
-      border-radius: 8px;
-      background-color: white;
-    `;
-
-    iframeContainer.appendChild(iframe);
-    document.body.appendChild(iframeContainer);
-    iframeContainerRef.current = iframeContainer;
-
-    const handleBackgroundClick = (event) => {
-      if (event.target === iframeContainer) {
-        closePaymentWindow();
-        setErrorMessage("Payment was cancelled.");
+      if (!effectivePayUrl) {
+        setErrorMessage("Payment URL is not available. Please try again.");
+        return;
       }
-    };
 
-    iframeContainer.addEventListener("click", handleBackgroundClick);
-    setPaymentWindow(iframeContainer);
+      console.log("Final payment URL being used:", effectivePayUrl);
+
+      // Set the payment URL and show the modal
+      setPaymentUrl(`${effectivePayUrl}&mode=frameless`);
+      setShowPaymentModal(true);
+    } catch (error) {
+      console.error("Error initializing payment:", error);
+      setErrorMessage("Failed to initialize payment form. Please try again.");
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowPaymentModal(false);
+    setPaymentUrl("");
+    setIsIframeLoaded(false);
+    setErrorMessage("Payment was cancelled.");
   };
 
   const messageHandler = useCallback(
     (event) => {
-      if (!event.origin.includes("payment.raiaccept.com")) return;
+      console.log("Message received:", event.origin, event.data);
+
+      // Check if the message is coming from the expected payment domain
+      if (
+        !event.origin.includes("payment.raiaccept.com") &&
+        !event.origin.includes("raiaccept.com") &&
+        !event.origin.includes("payment")
+      ) {
+        console.log("Ignoring message from unexpected origin:", event.origin);
+        return;
+      }
 
       try {
         const data = event.data;
-        if (data?.name !== "orderResult") return;
+        console.log("Processing payment message data:", data);
 
-        const {
+        // Different payment providers might use different message formats
+        if (
+          data?.name !== "orderResult" &&
+          !data?.status &&
+          !data?.paymentStatus
+        ) {
+          console.log("Message doesn't contain expected payment result format");
+          return;
+        }
+
+        // Extract payment status information - handle different possible formats
+        const status =
+          data?.payload?.status || data?.status || data?.paymentStatus;
+        const orderIdentification =
+          data?.payload?.orderIdentification ||
+          data?.orderIdentification ||
+          data?.orderId;
+        const paymentError =
+          data?.payload?.errorMessage || data?.errorMessage || data?.message;
+
+        console.log(
+          "Payment status:",
           status,
-          orderIdentification,
-          errorMessage: paymentError,
-        } = data.payload;
+          "Order ID:",
+          orderIdentification
+        );
         setPaymentStatus(status);
 
-        closePaymentWindow();
+        // Close the payment modal
+        setShowPaymentModal(false);
+        setPaymentUrl("");
 
         switch (status) {
           case "success":
+          case "completed":
+          case "approved":
             updateInvoiceStatus(orderIdentification);
             break;
           case "failure":
-            setErrorMessage("Payment failed. Please try again.");
+          case "failed":
+            setErrorMessage(
+              paymentError || "Payment failed. Please try again."
+            );
             break;
           case "cancel":
+          case "cancelled":
             setErrorMessage("Payment was cancelled.");
             break;
           case "exception":
+          case "error":
             setErrorMessage(paymentError || "An unexpected error occurred.");
+            break;
+          default:
+            console.warn("Unknown payment status:", status);
+            setErrorMessage(
+              "Payment status unknown. Please check your account for confirmation."
+            );
             break;
         }
       } catch (error) {
         console.error("Error processing payment message:", error);
+        setErrorMessage(
+          "Failed to process payment response. Please check your account for the payment status."
+        );
       }
     },
-    [closePaymentWindow, finishPayment]
+    [updateInvoiceStatus]
   );
 
+  const testBrowserSecurity = useCallback(() => {
+    try {
+      console.log("Running browser security diagnostics...");
+
+      // Test 1: Check if iframe creation is allowed
+      const testIframe = document.createElement("iframe");
+      testIframe.style.display = "none";
+      document.body.appendChild(testIframe);
+      document.body.removeChild(testIframe);
+      console.log("✅ Basic iframe creation test passed");
+
+      // Test 2: Check if third-party cookies are enabled
+      const cookieEnabled = navigator.cookieEnabled;
+      console.log(
+        `${cookieEnabled ? "✅" : "❌"} Cookies enabled: ${cookieEnabled}`
+      );
+
+      // Test 3: Check for Content-Security-Policy header
+      const cspMeta = document.querySelector(
+        'meta[http-equiv="Content-Security-Policy"]'
+      );
+      if (cspMeta) {
+        console.log("⚠️ CSP found:", cspMeta.content);
+        console.log("This might affect iframe loading");
+      } else {
+        console.log("✅ No CSP meta tag found");
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Browser security diagnostic failed:", error);
+      return false;
+    }
+  }, []);
+
   useEffect(() => {
+    // Run browser security test once on component mount
+    testBrowserSecurity();
+
     const currentUrl = window.location.href;
 
     if (currentUrl.includes("success") || currentUrl.includes("completed")) {
@@ -190,9 +264,54 @@ export default function Payment({
     window.addEventListener("message", messageHandler);
     return () => {
       window.removeEventListener("message", messageHandler);
-      closePaymentWindow();
     };
-  }, [messageHandler, closePaymentWindow]);
+  }, [messageHandler]);
+
+  // Payment Modal Component
+  const PaymentModal = () => {
+    if (!showPaymentModal) return null;
+
+    return (
+      <div className={styles.iframeOverlay}>
+        <div
+          className={styles.iframeWrapper}
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            width: window.innerWidth <= 640 ? "360px" : "640px",
+            height: window.innerWidth <= 640 ? "780px" : "580px",
+          }}
+        >
+          {!isIframeLoaded && (
+            <div className={styles.loadingIndicator}>
+              Loading payment form...
+            </div>
+          )}
+
+          <iframe
+            ref={iframeRef}
+            src={paymentUrl}
+            className={styles.iframeContent}
+            style={{ opacity: isIframeLoaded ? 1 : 0 }}
+            onLoad={() => {
+              console.log("Payment iframe loaded successfully");
+              setIsIframeLoaded(true);
+            }}
+            onError={(e) => {
+              console.error("Failed to load payment iframe:", e);
+              setErrorMessage("Failed to load payment form. Please try again.");
+            }}
+            allowFullScreen
+            allow="payment"
+            sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-top-navigation"
+          />
+
+          <button className={styles.closeButton} onClick={handleCloseModal}>
+            &times;
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   if (loading) {
     return (
@@ -213,11 +332,27 @@ export default function Payment({
       </div>
     );
   }
-  console.log(personalDeskUserInfo);
+
   return (
     <div className={styles.formBody}>
       <h1 className={styles.mainTitle}>Payment</h1>
       <p className={styles.subtitle}>Complete payment information</p>
+
+      {/* Display error message if any */}
+      {errorMessage && (
+        <div
+          className={styles.errorMessage || ""}
+          style={{
+            color: "red",
+            padding: "10px",
+            marginBottom: "15px",
+            backgroundColor: "rgba(255,0,0,0.1)",
+            borderRadius: "4px",
+          }}
+        >
+          {errorMessage}
+        </div>
+      )}
 
       <h2 className={styles.sectionTitle}>Order details</h2>
       <div className={styles.orderItem}>
@@ -317,6 +452,9 @@ export default function Payment({
           ? "Payment Completed"
           : "Proceed to Payment"}
       </button>
+
+      {/* Render the payment modal when needed */}
+      <PaymentModal />
     </div>
   );
 }

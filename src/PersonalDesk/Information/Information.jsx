@@ -48,17 +48,26 @@ export default function Information({
 
   // Add debounced price update
   useEffect(() => {
+    let timer = null;
+
     if (
       personalDeskUserInfo.bookingType === "Multi Pass" &&
       personalDeskUserInfo.passDuration > 0
     ) {
-      const timer = setTimeout(() => {
-        getPrice();
+      timer = setTimeout(() => {
+        getPrice(period);
       }, 500); // Wait 500ms after last change before calling getPrice
-
-      return () => clearTimeout(timer);
     }
-  }, [personalDeskUserInfo.passDuration, personalDeskUserInfo.bookingType]);
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [
+    personalDeskUserInfo.passDuration,
+    personalDeskUserInfo.bookingType,
+    getPrice,
+    period,
+  ]);
 
   if (loading) {
     return (
@@ -126,7 +135,7 @@ export default function Information({
       console.log("WORKSPACE SELECTED", workspace);
       setIsPriceFilled(false);
       handlePersonalDesk("workspace", workspace);
-      await getPrice();
+      await getPrice(period);
       setIsPriceFilled(true);
     } catch (error) {
       console.log("ERROR", error);
@@ -137,7 +146,7 @@ export default function Information({
     try {
       setIsPriceFilled(false);
       handlePersonalDesk("bookingType", event.target.value);
-      await getPrice();
+      await getPrice(period);
       setIsPriceFilled(true);
     } catch (error) {
       console.log("ERROR", error);
@@ -148,16 +157,23 @@ export default function Information({
     try {
       setIsPriceFilled(false);
       const newPeriod = event.target.value;
-      setPeriod(newPeriod);
-      console.log("PERIOD CHANGED", newPeriod);
 
-      // Check office availability if a date is selected, using the new period value
-      if (newPeriod) {
-        // Only call checkOffice which will handle both availability and price
+      // Only make a single API call based on whether we have a date or not
+      if (selectDate && dayjs(selectDate).isValid()) {
+        // Set period after we have the new value ready for the API call
+        setPeriod(newPeriod);
+        console.log("PERIOD CHANGED", newPeriod);
+
+        // This will handle both availability check and price update in one call
         await checkOffice(selectDate, newPeriod);
       } else {
-        // If no date selected, only get price
-        await getPrice();
+        // Set period after we have the new value ready for the API call
+        setPeriod(newPeriod);
+        console.log("PERIOD CHANGED", newPeriod);
+
+        // Only get price if no date is selected
+        console.log("No valid date selected, only updating price");
+        await getPrice(newPeriod);
       }
 
       setIsPriceFilled(true);

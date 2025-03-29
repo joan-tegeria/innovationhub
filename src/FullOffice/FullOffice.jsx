@@ -39,7 +39,7 @@ export default function FullOffice() {
   const [currentPrice, setCurrentPrice] = useState(0);
   const [payUrl, setPayUrl] = useState("");
   const [isFormValid, setIsFormValid] = useState(false);
-
+  const [priceId, setPriceId] = useState("");
   //Context
   const { fullOfficeInfo, period, handleFullOffice, setFullOfficeInfo } =
     useBooking();
@@ -146,10 +146,16 @@ export default function FullOffice() {
   const handleApplyCoupon = async (code) => {
     if (!code) return;
 
+    const selectedWorkspaceObj = workspaces.find(
+      (ws) => ws.value === fullOfficeInfo.workspace
+    );
+    const workspaceLabel = selectedWorkspaceObj?.label;
+    setSelectedWorkspace(selectedWorkspaceObj || {});
+
     setCouponLoading(true);
     try {
       const response = await api.get(
-        `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/coupon?coupon=${code}`,
+        `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/coupon?coupon=${code}&product=${priceId}&booking=${period}&quantity=1`,
         {
           headers: { Authorization: `${tokenType} ${accessToken}` },
         }
@@ -158,6 +164,7 @@ export default function FullOffice() {
       setPrice(
         (prev) => prev - (prev * response.data.couponData.Coupon_Value) / 100
       );
+
       setInfo("info");
       setInfoMessage("Coupon applied successfully!");
     } catch (error) {
@@ -181,25 +188,71 @@ export default function FullOffice() {
     setActiveStep(2);
   };
 
-  const sendBookRequest = async () => {
-    setLoading(true);
-    const userData = {
-      name: fullOfficeInfo.businessName,
-      lastName: fullOfficeInfo.businessName,
-      email: fullOfficeInfo.email,
-      company: fullOfficeInfo.businessName,
-      referral: "Private Office Form",
-      birthdate: "2003-11-02",
-      id: fullOfficeInfo.nipt,
-      nipt: fullOfficeInfo.nipt,
-      phone: fullOfficeInfo.phoneNumber,
-    };
-
+  const proceedToPayment = async () => {
     try {
+      setLoading(true);
+
+      // Get the selected workspace label
+      const selectedWorkspaceObj = workspaces.find(
+        (ws) => ws.value === fullOfficeInfo.workspace
+      );
+      const workspaceLabel = selectedWorkspaceObj?.label;
+
+      // For The Solo and The Duo workspaces
+      if (workspaceLabel === "The Solo" || workspaceLabel === "The Duo") {
+        const bookingData = {
+          username: fullOfficeInfo.businessName + " " + fullOfficeInfo.nipt,
+          user: fullOfficeInfo.userId, // Use the userId from account creation
+          from: fullOfficeInfo.selectDate,
+          to: fullOfficeInfo.endDate,
+          room: fullOfficeInfo.workspace,
+          booking: period,
+          requestedFrom: fullOfficeInfo.requestedFrom,
+          discount: validCoupon ? validCoupon : 0,
+        };
+
+        const bookingResponse = await api.post(
+          "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/private",
+          bookingData,
+          {
+            headers: {
+              Authorization: `${tokenType} ${accessToken}`,
+            },
+          }
+        );
+
+        // Get payment URL from response
+        const paymentUrl = bookingResponse.data.paymentSession;
+        setInvoiceId(bookingResponse.data.invoice);
+        setPayUrl(paymentUrl);
+        // Return the payment URL
+        return paymentUrl;
+      }
+      return null;
+    } catch (error) {
+      console.log("🚀 ~ proceedToPayment ~ error:", error);
+      setErrorMessage("Failed to process payment. Please try again.");
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createContact = async () => {
+    try {
+      setLoading(true);
+      const userData = {
+        name: fullOfficeInfo.businessName,
+        lastName: fullOfficeInfo.businessName,
+        email: fullOfficeInfo.email,
+        birthday: "2003-11-02", // Default birthdate
+        id: fullOfficeInfo.nipt,
+      };
+
       const {
         data: { data: response },
       } = await api.post(
-        "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/leads",
+        "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/account",
         userData,
         {
           headers: {
@@ -208,9 +261,65 @@ export default function FullOffice() {
         }
       );
 
+      // Store the user ID for later use in proceedToPayment
+      setUserId(response.id);
+      await handleFullOffice("userId", response.id);
+
+      // Move to the Payment step
+      setActiveStep(1);
+      setLoading(false);
+    } catch (error) {
+      console.log("🚀 ~ createContact ~ error:", error);
+      setErrorMessage("Failed to create account. Please try again.");
+      setLoading(false);
+    }
+  };
+
+  const sendBookRequest = async (userId) => {
+    setLoading(true);
+    let _userId = userId;
+
+    // Get the selected workspace label
+    const selectedWorkspaceObj = workspaces.find(
+      (ws) => ws.value === fullOfficeInfo.workspace
+    );
+    const workspaceLabel = selectedWorkspaceObj?.label;
+    setSelectedWorkspace(selectedWorkspaceObj || {});
+    console.log("🚀 ~ sendBookRequest ~ workspaceLabel:", workspaceLabel);
+    try {
+      // Use different APIs based on workspace type
+      if (workspaceLabel === "The Suite" || workspaceLabel === "The Pod") {
+        // Use leads API for other workspaces (The Suite and The Pod)
+        const userData = {
+          name: fullOfficeInfo.businessName,
+          lastName: fullOfficeInfo.businessName,
+          email: fullOfficeInfo.email,
+          company: fullOfficeInfo.businessName,
+          referral: "Private Office Form",
+          birthdate: "2003-11-02",
+          id: fullOfficeInfo.nipt,
+          nipt: fullOfficeInfo.nipt,
+          phone: fullOfficeInfo.phoneNumber,
+        };
+
+        const {
+          data: { data: response },
+        } = await api.post(
+          "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/leads",
+          userData,
+          {
+            headers: {
+              Authorization: `${tokenType} ${accessToken}`,
+            },
+          }
+        );
+
+        _userId = response.id;
+      }
+
       const bookingData = {
         username: fullOfficeInfo.businessName + " " + fullOfficeInfo.nipt,
-        user: response.id,
+        user: fullOfficeInfo.userId,
         from: fullOfficeInfo.selectDate,
         to: fullOfficeInfo.endDate,
         room: fullOfficeInfo.workspace,
@@ -230,28 +339,14 @@ export default function FullOffice() {
       );
 
       setPayUrl(bookingResponse.data.paymentSession);
-      setInvoiceId(bookingResponse.data.invoiceId);
+      setInvoiceId(bookingResponse.data.invoice);
       setLoading(false);
 
-      // Get the selected workspace label
-      const selectedWorkspaceObj = workspaces.find(
-        (ws) => ws.value === fullOfficeInfo.workspace
-      );
-      const workspaceLabel = selectedWorkspaceObj?.label;
-      setSelectedWorkspace(selectedWorkspaceObj || {});
-      console.log("🚀 ~ sendBookRequest ~ workspaceLabel:", workspaceLabel);
-
-      // Skip payment step for The Suite and The Pod
-      // Go to payment step for The Solo and The Duo
+      // Determine the next step based on workspace type
       if (workspaceLabel === "The Suite" || workspaceLabel === "The Pod") {
-        setActiveStep(2); // Go directly to Finished step
-      } else if (
-        workspaceLabel === "The Solo" ||
-        workspaceLabel === "The Duo"
-      ) {
-        setActiveStep(1); // Go to Payment step
+        setActiveStep(2); // Skip payment and go directly to Finished step
       } else {
-        setActiveStep(1); // Default: Go to Payment step
+        setActiveStep(1); // Go to Payment step for The Solo and The Duo
       }
     } catch (error) {
       console.log("🚀 ~ sendBookRequest ~ error:", error);
@@ -273,7 +368,7 @@ export default function FullOffice() {
           // Fetch price for the selected workspace
           try {
             const priceResponse = await api.get(
-              `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/prices?product=${selectedWorkspaceObj.label}&period=${period}`,
+              `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/prices?product=${selectedWorkspaceObj.value}&period=${period}`,
               {
                 headers: {
                   Authorization: `${tokenType} ${accessToken}`,
@@ -347,14 +442,19 @@ export default function FullOffice() {
         setPrice(basePrice - (basePrice * (validCoupon || 0)) / 100);
         setCurrentPrice(basePrice);
         setSinglePrice(basePrice);
-
+        console.log("🚀 ~ priceResponse ~ response:", priceResponse.data);
+        setPriceId(response.data[0].id);
+        localStorage.setItem("priceId", priceResponse.data[0].id);
         if (response === "Available") {
           setInfo("info");
           setInfoMessage("Space is available for " + period);
         }
       }
 
-      console.log("🚀 ~ checkOfficeAvaliablity ~ response:", response);
+      console.log(
+        "🚀 ~ checkOfficeAvaliablity ~ response:",
+        response.data[0].id
+      );
     } catch (error) {
       console.log("🚀 ~ checkOfficeAvaliablity ~ error:", error);
       setInfo("error");
@@ -363,10 +463,25 @@ export default function FullOffice() {
   };
 
   const handleNext = () => {
-    // setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    const selectedWorkspaceObj = workspaces.find(
+      (ws) => ws.value === fullOfficeInfo.workspace
+    );
+    const workspaceLabel = selectedWorkspaceObj?.label;
+    setSelectedWorkspace(selectedWorkspaceObj || {});
+
     if (activeStep === 0) {
-      sendBookRequest();
+      if (workspaceLabel === "The Suite" || workspaceLabel === "The Pod") {
+        // For The Suite and The Pod, use leads API and book directly
+        sendBookRequest();
+      } else if (
+        workspaceLabel === "The Solo" ||
+        workspaceLabel === "The Duo"
+      ) {
+        // For The Solo and The Duo, create account first
+        createContact();
+      }
     } else {
+      // For other steps, just move forward
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
   };
@@ -416,7 +531,9 @@ export default function FullOffice() {
         onApplyCoupon={handleApplyCoupon}
         onRemoveCoupon={removeCoupon}
         finishPayment={finishPayment}
+        proceedToPayment={proceedToPayment}
         period={period}
+        priceId={localStorage.getItem("priceId")}
       />
     ),
     2: (
@@ -463,7 +580,7 @@ export default function FullOffice() {
           </Alert>
         )}
 
-        {!loading && activeStep !== 2 && (
+        {!loading && activeStep === 0 && (
           <Footer
             price={price}
             handleNext={

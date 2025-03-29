@@ -12,13 +12,18 @@ export default function Footer({
 }) {
   // Format price as currency
   const formatCurrency = (value) => {
-    return new Intl.NumberFormat("en-US", {
+    // Format the number using the 'ALL' currency code
+    const formattedValue = new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "ALL",
       minimumFractionDigits: 0,
       maximumFractionDigits: 2,
     }).format(value);
+  
+    // Remove the 'ALL' part and add it manually at the end
+    return formattedValue.replace("ALL", "").trim() + " ALL";
   };
+  
 
   return (
     <div
