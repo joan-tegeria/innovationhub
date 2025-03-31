@@ -5,7 +5,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import styles from "./DeskBooking.module.css";
 import Dedicated from "../assets/dedicated.svg";
 import Flexible from "../assets/flexible.svg";
-import api from "../utility/axiosConfig";
+import api from "../util/axiosConfig";
 
 // Add a currency formatter function
 const formatCurrency = (value) => {
@@ -20,7 +20,6 @@ const formatCurrency = (value) => {
   // Remove the 'ALL' part and add it manually at the end
   return formattedValue.replace("ALL", "").trim() + " ALL";
 };
-
 
 const transformApiDataToDesks = (data, period) => {
   return data.map((item) => ({
@@ -169,7 +168,9 @@ const DeskBooking = ({ type }) => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3 }}
-          className={styles.grid}
+          className={`${styles.grid} ${
+            type === "private" ? styles.privateGrid : ""
+          }`}
         >
           {isLoading ? (
             <div className={styles.loadingContainer}>

@@ -4,7 +4,7 @@ import { useBooking } from "../../context/BookingContext";
 import CircularProgress, {
   circularProgressClasses,
 } from "@mui/material/CircularProgress";
-import api from "../../utility/axiosConfig";
+import api from "../../util/axiosConfig";
 import { useAuth } from "../../context/Auth";
 import { Chip } from "@mui/material";
 
@@ -146,7 +146,8 @@ export default function Payment({
       return;
     }
 
-    const paymentUrl = `${bookingResponse.data.paymentSession}&mode=frameless`;
+    // Remove the &mode=frameless parameter
+    const paymentUrl = bookingResponse.data.paymentSession;
     console.log("Opening payment URL:", paymentUrl);
 
     // Close existing payment window if it exists
@@ -169,34 +170,25 @@ export default function Payment({
     const iframe = document.createElement("iframe");
     iframe.src = paymentUrl;
     iframe.style.cssText = `
-      width: ${window.innerWidth <= 640 ? "360px" : "640px"};
-      height: ${window.innerWidth <= 640 ? "780px" : "580px"};
+      width: 90%;
+      max-width: 640px;
+      height: 90vh;
+      max-height: 780px;
       border: none;
       border-radius: 8px;
       background-color: white;
-      overflow: hidden;
-      -webkit-overflow-scrolling: touch;
     `;
 
-    // Add sandbox attributes to make it more secure and frameless
+    // Update sandbox attributes
     iframe.setAttribute(
       "sandbox",
-      "allow-forms allow-scripts allow-same-origin allow-top-navigation allow-popups"
+      "allow-forms allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-top-navigation"
     );
-    iframe.setAttribute("frameborder", "0");
-    iframe.setAttribute("scrolling", "no");
+    iframe.setAttribute("allow", "payment");
 
     // Add load event listener to check if iframe loads successfully
     iframe.onload = () => {
       console.log("Payment iframe loaded successfully");
-      // Attempt to make the iframe content fit without scrolling
-      try {
-        iframe.contentWindow.document.body.style.overflow = "hidden";
-      } catch (e) {
-        console.log(
-          "Could not modify iframe content directly due to same-origin policy"
-        );
-      }
     };
 
     iframe.onerror = () => {
@@ -239,8 +231,37 @@ export default function Payment({
 
         switch (status) {
           case "success":
-            updateInvoiceStatus(orderIdentification);
+            // Get the invoice ID from localStorage or state
+            const currentInvoiceId =
+              localStorage.getItem("tempInvoiceId") || idvoice;
+            if (!currentInvoiceId) {
+              console.error("No invoice ID found");
+              setErrorMessage("Payment completed but invoice ID is missing");
+              return;
+            }
 
+            // Update invoice status
+            api
+              .put(
+                `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/invoice/${currentInvoiceId}`,
+                { status: "Approved", order: orderIdentification },
+                {
+                  headers: {
+                    Authorization: `${tokenType} ${accessToken}`,
+                  },
+                }
+              )
+              .then(() => {
+                console.log("Successfully updated invoice status");
+                finishPayment();
+                localStorage.removeItem("tempInvoiceId"); // Clean up
+              })
+              .catch((error) => {
+                console.error("Error updating invoice status:", error);
+                setErrorMessage(
+                  "Payment completed but failed to update booking status"
+                );
+              });
             break;
           case "failure":
             setErrorMessage("Payment failed. Please try again.");
@@ -254,9 +275,10 @@ export default function Payment({
         }
       } catch (error) {
         console.error("Error processing payment message:", error);
+        setErrorMessage("Error processing payment response");
       }
     },
-    [closePaymentWindow]
+    [closePaymentWindow, finishPayment, tokenType, accessToken, idvoice]
   );
 
   useEffect(() => {

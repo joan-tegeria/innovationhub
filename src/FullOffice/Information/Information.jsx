@@ -10,7 +10,7 @@ import dayjs from "dayjs";
 import CircularProgress, {
   circularProgressClasses,
 } from "@mui/material/CircularProgress";
-import { formatBirthDate } from "../../utility";
+import { formatBirthDate } from "../../util";
 
 const timePeriods = [
   { value: "Daily", label: "Daily" },

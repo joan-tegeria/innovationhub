@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useParams, Navigate } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
 import styles from "./DesksTables.module.css";
-import api from "../utility/axiosConfig";
+import api from "../util/axiosConfig";
 
 // Add a currency formatter function
 const formatCurrency = (value) => {
@@ -18,7 +18,6 @@ const formatCurrency = (value) => {
   // Remove the 'ALL' part and add it manually at the end
   return formattedValue.replace("ALL", "").trim() + " ALL";
 };
-
 
 const transformApiDataToDesks = (data, period) => {
   // First, group items by their base name (without numbers)

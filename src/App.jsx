@@ -17,6 +17,9 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import EventTable from "./Desks/EventTable";
 
+import BookDesk from "./Screens/BookDesk";
+import BookingPayment from "./screens/BookingPayment/BookingPayment";
+
 function App() {
   // Function to send the current height to the parent
   const sendHeightToParent = () => {
@@ -71,6 +74,7 @@ function App() {
 
             {/* Optionally, you can add a fallback route or home route */}
             <Route path="/fullOffice" element={<FullOffice />} />
+            <Route path="/bookDesk" element={<BookDesk />} />
             <Route path="/" element={<Home />} />
             <Route path="/contact" element={<ContactUs />} />
             <Route path="/desks">
@@ -99,6 +103,7 @@ function App() {
             <Route path="/membershipplans" element={<MembershipPlans />} />
             <Route path="/partners" element={<Partners />} />
             <Route path="/eventslist" element={<EventTable />} />
+            <Route path="/booking/payment" element={<BookingPayment />} />
           </Routes>
         </BrowserRouter>
       </BookingProvider>

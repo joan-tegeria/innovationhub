@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import styles from "./FullOffice.module.css";
-import api from "../utility/axiosConfig";
+import api from "../util/axiosConfig";
 import dayjs from "dayjs";
 import { useLocalStorage } from "../hooks/useLocalStorage/useLocalStorage";
-import { calculateEndDate, formatDate, formatBirthDate } from "../utility";
+import { calculateEndDate, formatDate, formatBirthDate } from "../util";
 import { Alert } from "@mui/material";
 import { useBooking } from "../context/BookingContext";
 import { useAuth } from "../context/Auth";
@@ -21,7 +21,7 @@ export default function FullOffice() {
   const [loading, setLoading] = useState(false);
 
   const [open, setOpen] = useState(false);
-  
+
   const [workspaces, setWorkspaces] = useState([{ value: "", label: "" }]);
   const [isAvailable, setIsAvailable] = useState("");
   const [info, setInfo] = useState("none");
@@ -172,7 +172,6 @@ export default function FullOffice() {
         room: fullOfficeInfo.workspace,
         booking: period,
         requestedFrom: fullOfficeInfo.requestedFrom,
-  
       };
 
       await api.post(

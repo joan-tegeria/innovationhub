@@ -6,7 +6,7 @@ import dedicatedIcon from "../assets/dedicated.svg";
 // Import Swiper React components
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
-import api from "../utility/axiosConfig";
+import api from "../util/axiosConfig";
 import { CircularProgress } from "@mui/material";
 // Import Swiper styles
 import "swiper/css";

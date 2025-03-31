@@ -4,7 +4,7 @@ import { useBooking } from "../../context/BookingContext";
 import CircularProgress, {
   circularProgressClasses,
 } from "@mui/material/CircularProgress";
-import api from "../../utility/axiosConfig";
+import api from "../../util/axiosConfig";
 import { useAuth } from "../../context/Auth";
 import { Chip } from "@mui/material";
 

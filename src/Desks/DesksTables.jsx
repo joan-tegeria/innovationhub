@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useParams, Navigate } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
 import styles from "./DesksTables.module.css";
-import api from "../utility/axiosConfig";
+import api from "../util/axiosConfig";
 // import useWindowSize from "../hooks/useWindowSize";
 
 // Add a currency formatter function

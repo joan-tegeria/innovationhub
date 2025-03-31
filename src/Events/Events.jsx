@@ -5,7 +5,7 @@ import { useAuth } from "../context/Auth";
 import CircularProgress from "@mui/material/CircularProgress";
 import { circularProgressClasses } from "@mui/material/CircularProgress";
 import LabeledInput from "../components/LabeledInput";
-import api from "../utility/axiosConfig";
+import api from "../util/axiosConfig";
 import dayjs from "dayjs";
 import { duration } from "@mui/material";
 import Success from "../assets/form_success.svg";

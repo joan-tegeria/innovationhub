@@ -9,10 +9,10 @@ import dayjs from "dayjs";
 import CircularProgress, {
   circularProgressClasses,
 } from "@mui/material/CircularProgress";
-import { formatBirthDate } from "../../utility";
+import { formatBirthDate } from "../../util";
 import { TextField, Chip } from "@mui/material";
 import { label, tr } from "framer-motion/client";
-import api from "../../utility/axiosConfig";
+import api from "../../util/axiosConfig";
 
 const timePeriods = [
   { value: "Daily", label: "Daily" },

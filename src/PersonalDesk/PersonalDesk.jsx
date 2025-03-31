@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import styles from "./PersonalDesk.module.css";
-import api from "../utility/axiosConfig";
+import api from "../util/axiosConfig";
 import dayjs from "dayjs";
 import { useLocalStorage } from "../hooks/useLocalStorage/useLocalStorage";
-import { calculateEndDate, formatDate } from "../utility";
+import { calculateEndDate, formatDate } from "../util";
 import { Alert } from "@mui/material";
 import { useBooking } from "../context/BookingContext";
 import Information from "./Information";
@@ -612,7 +612,7 @@ export default function PersonalDesk() {
       booked: period,
       discount: validCoupon ? validCoupon : 0,
       type: personalDeskUserInfo.bookingType,
-      duration: personalDeskUserInfo.passDuration,
+      // duration: personalDeskUserInfo.passDuration,
     };
 
     try {
