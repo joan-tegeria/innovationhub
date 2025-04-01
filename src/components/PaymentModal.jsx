@@ -57,8 +57,8 @@ const PaymentModal = ({ paymentUrl, onClose, onError, onLoad }) => {
   const handleBackgroundClick = (event) => {
     // Only close if clicking directly on the background
     if (event.target === event.currentTarget) {
-      console.log("Modal background clicked, closing");
-      onClose();
+      console.log("Modal background clicked");
+      // onClose();
     }
   };
 

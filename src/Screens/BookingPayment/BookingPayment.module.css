@@ -3,6 +3,9 @@
   margin: 0 auto;
   padding: 20px;
   font-family: "Inter", sans-serif;
+  align-self: center;
+  background-color: white;
+  padding-top: 120px;
 }
 
 .mainTitle {

@@ -1,0 +1,65 @@
+.sectionTittle {
+  color: #222222;
+  font-weight: 700;
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+
+.formRow {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 32px;
+}
+
+.divider {
+  width: 100%;
+  height: 1px;
+  background-color: #999999;
+  margin-bottom: 20px;
+}
+
+.formBody {
+  /* height: 501px; */
+  padding-top: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  background-color: white;
+}
+
+.successImage {
+  width: 131px;
+  margin-bottom: 25px;
+}
+
+.purchaseInfo {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 16px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 57px;
+  font-size: 17px;
+  color: #222222;
+  margin-bottom: 29px;
+  background-color: #efefef;
+  padding: 20px 24px;
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
+}
+
+.infoTitle {
+  width: 100%;
+  display: flex;
+}
+
+.infoTitle span {
+  color: #222222;
+  font-size: 20px;
+  font-weight: 700;
+}

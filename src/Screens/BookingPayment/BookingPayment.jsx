@@ -47,6 +47,7 @@ export default function BookingPayment() {
       price,
       userName,
       endDate,
+      workspaceLabel,
     });
   }, [
     userId,
@@ -58,6 +59,7 @@ export default function BookingPayment() {
     price,
     userName,
     endDate,
+    workspaceLabel,
   ]);
 
   // =========== STATE MANAGEMENT ===========
@@ -313,7 +315,16 @@ export default function BookingPayment() {
               .then(() => {
                 console.log("Invoice updated successfully");
                 // Navigate to success page
-                navigate("/booking-success");
+
+                navigate(`/booking-success`, {
+                  state: {
+                    selectedWorkspace: workspaceLabel,
+                    selectDate: startDate,
+                    endDate: endDate,
+                    period: period,
+                    price: price,
+                  },
+                });
               })
               .catch((error) => {
                 console.error("Error updating invoice:", error);
@@ -493,6 +504,10 @@ export default function BookingPayment() {
           </span>
         </div>
       </div>
+      {/* Error Messages */}
+      {errorMessage && (
+        <div className={styles.errorMessage}>{errorMessage}</div>
+      )}
 
       {/* Payment Button */}
       <button
@@ -504,11 +519,6 @@ export default function BookingPayment() {
           ? "Payment Completed"
           : "Proceed to Payment"}
       </button>
-
-      {/* Error Messages */}
-      {errorMessage && (
-        <div className={styles.errorMessage}>{errorMessage}</div>
-      )}
 
       {/* Payment Modal */}
       {showPaymentModal && paymentUrl && (

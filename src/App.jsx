@@ -9,7 +9,9 @@ import ContactUs from "./ContactUs";
 import FullOffice from "./FullOffice";
 import Events from "./Events";
 import { AuthProvider } from "./context/Auth";
-import DeskBooking from "./Desks";
+import Desks from "./Desks/Desks";
+import DedicatedDesks from "./Desks/DedicatedDesks";
+import PrivateOffices from "./Desks/PrivateOffices";
 import DesksTables from "./Desks/DesksTables";
 import MembershipPlans from "./MembershipPlans";
 import Partners from "./Partners/Partners";
@@ -18,7 +20,9 @@ import "slick-carousel/slick/slick-theme.css";
 import EventTable from "./Desks/EventTable";
 
 import BookDesk from "./Screens/BookDesk";
-import BookingPayment from "./screens/BookingPayment/BookingPayment";
+import BookingPayment from "./Screens/BookingPayment/BookingPayment";
+import FinishedBooking from "./Screens/FinishedBooking/FinishedBooking";
+import BookOffice from "./Screens/BookOffice";
 
 function App() {
   // Function to send the current height to the parent
@@ -75,19 +79,23 @@ function App() {
             {/* Optionally, you can add a fallback route or home route */}
             <Route path="/fullOffice" element={<FullOffice />} />
             <Route path="/bookDesk" element={<BookDesk />} />
+            <Route path="/bookOffice" element={<BookOffice />} />
             <Route path="/" element={<Home />} />
             <Route path="/contact" element={<ContactUs />} />
-            <Route path="/desks">
+
+            {/* Routes for the desk components */}
+            <Route path="/desks" element={<Desks />}>
               <Route
                 index
                 element={<Navigate to="/desks/dedicated" replace />}
               />
-              <Route
-                path="dedicated"
-                element={<DeskBooking type="dedicated" />}
-              />
-              <Route path="private" element={<DeskBooking type="private" />} />
+              <Route path=":type" element={<Desks />} />
             </Route>
+
+            {/* Direct routes to the specific desk components */}
+            <Route path="/dedicated-desks" element={<DedicatedDesks />} />
+            <Route path="/private-offices" element={<PrivateOffices />} />
+
             <Route path="/desks-table">
               <Route
                 index
@@ -99,11 +107,13 @@ function App() {
               />
               <Route path="private" element={<DesksTables type="private" />} />
             </Route>
+
             <Route path="/events" element={<Events />} />
             <Route path="/membershipplans" element={<MembershipPlans />} />
             <Route path="/partners" element={<Partners />} />
             <Route path="/eventslist" element={<EventTable />} />
             <Route path="/booking/payment" element={<BookingPayment />} />
+            <Route path="/booking-success" element={<FinishedBooking />} />
           </Routes>
         </BrowserRouter>
       </BookingProvider>

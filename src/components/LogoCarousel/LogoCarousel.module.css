@@ -4,6 +4,7 @@
   padding: 40px 0;
   overflow: hidden;
   position: relative;
+  cursor: pointer;
 }
 
 .carouselContainer::before,
@@ -46,7 +47,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #000;
+  border: 1px solid #ddddd1;
   background: white;
   margin: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);

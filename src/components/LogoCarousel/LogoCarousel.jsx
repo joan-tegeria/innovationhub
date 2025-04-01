@@ -5,29 +5,42 @@ const logos = [
   {
     id: 1,
     url: "http://35.176.180.59/wp-content/uploads/2025/02/image.png",
-    alt: "Partner 1",
+    alt: "Plug and Play",
+    link: "https://www.plugandplaytechcenter.com/",
   },
   {
     id: 2,
     url: "http://35.176.180.59/wp-content/uploads/2025/02/Bashkia-Tirane.jpg",
-    alt: "Partner 2",
+    alt: "Bashkia e Tiranes",
+    link: "https://www.tirana.al/",
   },
   {
     id: 3,
     url: "http://35.176.180.59/wp-content/uploads/2025/02/IDEMIA_Smart_Identity_3L_RGB.png",
-    alt: "Partner 3",
+    alt: "Idemia",
+    link: "https://www.aadf.org/",
   },
   {
     id: 4,
     url: "http://35.176.180.59/wp-content/uploads/2025/02/Logo-AADF_-Shkrimi-poshte-01.png",
-    alt: "Partner 4",
+    alt: "AADF",
+    link: "https://www.idemia.com/",
   },
   {
     id: 5,
     url: "http://35.176.180.59/wp-content/uploads/2025/02/image-14.png",
-    alt: "Partner 5",
+    alt: "Piramida",
+    link: "https://piramida.edu.al/",
   },
 ];
+
+const handleLogoClick = (link) => {
+  if (window.self !== window.top) {
+    window.parent.open(link, "_blank");
+  } else {
+    window.open(link, "_blank");
+  }
+};
 
 const LogoCarousel = () => {
   return (
@@ -36,8 +49,19 @@ const LogoCarousel = () => {
         <div className={styles.slideTrack}>
           {/* Triple the logos for smoother infinite effect */}
           {[...logos, ...logos, ...logos].map((logo, index) => (
-            <div key={`${logo.id}-${index}`} className={styles.slide}>
-              <img src={logo.url} alt={logo.alt} />
+            <div
+              key={`${logo.id}-${index}`}
+              className={styles.slide}
+              onClick={() => {
+                handleLogoClick(logo.link);
+              }}
+              style={{ cursor: "pointer" }}
+            >
+              <img
+                src={logo.url}
+                alt={logo.alt}
+                style={{ cursor: "pointer" }}
+              />
             </div>
           ))}
         </div>

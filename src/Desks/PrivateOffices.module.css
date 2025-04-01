@@ -1,7 +1,9 @@
 .container {
-  max-width: 72rem;
+  width: 100%;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: 1rem;
+  box-sizing: border-box;
 }
 
 .titleContainer {
@@ -9,7 +11,8 @@
   width: 100%;
   justify-content: space-between !important;
   align-items: center;
-  min-width: 1104px;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .title {
@@ -39,12 +42,13 @@
   margin-bottom: 2rem;
   border: 1px solid #ddddd1;
   position: relative;
-  /* width: 20px; */
+  width: 100%;
+  max-width: 400px;
 }
 
 .imgContainer {
   width: 100%;
-  height: 200px;
+  height: 220px; /* Slightly taller images for offices */
   object-fit: cover;
   position: relative;
   display: block;
@@ -69,7 +73,7 @@
 
 .tab {
   background-color: transparent;
-  padding: 0.5rem 1.5rem;
+  padding: 0.5rem 0.75rem;
   border-radius: 9999px;
   transition: color 0.3s ease;
   border: none;
@@ -96,31 +100,20 @@
   top: 4px;
   left: 4px;
   bottom: 4px;
-  width: calc((100% - 8px) / 3);
   border-radius: 9999px;
   z-index: 1;
 }
 
-.activeIndicator {
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: #007bff;
-  border-radius: 1px;
-}
-
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 25px; /* Larger gap for private offices */
   margin-top: 30px;
   width: 100%;
 }
 
 .privateGrid {
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 }
 
 .card {
@@ -132,6 +125,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
+  border: 1px solid #9d9fa365;
 }
 
 .cardContent {
@@ -143,6 +137,7 @@
 
 .card:hover {
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
 }
 
 .cardInfo {
@@ -154,7 +149,7 @@
 }
 
 .cardTitle {
-  font-size: 18px;
+  font-size: 20px; /* Larger font for office titles */
   font-weight: bold;
   margin-bottom: 1rem;
 }
@@ -171,7 +166,7 @@
 }
 
 .price {
-  font-size: 22px;
+  font-size: 24px; /* Larger price for offices */
   font-weight: bold;
 }
 
@@ -219,32 +214,65 @@
 }
 
 @media (max-width: 1200px) {
+  .grid,
+  .privateGrid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
+@media (max-width: 991px) {
+  .grid,
   .privateGrid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 767px) {
+  .container {
+    padding: 0.75rem;
+    width: 100%;
+  }
+
+  .titleContainer {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .tabContainer {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .tab {
+    padding: 0.5rem 0.25rem;
+    font-size: 12px;
+  }
+
+  .grid,
   .privateGrid {
     grid-template-columns: 1fr;
+    width: 100%;
   }
-}
 
-/* Remove or modify these media queries for the regular grid */
-@media (min-width: 1200px) {
-  .grid:not(.privateGrid) {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  .card {
+    width: 100%;
   }
-}
 
-@media (min-width: 768px) and (max-width: 1199px) {
-  .grid:not(.privateGrid) {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  .cardContent {
+    padding: 1.5rem;
   }
-}
 
-@media (max-width: 767px) {
-  .grid:not(.privateGrid) {
-    grid-template-columns: 1fr;
+  .price {
+    font-size: 20px;
+  }
+
+  .description {
+    font-size: 13px;
+  }
+
+  .button {
+    padding: 0.6rem;
+    font-size: 14px;
   }
 }

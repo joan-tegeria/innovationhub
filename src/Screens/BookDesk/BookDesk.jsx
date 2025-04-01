@@ -33,7 +33,29 @@ const validationSchema = Yup.object({
     .min(2, "Last name must be at least 2 characters"),
   birthday: Yup.date()
     .required("Birthday is required")
-    .max(new Date(), "Birthday cannot be in the future"),
+    .max(new Date(), "Birthday cannot be in the future")
+    .test(
+      "is-at-least-18",
+      "You must be at least 18 years old",
+      function (value) {
+        if (!value) return false;
+        // Calculate age
+        const today = new Date();
+        const birthDate = new Date(value);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+
+        // Adjust age if birthday hasn't occurred yet this year
+        if (
+          monthDiff < 0 ||
+          (monthDiff === 0 && today.getDate() < birthDate.getDate())
+        ) {
+          age--;
+        }
+
+        return age >= 18;
+      }
+    ),
   idNumber: Yup.string()
     .required("ID number is required")
     .matches(
@@ -126,7 +148,7 @@ export default function BookDesk() {
         console.log("Find the user id ", userResponse);
         navigate(`/booking/payment`, {
           state: {
-            userId: userResponse.data.data.id,
+            userId: userResponse.data.data,
             workspaceId: values.selectedWorkspace,
             priceId: priceId,
             startDate: values.selectedDate,
@@ -309,7 +331,11 @@ export default function BookDesk() {
   }, [values.bookingPeriod, values.selectedWorkspace]);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.spinner}></div>
+      </div>
+    );
   }
 
   return (
@@ -383,13 +409,16 @@ export default function BookDesk() {
             <div className={styles.error}>{errors.selectedDate}</div>
           )}
         </div>
-        <div
-          className={isAvailable ? styles.infoContainer: styles.infoContainerErr}
-        
-        >
-          <img src={isAvailable ? info : infowhite} alt="" />
-          <span>{infoMessage}</span>
-        </div>
+        {infoMessage !== "" && (
+          <div
+            className={
+              isAvailable ? styles.infoContainer : styles.infoContainerErr
+            }
+          >
+            <img src={isAvailable ? info : infowhite} alt="" />
+            <span>{infoMessage}</span>
+          </div>
+        )}
         <div className={styles.divider} />
         <h1 className={styles.subHeading}>Personal Information</h1>
 
@@ -442,6 +471,11 @@ export default function BookDesk() {
               onChange={handleChange}
               className={styles.input}
               autoComplete="bday"
+              max={
+                new Date(new Date().setFullYear(new Date().getFullYear() - 18))
+                  .toISOString()
+                  .split("T")[0]
+              }
             />
             {errors.birthday && touched.birthday && (
               <div className={styles.error}>{errors.birthday}</div>
