@@ -111,17 +111,22 @@ export default function BookOffice() {
         const bookingData = {
           username: values.businessName + " " + values.nipt,
           user: userId,
-          from: values.selectedDate,
-          to: endDate,
-          room: values.workspace,
+          from: values.selectedDate + `T00:00:00+02:00`,
+          to: endDate + `T00:00:00+02:00`,
+          room: values.selectedWorkspace[0],
           booking: values.bookingPeriod,
           requestedFrom: "Business",
         };
         console.log("🚀 ~ onSubmit: ~ bookingData:", bookingData);
-
-        // if (!userResponse.data?.data?.id) {
-        //   throw new Error("Failed to create user account");
-        // }
+        await api.post(
+          "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/private",
+          bookingData,
+          {
+            headers: {
+              Authorization: `${tokenType} ${accessToken}`,
+            },
+          }
+        );
 
         const _selectedWorkspace = workspaces.find((workspace) => {
           if (
@@ -322,225 +327,227 @@ export default function BookOffice() {
   }
 
   return (
-    <div className={styles.container}>
-      <h1 className={styles.title}>Get a Quote</h1>
-      <form onSubmit={handleSubmit} className={styles.form} autoComplete="on">
-        <div className={styles.divider} />
-        <h1 className={styles.subHeading}>Space Information</h1>
+    <div className={styles.background}>
+      <div className={styles.container}>
+        <h1 className={styles.title}>Get a Quote</h1>
+        <form onSubmit={handleSubmit} className={styles.form} autoComplete="on">
+          <div className={styles.divider} />
+          <h1 className={styles.subHeading}>Space Information</h1>
 
-        <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-          <label className={styles.label}>
-            Select the office you are interested:
-          </label>
-          <div className={styles.workspaceButtons}>
-            {workspaces.map((workspace) => (
-              <button
-                key={workspace.value}
-                type="button"
-                className={`${styles.workspaceButton} ${
-                  values.selectedWorkspace === workspace.value
-                    ? styles.workspaceButtonActive
-                    : ""
-                }`}
-                onClick={() => handleWorkspaceSelect(workspace.value)}
-              >
-                {workspace.label}
-              </button>
-            ))}
+          <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+            <label className={styles.label}>
+              Select the office you are interested:
+            </label>
+            <div className={styles.workspaceButtons}>
+              {workspaces.map((workspace) => (
+                <button
+                  key={workspace.value}
+                  type="button"
+                  className={`${styles.workspaceButton} ${
+                    values.selectedWorkspace === workspace.value
+                      ? styles.workspaceButtonActive
+                      : ""
+                  }`}
+                  onClick={() => handleWorkspaceSelect(workspace.value)}
+                >
+                  {workspace.label}
+                </button>
+              ))}
+            </div>
+            {errors.selectedWorkspace && touched.selectedWorkspace && (
+              <div className={styles.error}>{errors.selectedWorkspace}</div>
+            )}
           </div>
-          {errors.selectedWorkspace && touched.selectedWorkspace && (
-            <div className={styles.error}>{errors.selectedWorkspace}</div>
+
+          <div className={styles.formGroup}>
+            <label htmlFor="bookingPeriod" className={styles.label}>
+              Booking Period
+            </label>
+            <select
+              id="bookingPeriod"
+              name="bookingPeriod"
+              value={values.bookingPeriod}
+              onChange={handleChange}
+              className={styles.select}
+            >
+              <option value="">Select a booking period</option>
+              {bookingPeriods.map((period) => (
+                <option key={period.value} value={period.value}>
+                  {period.label}
+                </option>
+              ))}
+            </select>
+            {errors.bookingPeriod && touched.bookingPeriod && (
+              <div className={styles.error}>{errors.bookingPeriod}</div>
+            )}
+          </div>
+
+          <div className={styles.formGroup}>
+            <label htmlFor="selectedDate" className={styles.label}>
+              Date
+            </label>
+            <input
+              type="date"
+              id="selectedDate"
+              name="selectedDate"
+              value={values.selectedDate}
+              onChange={handleChange}
+              className={styles.input}
+              autoComplete="off"
+              min={new Date(Date.now() + 86400000).toISOString().split("T")[0]}
+            />
+            {errors.selectedDate && touched.selectedDate && (
+              <div className={styles.error}>{errors.selectedDate}</div>
+            )}
+          </div>
+          {infoMessage !== "" && (
+            <div
+              className={
+                isAvailable ? styles.infoContainer : styles.infoContainerErr
+              }
+            >
+              <img src={isAvailable ? info : infowhite} alt="" />
+              <span>{infoMessage}</span>
+            </div>
           )}
-        </div>
+          <div className={styles.divider} />
+          <h1 className={styles.subHeading}>Personal Information</h1>
 
-        <div className={styles.formGroup}>
-          <label htmlFor="bookingPeriod" className={styles.label}>
-            Booking Period
-          </label>
-          <select
-            id="bookingPeriod"
-            name="bookingPeriod"
-            value={values.bookingPeriod}
-            onChange={handleChange}
-            className={styles.select}
-          >
-            <option value="">Select a booking period</option>
-            {bookingPeriods.map((period) => (
-              <option key={period.value} value={period.value}>
-                {period.label}
-              </option>
-            ))}
-          </select>
-          {errors.bookingPeriod && touched.bookingPeriod && (
-            <div className={styles.error}>{errors.bookingPeriod}</div>
-          )}
-        </div>
+          <div className={styles.formSection}>
+            <div className={styles.formGroup}>
+              <label htmlFor="businessName" className={styles.label}>
+                Business Name
+              </label>
+              <input
+                type="text"
+                id="businessName"
+                name="businessName"
+                value={values.businessName}
+                onChange={handleChange}
+                className={styles.input}
+                placeholder="Hubitat SH.P.K"
+                autoComplete="given-name"
+              />
+              {errors.businessName && touched.businessName && (
+                <div className={styles.error}>{errors.businessName}</div>
+              )}
+            </div>
 
-        <div className={styles.formGroup}>
-          <label htmlFor="selectedDate" className={styles.label}>
-            Date
-          </label>
-          <input
-            type="date"
-            id="selectedDate"
-            name="selectedDate"
-            value={values.selectedDate}
-            onChange={handleChange}
-            className={styles.input}
-            autoComplete="off"
-            min={new Date(Date.now() + 86400000).toISOString().split("T")[0]}
-          />
-          {errors.selectedDate && touched.selectedDate && (
-            <div className={styles.error}>{errors.selectedDate}</div>
-          )}
-        </div>
-        {infoMessage !== "" && (
-          <div
-            className={
-              isAvailable ? styles.infoContainer : styles.infoContainerErr
-            }
-          >
-            <img src={isAvailable ? info : infowhite} alt="" />
-            <span>{infoMessage}</span>
-          </div>
-        )}
-        <div className={styles.divider} />
-        <h1 className={styles.subHeading}>Personal Information</h1>
+            <div className={styles.formGroup}>
+              <label htmlFor="nipt" className={styles.label}>
+                NIPT
+              </label>
+              <input
+                type="text"
+                id="nipt"
+                name="nipt"
+                value={values.nipt}
+                placeholder="A12345678B"
+                onChange={handleChange}
+                className={styles.input}
+                autoComplete="nipt"
+              />
+              {errors.nipt && touched.nipt && (
+                <div className={styles.error}>{errors.nipt}</div>
+              )}
+            </div>
 
-        <div className={styles.formSection}>
-          <div className={styles.formGroup}>
-            <label htmlFor="businessName" className={styles.label}>
-              Business Name
-            </label>
-            <input
-              type="text"
-              id="businessName"
-              name="businessName"
-              value={values.businessName}
-              onChange={handleChange}
-              className={styles.input}
-              placeholder="Hubitat SH.P.K"
-              autoComplete="given-name"
-            />
-            {errors.businessName && touched.businessName && (
-              <div className={styles.error}>{errors.businessName}</div>
-            )}
-          </div>
+            <div className={styles.formGroup}>
+              <label htmlFor="phoneNumber" className={styles.label}>
+                Phone Number
+              </label>
+              <input
+                type="text"
+                id="phoneNumber"
+                name="phoneNumber"
+                value={values.phoneNumber}
+                onChange={handleChange}
+                className={styles.input}
+                placeholder="355xxxxxxxxx"
+                autoComplete="phoneNumber"
+              />
+              {errors.phoneNumber && touched.phoneNumber && (
+                <div className={styles.error}>{errors.phoneNumber}</div>
+              )}
+            </div>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="nipt" className={styles.label}>
-              NIPT
-            </label>
-            <input
-              type="text"
-              id="nipt"
-              name="nipt"
-              value={values.nipt}
-              placeholder="A12345678B"
-              onChange={handleChange}
-              className={styles.input}
-              autoComplete="nipt"
-            />
-            {errors.nipt && touched.nipt && (
-              <div className={styles.error}>{errors.nipt}</div>
-            )}
+            <div className={styles.formGroup}>
+              <label htmlFor="email" className={styles.label}>
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={values.email}
+                onChange={handleChange}
+                className={styles.input}
+                autoComplete="email"
+                placeholder="hubitat@gmail.com"
+              />
+              {errors.email && touched.email && (
+                <div className={styles.error}>{errors.email}</div>
+              )}
+            </div>
           </div>
+          <div className={styles.divider} />
+          <h1 className={styles.subHeading}>Address</h1>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="phoneNumber" className={styles.label}>
-              Phone Number
-            </label>
-            <input
-              type="text"
-              id="phoneNumber"
-              name="phoneNumber"
-              value={values.phoneNumber}
-              onChange={handleChange}
-              className={styles.input}
-              placeholder="355xxxxxxxxx"
-              autoComplete="phoneNumber"
-            />
-            {errors.phoneNumber && touched.phoneNumber && (
-              <div className={styles.error}>{errors.phoneNumber}</div>
-            )}
-          </div>
+          <div className={styles.formSection}>
+            <div className={styles.formGroup}>
+              <label htmlFor="street" className={styles.label}>
+                Street
+              </label>
+              <input
+                type="text"
+                id="street"
+                name="street"
+                value={values.street}
+                onChange={handleChange}
+                className={styles.input}
+                placeholder="Muhamet Gjollesha"
+                autoComplete="street-name"
+              />
+              {errors.street && touched.street && (
+                <div className={styles.error}>{errors.street}</div>
+              )}
+            </div>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="email" className={styles.label}>
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={values.email}
-              onChange={handleChange}
-              className={styles.input}
-              autoComplete="email"
-              placeholder="hubitat@gmail.com"
-            />
-            {errors.email && touched.email && (
-              <div className={styles.error}>{errors.email}</div>
-            )}
+            <div className={styles.formGroup}>
+              <label htmlFor="City" className={styles.label}>
+                City
+              </label>
+              <input
+                type="text"
+                id="city"
+                name="city"
+                value={values.city}
+                placeholder="Tirana"
+                onChange={handleChange}
+                className={styles.input}
+                autoComplete="city"
+              />
+              {errors.city && touched.city && (
+                <div className={styles.error}>{errors.city}</div>
+              )}
+            </div>
           </div>
-        </div>
-        <div className={styles.divider} />
-        <h1 className={styles.subHeading}>Address</h1>
-
-        <div className={styles.formSection}>
-          <div className={styles.formGroup}>
-            <label htmlFor="street" className={styles.label}>
-              Street
-            </label>
-            <input
-              type="text"
-              id="street"
-              name="street"
-              value={values.street}
-              onChange={handleChange}
-              className={styles.input}
-              placeholder="Muhamet Gjollesha"
-              autoComplete="street-name"
-            />
-            {errors.street && touched.street && (
-              <div className={styles.error}>{errors.street}</div>
-            )}
+          <div className={styles.divider} />
+          <div className={styles.footer}>
+            <div className={styles.priceContainer}>
+              <span>Total to pay</span>
+              <span className={styles.price}>{price} ALL</span>
+            </div>
+            <button
+              type="submit"
+              className={styles.submitButton}
+              disabled={isSubmitting || !isAvailable}
+            >
+              {isSubmitting ? "Creating..." : "Book Now"}
+            </button>
           </div>
-
-          <div className={styles.formGroup}>
-            <label htmlFor="City" className={styles.label}>
-              City
-            </label>
-            <input
-              type="text"
-              id="city"
-              name="city"
-              value={values.city}
-              placeholder="Tirana"
-              onChange={handleChange}
-              className={styles.input}
-              autoComplete="city"
-            />
-            {errors.city && touched.city && (
-              <div className={styles.error}>{errors.city}</div>
-            )}
-          </div>
-        </div>
-        <div className={styles.divider} />
-        <div className={styles.footer}>
-          <div className={styles.priceContainer}>
-            <span>Total to pay</span>
-            <span className={styles.price}>{price} ALL</span>
-          </div>
-          <button
-            type="submit"
-            className={styles.submitButton}
-            disabled={isSubmitting || !isAvailable}
-          >
-            {isSubmitting ? "Creating..." : "Book Now"}
-          </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }

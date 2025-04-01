@@ -339,201 +339,205 @@ export default function BookDesk() {
   }
 
   return (
-    <div className={styles.container}>
-      <h1 className={styles.title}>Ready to Get Started?</h1>
-      <form onSubmit={handleSubmit} className={styles.form} autoComplete="on">
-        <div className={styles.divider} />
-        <h1 className={styles.subHeading}>Space Information</h1>
+    <div className={styles.background}>
+      <div className={styles.container}>
+        <h1 className={styles.title}>Ready to Get Started?</h1>
+        <form onSubmit={handleSubmit} className={styles.form} autoComplete="on">
+          <div className={styles.divider} />
+          <h1 className={styles.subHeading}>Space Information</h1>
 
-        <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-          <label className={styles.label}>Select desk type:</label>
-          <div className={styles.workspaceButtons}>
-            {workspaces.map((workspace) => (
-              <button
-                key={workspace.value}
-                type="button"
-                className={`${styles.workspaceButton} ${
-                  values.selectedWorkspace === workspace.value
-                    ? styles.workspaceButtonActive
-                    : ""
-                }`}
-                onClick={() => handleWorkspaceSelect(workspace.value)}
-              >
-                {workspace.label}
-              </button>
-            ))}
-          </div>
-          {errors.selectedWorkspace && touched.selectedWorkspace && (
-            <div className={styles.error}>{errors.selectedWorkspace}</div>
-          )}
-        </div>
-
-        <div className={styles.formGroup}>
-          <label htmlFor="bookingPeriod" className={styles.label}>
-            Booking Period
-          </label>
-          <select
-            id="bookingPeriod"
-            name="bookingPeriod"
-            value={values.bookingPeriod}
-            onChange={handleChange}
-            className={styles.select}
-          >
-            <option value="">Select a booking period</option>
-            {bookingPeriods.map((period) => (
-              <option key={period.value} value={period.value}>
-                {period.label}
-              </option>
-            ))}
-          </select>
-          {errors.bookingPeriod && touched.bookingPeriod && (
-            <div className={styles.error}>{errors.bookingPeriod}</div>
-          )}
-        </div>
-
-        <div className={styles.formGroup}>
-          <label htmlFor="selectedDate" className={styles.label}>
-            Date
-          </label>
-          <input
-            type="date"
-            id="selectedDate"
-            name="selectedDate"
-            value={values.selectedDate}
-            onChange={handleChange}
-            className={styles.input}
-            autoComplete="off"
-            min={new Date(Date.now() + 86400000).toISOString().split("T")[0]}
-          />
-          {errors.selectedDate && touched.selectedDate && (
-            <div className={styles.error}>{errors.selectedDate}</div>
-          )}
-        </div>
-        {infoMessage !== "" && (
-          <div
-            className={
-              isAvailable ? styles.infoContainer : styles.infoContainerErr
-            }
-          >
-            <img src={isAvailable ? info : infowhite} alt="" />
-            <span>{infoMessage}</span>
-          </div>
-        )}
-        <div className={styles.divider} />
-        <h1 className={styles.subHeading}>Personal Information</h1>
-
-        <div className={styles.formSection}>
-          <div className={styles.formGroup}>
-            <label htmlFor="first_name" className={styles.label}>
-              First Name
-            </label>
-            <input
-              type="text"
-              id="first_name"
-              name="first_name"
-              value={values.first_name}
-              onChange={handleChange}
-              className={styles.input}
-              autoComplete="given-name"
-            />
-            {errors.first_name && touched.first_name && (
-              <div className={styles.error}>{errors.first_name}</div>
+          <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+            <label className={styles.label}>Select desk type:</label>
+            <div className={styles.workspaceButtons}>
+              {workspaces.map((workspace) => (
+                <button
+                  key={workspace.value}
+                  type="button"
+                  className={`${styles.workspaceButton} ${
+                    values.selectedWorkspace === workspace.value
+                      ? styles.workspaceButtonActive
+                      : ""
+                  }`}
+                  onClick={() => handleWorkspaceSelect(workspace.value)}
+                >
+                  {workspace.label}
+                </button>
+              ))}
+            </div>
+            {errors.selectedWorkspace && touched.selectedWorkspace && (
+              <div className={styles.error}>{errors.selectedWorkspace}</div>
             )}
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="last_name" className={styles.label}>
-              Last Name
+            <label htmlFor="bookingPeriod" className={styles.label}>
+              Booking Period
             </label>
-            <input
-              type="text"
-              id="last_name"
-              name="last_name"
-              value={values.last_name}
+            <select
+              id="bookingPeriod"
+              name="bookingPeriod"
+              value={values.bookingPeriod}
               onChange={handleChange}
-              className={styles.input}
-              autoComplete="family-name"
-            />
-            {errors.last_name && touched.last_name && (
-              <div className={styles.error}>{errors.last_name}</div>
+              className={styles.select}
+            >
+              <option value="">Select a booking period</option>
+              {bookingPeriods.map((period) => (
+                <option key={period.value} value={period.value}>
+                  {period.label}
+                </option>
+              ))}
+            </select>
+            {errors.bookingPeriod && touched.bookingPeriod && (
+              <div className={styles.error}>{errors.bookingPeriod}</div>
             )}
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="birthday" className={styles.label}>
-              Birthday
+            <label htmlFor="selectedDate" className={styles.label}>
+              Date
             </label>
             <input
               type="date"
-              id="birthday"
-              name="birthday"
-              value={values.birthday}
+              id="selectedDate"
+              name="selectedDate"
+              value={values.selectedDate}
               onChange={handleChange}
               className={styles.input}
-              autoComplete="bday"
-              max={
-                new Date(new Date().setFullYear(new Date().getFullYear() - 18))
-                  .toISOString()
-                  .split("T")[0]
-              }
-            />
-            {errors.birthday && touched.birthday && (
-              <div className={styles.error}>{errors.birthday}</div>
-            )}
-          </div>
-
-          <div className={styles.formGroup}>
-            <label htmlFor="idNumber" className={styles.label}>
-              ID Number
-            </label>
-            <input
-              type="text"
-              id="idNumber"
-              name="idNumber"
-              value={values.idNumber}
-              onChange={handleChange}
-              className={styles.input}
-              placeholder="A12345678B"
               autoComplete="off"
+              min={new Date(Date.now() + 86400000).toISOString().split("T")[0]}
             />
-            {errors.idNumber && touched.idNumber && (
-              <div className={styles.error}>{errors.idNumber}</div>
+            {errors.selectedDate && touched.selectedDate && (
+              <div className={styles.error}>{errors.selectedDate}</div>
             )}
           </div>
+          {infoMessage !== "" && (
+            <div
+              className={
+                isAvailable ? styles.infoContainer : styles.infoContainerErr
+              }
+            >
+              <img src={isAvailable ? info : infowhite} alt="" />
+              <span>{infoMessage}</span>
+            </div>
+          )}
+          <div className={styles.divider} />
+          <h1 className={styles.subHeading}>Personal Information</h1>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="email" className={styles.label}>
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={values.email}
-              onChange={handleChange}
-              className={styles.input}
-              autoComplete="email"
-            />
-            {errors.email && touched.email && (
-              <div className={styles.error}>{errors.email}</div>
-            )}
+          <div className={styles.formSection}>
+            <div className={styles.formGroup}>
+              <label htmlFor="first_name" className={styles.label}>
+                First Name
+              </label>
+              <input
+                type="text"
+                id="first_name"
+                name="first_name"
+                value={values.first_name}
+                onChange={handleChange}
+                className={styles.input}
+                autoComplete="given-name"
+              />
+              {errors.first_name && touched.first_name && (
+                <div className={styles.error}>{errors.first_name}</div>
+              )}
+            </div>
+
+            <div className={styles.formGroup}>
+              <label htmlFor="last_name" className={styles.label}>
+                Last Name
+              </label>
+              <input
+                type="text"
+                id="last_name"
+                name="last_name"
+                value={values.last_name}
+                onChange={handleChange}
+                className={styles.input}
+                autoComplete="family-name"
+              />
+              {errors.last_name && touched.last_name && (
+                <div className={styles.error}>{errors.last_name}</div>
+              )}
+            </div>
+
+            <div className={styles.formGroup}>
+              <label htmlFor="birthday" className={styles.label}>
+                Birthday
+              </label>
+              <input
+                type="date"
+                id="birthday"
+                name="birthday"
+                value={values.birthday}
+                onChange={handleChange}
+                className={styles.input}
+                autoComplete="bday"
+                max={
+                  new Date(
+                    new Date().setFullYear(new Date().getFullYear() - 18)
+                  )
+                    .toISOString()
+                    .split("T")[0]
+                }
+              />
+              {errors.birthday && touched.birthday && (
+                <div className={styles.error}>{errors.birthday}</div>
+              )}
+            </div>
+
+            <div className={styles.formGroup}>
+              <label htmlFor="idNumber" className={styles.label}>
+                ID Number
+              </label>
+              <input
+                type="text"
+                id="idNumber"
+                name="idNumber"
+                value={values.idNumber}
+                onChange={handleChange}
+                className={styles.input}
+                placeholder="A12345678B"
+                autoComplete="off"
+              />
+              {errors.idNumber && touched.idNumber && (
+                <div className={styles.error}>{errors.idNumber}</div>
+              )}
+            </div>
+
+            <div className={styles.formGroup}>
+              <label htmlFor="email" className={styles.label}>
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={values.email}
+                onChange={handleChange}
+                className={styles.input}
+                autoComplete="email"
+              />
+              {errors.email && touched.email && (
+                <div className={styles.error}>{errors.email}</div>
+              )}
+            </div>
           </div>
-        </div>
-        <div className={styles.divider} />
-        <div className={styles.footer}>
-          <div className={styles.priceContainer}>
-            <span>Total to pay</span>
-            <span className={styles.price}>{price} ALL</span>
+          <div className={styles.divider} />
+          <div className={styles.footer}>
+            <div className={styles.priceContainer}>
+              <span>Total to pay</span>
+              <span className={styles.price}>{price} ALL</span>
+            </div>
+            <button
+              type="submit"
+              className={styles.submitButton}
+              disabled={isSubmitting || !isAvailable}
+            >
+              {isSubmitting ? "Creating..." : "Book Now"}
+            </button>
           </div>
-          <button
-            type="submit"
-            className={styles.submitButton}
-            disabled={isSubmitting || !isAvailable}
-          >
-            {isSubmitting ? "Creating..." : "Book Now"}
-          </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }
