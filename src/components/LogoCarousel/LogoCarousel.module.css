@@ -78,3 +78,10 @@
 .slideTrack:hover {
   animation-play-state: paused;
 }
+
+/* Mobile-specific adjustments */
+@media (max-width: 768px) {
+  .slideTrack {
+    animation: scroll 5s linear infinite; /* Twice as fast animation on mobile */
+  }
+}

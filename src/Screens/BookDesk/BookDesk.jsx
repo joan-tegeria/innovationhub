@@ -64,7 +64,10 @@ const validationSchema = Yup.object({
     ),
   email: Yup.string()
     .email("Invalid email address")
-    .required("Email is required"),
+    .matches(
+      /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+      "Email must have a valid domain (e.g., .com, .net, etc.)"
+    ),
 });
 
 const API_BASE_URL =
@@ -174,13 +177,19 @@ export default function BookDesk() {
   useEffect(() => {
     setFieldValue(
       "selectedDate",
-      new Date(Date.now() + 86400000).toISOString().split("T")[0]
+      new Date(Date.now()).toISOString().split("T")[0]
     );
     setFieldValue("bookingPeriod", "Daily");
     // checkOfficeAvailability(
     //   new Date(Date.now() + 86400000).toISOString().split("T")[0],
     //   "Daily"
     // );
+    setFieldValue(
+      "birthday",
+      new Date(new Date().setFullYear(new Date().getFullYear() - 18))
+        .toISOString()
+        .split("T")[0]
+    );
   }, []);
 
   const handleWorkspaceSelect = (workspaceId) => {
@@ -404,7 +413,7 @@ export default function BookDesk() {
               onChange={handleChange}
               className={styles.input}
               autoComplete="off"
-              min={new Date(Date.now() + 86400000).toISOString().split("T")[0]}
+              min={new Date(Date.now()).toISOString().split("T")[0]}
             />
             {errors.selectedDate && touched.selectedDate && (
               <div className={styles.error}>{errors.selectedDate}</div>
@@ -436,6 +445,7 @@ export default function BookDesk() {
                 onChange={handleChange}
                 className={styles.input}
                 autoComplete="given-name"
+                placeholder="First Name"
               />
               {errors.first_name && touched.first_name && (
                 <div className={styles.error}>{errors.first_name}</div>
@@ -454,6 +464,7 @@ export default function BookDesk() {
                 onChange={handleChange}
                 className={styles.input}
                 autoComplete="family-name"
+                placeholder="Last Name"
               />
               {errors.last_name && touched.last_name && (
                 <div className={styles.error}>{errors.last_name}</div>
@@ -516,6 +527,7 @@ export default function BookDesk() {
                 onChange={handleChange}
                 className={styles.input}
                 autoComplete="email"
+                placeholder="Email Address"
               />
               {errors.email && touched.email && (
                 <div className={styles.error}>{errors.email}</div>
@@ -526,7 +538,9 @@ export default function BookDesk() {
           <div className={styles.footer}>
             <div className={styles.priceContainer}>
               <span>Total to pay</span>
-              <span className={styles.price}>{price} ALL</span>
+              <span className={styles.price}>
+                {price ? Number(price).toLocaleString() : 0} ALL
+              </span>
             </div>
             <button
               type="submit"

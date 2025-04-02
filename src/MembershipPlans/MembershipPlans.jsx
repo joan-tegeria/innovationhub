@@ -16,9 +16,17 @@ import "swiper/css/pagination";
 const transformApiDataToPlans = (apiData) => {
   return apiData.map((item) => {
     const facilities = item.Facilities.split("\n");
+    console.log(item.Price);
+
+    // Extract only the numeric part from the price
+    let numericPrice = item.Price;
+    if (typeof item.Price === "string" && item.Price.includes("ALL")) {
+      numericPrice = item.Price.replace("ALL", "").trim();
+    }
+
     return {
       title: item.Name,
-      price: item.Price, // Keep the full price string including currency
+      price: numericPrice, // Only store the numeric part
       description: item.Description,
       features: facilities.map((facility) => ({
         text: facility,
@@ -40,7 +48,7 @@ const PlanFeature = ({ icon, text }) => (
 const getRedirectUrl = (title) => {
   switch (title) {
     case "Dedicated Desk":
-      return "http://35.176.180.59/services/flexible-desk/";
+      return "http://35.176.180.59/services/dedicated-desk/";
     case "Event Space":
       return "http://35.176.180.59/events-info/";
     case "Private Office":
@@ -70,8 +78,8 @@ const PlanCard = ({ plan }) => (
       <div className={styles.priceSection}>
         <span className={styles.startingFrom}>Starting from</span>
         <span className={styles.price}>
-          {plan.price}
-          {plan.price.includes("300") ? "" : "/day"}
+          {plan.price ? Number(plan.price).toLocaleString() : 0} ALL
+          {plan.price.includes("300") ? "" : "/Day"}
         </span>
       </div>
       <p className={styles.description}>{plan.description}</p>
@@ -168,14 +176,35 @@ export default function MembershipPlans() {
         }}
         className={styles.plansWrapper}
         breakpoints={{
-          900: {
-            slidesPerView: 1.7,
+          // Mobile and small tablets - show exactly one card, centered
+          320: {
+            slidesPerView: 1,
+            centeredSlides: true,
           },
-          1024: {
-            slidesPerView: 1.9,
+          480: {
+            slidesPerView: 1,
+            centeredSlides: true,
           },
-          1280: {
+          640: {
+            slidesPerView: 1,
+            centeredSlides: true,
+          },
+          // Medium-sized tablets and up - start showing partial cards
+          771: {
+            slidesPerView: 1.6,
+            centeredSlides: true,
+          },
+          1025: {
+            slidesPerView: 2,
+            centeredSlides: true,
+          },
+          1200: {
+            slidesPerView: 2.4,
+            centeredSlides: true,
+          },
+          1500: {
             slidesPerView: 2.5,
+            centeredSlides: true,
           },
         }}
       >

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import styles from "./LogoCarousel.module.css";
 
 const logos = [
@@ -34,32 +34,45 @@ const logos = [
   },
 ];
 
-const handleLogoClick = (link) => {
-  if (window.self !== window.top) {
-    window.parent.open(link, "_blank");
-  } else {
-    window.open(link, "_blank");
-  }
-};
-
 const LogoCarousel = () => {
+  const handleLogoClick = useCallback((e, link) => {
+    e.preventDefault();
+
+    // Try to communicate with parent window if in iframe
+    if (window.parent !== window) {
+      try {
+        // Send message to parent window
+        window.parent.postMessage({ type: "openLInkInside", link: link }, "*");
+      } catch (error) {
+        // Fallback to direct window.open if postMessage fails
+        window.open(link);
+      }
+    } else {
+      // If not in iframe, open directly
+      window.open(link);
+    }
+  }, []);
+
+  // Only duplicate logos once instead of twice to reduce DOM elements
+  const displayLogos = [...logos, ...logos];
+
   return (
     <div className={styles.carouselContainer}>
       <div className={styles.slider}>
         <div className={styles.slideTrack}>
-          {/* Triple the logos for smoother infinite effect */}
-          {[...logos, ...logos, ...logos].map((logo, index) => (
+          {displayLogos.map((logo, index) => (
             <div
               key={`${logo.id}-${index}`}
               className={styles.slide}
-              onClick={() => {
-                handleLogoClick(logo.link);
-              }}
+              onClick={(e) => handleLogoClick(e, logo.link)}
               style={{ cursor: "pointer" }}
             >
               <img
                 src={logo.url}
                 alt={logo.alt}
+                loading="lazy"
+                width="200"
+                height="100"
                 style={{ cursor: "pointer" }}
               />
             </div>

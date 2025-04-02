@@ -1,55 +1,51 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import styles from "./Finished.module.css";
-import LabeledInput from "../../components/LabeledInput";
-import { useBooking } from "../../context/BookingContext";
 import Success from "../../assets/form_success.svg";
-import CircularProgress, {
-  circularProgressClasses,
-} from "@mui/material/CircularProgress";
-import { TextField, Button } from "@mui/material";
-import dayjs from "dayjs";
-import { useNavigate, useLocation } from "react-router-dom";
+import { Button } from "@mui/material";
+import { useLocation } from "react-router-dom";
 
 export default function FinishedBooking() {
-  // const navigate = useNavigate();
   const location = useLocation();
-  const { selectedWorkspace, selectDate, endDate, period, price } =
-    location.state || {};
-  console.log(location.state);
+
+  // Get type from location state with a default value
+  const { type = "personal" } = location.state || {};
+
+  // Determine title based on type
+  const titleText =
+    type === "private"
+      ? "Your quote request is sent!"
+      : "Your payment is made successfully.";
+
+  const handleReturnHome = (e) => {
+    e.preventDefault();
+    const link = "http://35.176.180.59/";
+
+    // Try to communicate with parent window if in iframe
+    if (window.parent !== window) {
+      try {
+        // Send message to parent window
+        window.parent.postMessage(
+          { type: "openLInkInside", link: "http://35.176.180.59/" },
+          "*"
+        );
+      } catch (error) {
+        // Fallback to direct window.open if postMessage fails
+        window.open(link);
+      }
+    } else {
+      // If not in iframe, open directly
+      window.open(link);
+    }
+  };
+
   return (
     <div className={styles.background}>
       <div className={styles.formBody}>
-        <img src={Success} className={styles.successImage} />
-        <div className={styles.sectionTittle}>
-          Your submission is made successfully.
-        </div>
-        <span>Check your email for further details.</span>
-        <div className={styles.purchaseInfo}>
-          <div className={styles.infoTitle}>
-            <span>Order details</span>
-          </div>
-          <div className={styles.formRow}>
-            <div>Workspace:</div>
-            <div>{selectedWorkspace.label || ""}</div>
-          </div>
-          <div className={styles.formRow}>
-            <div>Period:</div>
-            <div>{period || ""}</div>
-          </div>
-          <div className={styles.formRow}>
-            <div>Starting date:</div>
-            <div>{selectDate || ""}</div>
-          </div>
-          <div className={styles.formRow}>
-            <div>Ending date:</div>
-            <div>{endDate || ""}</div>
-          </div>
-          <div className={styles.formRow}>
-            <div>Total payment:</div>
-            <div>{price || ""}</div>
-          </div>
-        </div>
-        {/* <div className={styles.divider} /> */}
+        <img src={Success} className={styles.successImage} alt="Success" />
+        <h2 className={styles.successTitle}>{titleText}</h2>
+        <p className={styles.successMessage}>
+          Check your email for further details.
+        </p>
 
         <Button
           variant="contained"
@@ -61,11 +57,13 @@ export default function FinishedBooking() {
             fontFamily: "Termina Test",
             textTransform: "none",
             marginTop: "25px",
+            borderRadius: "4px",
+            padding: "10px 20px",
           }}
           style={{ width: 220, height: 42 }}
-          onClick={() => window.parent.open("http://35.176.180.59/", "_self")}
+          onClick={handleReturnHome}
         >
-          Back to Home
+          Go to home
         </Button>
       </div>
     </div>

@@ -175,7 +175,7 @@ export default function FullOffice() {
       };
 
       await api.post(
-        "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/private",
+        "https://nhpvz8wphf.execute-api.eu-cen wtral-1.amazonaws.com/prod/private",
         bookingData,
         {
           headers: {

@@ -67,10 +67,12 @@ export default function BookingPayment() {
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
   const [invoiceId, setInvoiceId] = useState("");
+  const [paymentFailed, setPaymentFailed] = useState(false);
 
   // Payment modal state
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentUrl, setPaymentUrl] = useState(null);
+  const [bookingInitiated, setBookingInitiated] = useState(false);
 
   // Coupon state
   const [couponCode, setCouponCode] = useState("");
@@ -123,13 +125,14 @@ export default function BookingPayment() {
     console.log("Closing payment modal");
     setShowPaymentModal(false);
 
-    // Only show cancelled message if it wasn't a success
-    if (paymentStatus !== "success") {
+    // Only show cancelled message if it wasn't a success and no specific error is already set
+    if (paymentStatus !== "success" && !errorMessage) {
       setTimeout(() => {
         setErrorMessage("Payment was cancelled.");
+        setPaymentFailed(true);
       }, 100);
     }
-  }, [paymentStatus]);
+  }, [paymentStatus, errorMessage]);
 
   /**
    * Handle the payment process
@@ -141,7 +144,16 @@ export default function BookingPayment() {
     e.preventDefault();
     setPaymentStatus(null);
     setErrorMessage(null);
+    setPaymentFailed(false);
     setShowPaymentModal(false); // Reset modal state
+
+    // If we already have a payment URL, just show the modal without calling the API again
+    if (bookingInitiated && paymentUrl) {
+      console.log("Reopening payment modal with existing payment URL");
+      setShowPaymentModal(true);
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -190,6 +202,7 @@ export default function BookingPayment() {
 
       console.log("Opening payment modal with URL:", paymentUrl);
       setPaymentUrl(paymentUrl);
+      setBookingInitiated(true);
 
       // Small delay before showing modal
       setTimeout(() => {
@@ -318,11 +331,7 @@ export default function BookingPayment() {
 
                 navigate(`/booking-success`, {
                   state: {
-                    selectedWorkspace: workspaceLabel,
-                    selectDate: startDate,
-                    endDate: endDate,
-                    period: period,
-                    price: price,
+                    type: "personal",
                   },
                 });
               })
@@ -337,16 +346,19 @@ export default function BookingPayment() {
           case "failure":
             console.log("Payment failed");
             setErrorMessage("Payment failed. Please try again.");
+            setPaymentFailed(true);
             break;
 
           case "cancel":
             console.log("Payment cancelled");
             setErrorMessage("Payment was cancelled.");
+            setPaymentFailed(true);
             break;
 
           case "exception":
             console.log("Payment exception:", paymentError);
             setErrorMessage(paymentError || "An unexpected error occurred.");
+            setPaymentFailed(true);
             break;
 
           default:
@@ -381,9 +393,9 @@ export default function BookingPayment() {
   }, [showPaymentModal, paymentUrl, paymentStatus, errorMessage]);
 
   // =========== RENDER ===========
-  if (loading) {
-    return <CircularProgress />;
-  }
+  // if (loading) {
+  //   return <CircularProgress />;
+  // }
 
   return (
     <div className={styles.background}>
@@ -392,149 +404,193 @@ export default function BookingPayment() {
         <h1 className={styles.mainTitle}>Payment</h1>
         <p className={styles.subtitle}>Complete payment information</p>
 
-        {/* Order Details */}
-        <h2 className={styles.sectionTitle}>Order details</h2>
-        <div className={styles.orderItem}>
-          <div className={styles.itemInfo}>
-            <h3>
-              {typeof bookingDetails?.workspace?.label === "object"
-                ? bookingDetails?.workspace?.label?.label ||
-                  "No workspace selected"
-                : bookingDetails?.workspace?.label || "No workspace selected"}
-            </h3>
-            {bookingDetails?.bookingType === "Multi Pass" ? (
-              <p>
-                {bookingDetails?.quantity || 0} x{" "}
-                {formatCurrency(bookingDetails?.price?.single || 0)}
-              </p>
-            ) : (
-              <p>{bookingDetails?.period || ""}</p>
-            )}
+        {loading ? (
+          <div className={styles.loadingContainer}>
+            <div className={styles.spinner}></div>
           </div>
-          <div className={styles.itemPrice}>
-            <p className={styles.currentPrice}>
-              {formatCurrency(bookingDetails?.price?.current || 0)}
-            </p>
-          </div>
-        </div>
-
-        {/* Date Information - Only show for Single Pass */}
-        {bookingDetails?.bookingType === "Single Pass" &&
-          bookingDetails?.dates && (
-            <div className={styles.dateInfo}>
-              <div className={styles.dateRow}>
-                <span>Starting date:</span>
-                <span>{bookingDetails?.dates?.startDate || ""}</span>
-              </div>
-              <div className={styles.dateRow}>
-                <span>Ending date:</span>
-                <span>{bookingDetails?.dates?.endDate || ""}</span>
-              </div>
-            </div>
-          )}
-
-        {/* Coupon Section */}
-        <div className={styles.couponSection}>
-          <h2 className={styles.sectionTitle}>Do you have a discount code?</h2>
-          <span style={{ fontSize: 14 }}>
-            Apply it at checkout to get a special discount on your order.
-            <div className={styles.couponInputContainer}>
-              {validCoupon ? (
-                <div className={styles.couponChip}>
-                  <Chip
-                    label={couponCode}
-                    onDelete={removeCoupon}
-                    color="primary"
-                    variant="outlined"
-                    style={{ height: 48, fontSize: 16 }}
-                  />
-                </div>
-              ) : (
-                <>
-                  <input
-                    type="text"
-                    placeholder="Code"
-                    className={styles.couponInputField}
-                    value={couponCode}
-                    onChange={(e) => setCouponCode(e.target.value)}
-                  />
-                  <button
-                    className={styles.couponButton}
-                    onClick={() => handleApplyCoupon(couponCode)}
-                    disabled={couponLoading}
-                  >
-                    {couponLoading ? "Applying..." : "Apply"}
-                  </button>
-                </>
-              )}
-            </div>
-          </span>
-        </div>
-
-        {/* Discount Info - Only show when coupon is applied */}
-        {validCoupon && (
-          <div className={styles.discountInfo}>
-            <div className={styles.discountRow}>
-              <span>Discount code:</span>
-              <span>{couponCode}</span>
-            </div>
-            <div className={styles.discountRow}>
-              <span>Discount percentage:</span>
-              <span>
-                {((validCoupon / bookingDetails?.price?.current) * 100).toFixed(
-                  0
+        ) : (
+          <>
+            {/* Order Details */}
+            <h2 className={styles.sectionTitle}>Order details</h2>
+            <div className={styles.orderItem}>
+              <div className={styles.itemInfo}>
+                <h3>
+                  {typeof bookingDetails?.workspace?.label === "object"
+                    ? bookingDetails?.workspace?.label?.label ||
+                      "No workspace selected"
+                    : bookingDetails?.workspace?.label ||
+                      "No workspace selected"}
+                </h3>
+                {bookingDetails?.bookingType === "Multi Pass" ? (
+                  <p>
+                    {bookingDetails?.quantity || 0} x{" "}
+                    {formatCurrency(bookingDetails?.price?.single || 0)}
+                  </p>
+                ) : (
+                  <p>{bookingDetails?.period || ""}</p>
                 )}
-                %
+              </div>
+              <div className={styles.itemPrice}>
+                <p className={styles.currentPrice}>
+                  {formatCurrency(bookingDetails?.price?.current || 0)}
+                </p>
+              </div>
+            </div>
+
+            {/* Date Information - Only show for Single Pass */}
+            {bookingDetails?.bookingType === "Single Pass" &&
+              bookingDetails?.dates && (
+                <div className={styles.dateInfo}>
+                  <div className={styles.dateRow}>
+                    <span>Starting date:</span>
+                    <span>{bookingDetails?.dates?.startDate || ""}</span>
+                  </div>
+                  <div className={styles.dateRow}>
+                    <span>Ending date:</span>
+                    <span>{bookingDetails?.dates?.endDate || ""}</span>
+                  </div>
+                </div>
+              )}
+
+            {/* Coupon Section */}
+            <div className={styles.couponSection}>
+              <h2 className={styles.sectionTitle}>
+                Do you have a discount code?
+              </h2>
+              <span style={{ fontSize: 14 }}>
+                Apply it at checkout to get a special discount on your order.
+                <div className={styles.couponInputContainer}>
+                  {validCoupon ? (
+                    <div className={styles.couponChip}>
+                      <Chip
+                        label={couponCode}
+                        onDelete={removeCoupon}
+                        color="primary"
+                        variant="outlined"
+                        style={{ height: 48, fontSize: 16 }}
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      <input
+                        type="text"
+                        placeholder="Code"
+                        className={styles.couponInputField}
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value)}
+                      />
+                      <button
+                        className={styles.couponButton}
+                        onClick={() => handleApplyCoupon(couponCode)}
+                        disabled={couponLoading}
+                      >
+                        {couponLoading ? "Applying..." : "Apply"}
+                      </button>
+                    </>
+                  )}
+                </div>
               </span>
             </div>
-            <div className={styles.subtotalRow}>
-              <span>Subtotal:</span>
-              <span className={styles.subtotalAmount}>
-                -{formatCurrency(validCoupon)}
-              </span>
+
+            {/* Discount Info - Only show when coupon is applied */}
+            {validCoupon && (
+              <div className={styles.discountInfo}>
+                <div className={styles.discountRow}>
+                  <span>Discount code:</span>
+                  <span>{couponCode}</span>
+                </div>
+                <div className={styles.discountRow}>
+                  <span>Discount percentage:</span>
+                  <span>
+                    {(
+                      (validCoupon / bookingDetails?.price?.current) *
+                      100
+                    ).toFixed(0)}
+                    %
+                  </span>
+                </div>
+                <div className={styles.subtotalRow}>
+                  <span>Subtotal:</span>
+                  <span className={styles.subtotalAmount}>
+                    -{formatCurrency(validCoupon)}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Total Section */}
+            <div className={styles.totalSection}>
+              <div className={styles.totalRow}>
+                <span>TOTAL:</span>
+                <span className={styles.totalAmount}>
+                  {formatCurrency(bookingDetails?.price?.total || 0)}
+                </span>
+              </div>
             </div>
-          </div>
-        )}
+            {/* Error Messages */}
+            {errorMessage && (
+              <div className={styles.errorMessage}>
+                {errorMessage}
+                {bookingInitiated && (
+                  <button
+                    onClick={() => {
+                      setBookingInitiated(false);
+                      setPaymentUrl(null);
+                      setInvoiceId("");
+                      setErrorMessage(null);
+                      setPaymentFailed(false);
+                      // Navigate back to the deskBook page
+                      navigate("/bookDesk");
+                    }}
+                    className={styles.resetButton}
+                    style={{
+                      marginLeft: "10px",
+                      padding: "5px 10px",
+                      backgroundColor: "transparent",
+                      border: "1px solid #f44336",
+                      color: "#f44336",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                      fontSize: "14px",
+                    }}
+                  >
+                    Reset Application
+                  </button>
+                )}
+              </div>
+            )}
 
-        {/* Total Section */}
-        <div className={styles.totalSection}>
-          <div className={styles.totalRow}>
-            <span>TOTAL:</span>
-            <span className={styles.totalAmount}>
-              {formatCurrency(bookingDetails?.price?.total || 0)}
-            </span>
-          </div>
-        </div>
-        {/* Error Messages */}
-        {errorMessage && (
-          <div className={styles.errorMessage}>{errorMessage}</div>
-        )}
+            {/* Payment Button */}
+            <button
+              onClick={handlePayment}
+              className={styles.paymentButton}
+              disabled={paymentStatus === "success" || paymentFailed}
+            >
+              {paymentStatus === "success"
+                ? "Payment Completed"
+                : paymentFailed
+                ? "Payment Failed"
+                : bookingInitiated && paymentUrl
+                ? "Resume Payment"
+                : "Proceed to Payment"}
+            </button>
 
-        {/* Payment Button */}
-        <button
-          onClick={handlePayment}
-          className={styles.paymentButton}
-          disabled={paymentStatus === "success"}
-        >
-          {paymentStatus === "success"
-            ? "Payment Completed"
-            : "Proceed to Payment"}
-        </button>
-
-        {/* Payment Modal */}
-        {showPaymentModal && paymentUrl && (
-          <PaymentModal
-            paymentUrl={paymentUrl}
-            onClose={handleClosePayment}
-            onError={(error) => {
-              console.error("Iframe loading error:", error);
-              setErrorMessage("Failed to load payment window");
-              setShowPaymentModal(false);
-            }}
-            onLoad={() => {
-              console.log("Payment iframe loaded successfully");
-            }}
-          />
+            {/* Payment Modal */}
+            {showPaymentModal && paymentUrl && (
+              <PaymentModal
+                paymentUrl={paymentUrl}
+                onClose={handleClosePayment}
+                onError={(error) => {
+                  console.error("Iframe loading error:", error);
+                  setErrorMessage("Failed to load payment window");
+                  setShowPaymentModal(false);
+                }}
+                onLoad={() => {
+                  console.log("Payment iframe loaded successfully");
+                }}
+              />
+            )}
+          </>
         )}
       </div>
     </div>

@@ -4,55 +4,72 @@ import styles from "./ContactUs.module.css";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import { useAuth } from "../context/Auth";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 
 const ContactForm = () => {
   const [open, setOpen] = useState(false);
   const { accessToken, tokenType, tokenLoading } = useAuth();
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    message: "",
+
+  // Define validation schema
+  const validationSchema = Yup.object({
+    name: Yup.string()
+      .required("Full name is required")
+      .matches(
+        /^[A-Za-z]+ [A-Za-z]+(\s[A-Za-z]+)*$/,
+        "Please enter your first and last name separated by a space"
+      ),
+    email: Yup.string()
+      .email("Invalid email address")
+      .required("Email is required")
+      .matches(
+        /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/,
+        "Please enter a valid email"
+      ),
+    message: Yup.string().required("Message is required"),
   });
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.id]: e.target.value,
-    });
-  };
+  // Initialize formik
+  const formik = useFormik({
+    initialValues: {
+      name: "",
+      email: "",
+      message: "",
+    },
+    validationSchema,
+    onSubmit: async (values) => {
+      const nameParts = values.name.trim().split(/\s+/);
+      const name = nameParts[0];
+      const lastName = nameParts.slice(1).join(" ");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const nameParts = formData.name.trim().split(/\s+/);
-    const name = nameParts[0];
-    const lastName = nameParts.slice(1).join(" ");
+      const submitData = {
+        ...values,
+        name,
+        lastName,
+        referral: "Contact Us Form",
+      };
 
-    const submitData = {
-      ...formData,
-      name,
-      lastName,
-      referral: "Contact Us Form",
-    };
-
-    try {
-      const response = await fetch(
-        "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/contact",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `${tokenType} ${accessToken}`,
-          },
-          body: JSON.stringify(submitData),
-        }
-      );
-      setFormData({ name: "", email: "", message: "" });
-      setOpen(true);
-    } catch (error) {
-      console.error("Error:", error);
-      alert("An error occurred. Please try again later.");
-    }
-  };
+      try {
+        const response = await fetch(
+          "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/contact",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `${tokenType} ${accessToken}`,
+            },
+            body: JSON.stringify(submitData),
+          }
+        );
+        console.log(response);
+        formik.resetForm();
+        setOpen(true);
+      } catch (error) {
+        console.error("Error:", error);
+        alert("An error occurred. Please try again later.");
+      }
+    },
+  });
 
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
@@ -65,10 +82,45 @@ const ContactForm = () => {
   // Handle email link click for iframe parent window
   const handleEmailClick = (e) => {
     e.preventDefault();
-    if (window.parent) {
-      window.parent.href("mailto:info@hubitat.al", "_blank");
+    const emailLink = "mailto:info@hubitat.al";
+
+    // Try to communicate with parent window if in iframe
+    if (window.parent !== window) {
+      try {
+        // Send message to parent window
+        window.parent.postMessage({ type: "openEmail", email: emailLink }, "*");
+      } catch (error) {
+        // Fallback to direct window.open if postMessage fails
+        window.open(emailLink, "_blank");
+      }
     } else {
-      window.open("mailto:info@hubitat.al", "_blank");
+      // If not in iframe, open directly
+      window.open(emailLink, "_blank");
+    }
+  };
+
+  const handleTermsRediredct = (e) => {
+    e.preventDefault();
+    const link = "http://35.176.180.59/terms-of-service/";
+
+    // Try to communicate with parent window if in iframe
+    if (window.parent !== window) {
+      try {
+        // Send message to parent window
+        window.parent.postMessage(
+          {
+            type: "openLInkInside",
+            link: "http://35.176.180.59/terms-of-service/",
+          },
+          "*"
+        );
+      } catch (error) {
+        // Fallback to direct window.open if postMessage fails
+        window.open(link);
+      }
+    } else {
+      // If not in iframe, open directly
+      window.open(link);
     }
   };
 
@@ -78,7 +130,12 @@ const ContactForm = () => {
 
   return (
     <div className={styles.container}>
-      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+      <Snackbar
+        open={open}
+        autoHideDuration={6000}
+        onClose={handleClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      >
         <Alert
           onClose={handleClose}
           severity="success"
@@ -196,7 +253,7 @@ const ContactForm = () => {
         </div>
       </div>
       <div className={styles.formBody}>
-        <form id="contact-form" onSubmit={handleSubmit}>
+        <form id="contact-form" onSubmit={formik.handleSubmit}>
           <TextField
             id="name"
             label="Full Name"
@@ -204,8 +261,12 @@ const ContactForm = () => {
             fullWidth
             required
             margin="normal"
-            value={formData.name}
-            onChange={handleChange}
+            value={formik.values.name}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.name && Boolean(formik.errors.name)}
+            helperText={formik.touched.name && formik.errors.name}
+            placeholder="First Last"
             sx={{
               "& .MuiInputBase-root": {
                 fontFamily: "Termina, sans-serif",
@@ -230,8 +291,11 @@ const ContactForm = () => {
             fullWidth
             required
             margin="normal"
-            value={formData.email}
-            onChange={handleChange}
+            value={formik.values.email}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.email && Boolean(formik.errors.email)}
+            helperText={formik.touched.email && formik.errors.email}
             sx={{
               "& .MuiInputBase-root": {
                 fontFamily: "Termina, sans-serif",
@@ -257,8 +321,11 @@ const ContactForm = () => {
             fullWidth
             required
             margin="normal"
-            value={formData.message}
-            onChange={handleChange}
+            value={formik.values.message}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.message && Boolean(formik.errors.message)}
+            helperText={formik.touched.message && formik.errors.message}
             sx={{
               "& .MuiInputBase-root": {
                 fontFamily: "Termina, sans-serif",
@@ -275,9 +342,9 @@ const ContactForm = () => {
               },
             }}
           />
-          <p className={styles.terms}>
+          <p className={styles.terms} style={{ cursor: "pointer" }}>
             By clicking the button below, you agree to our{" "}
-            <a href="#">Terms of Service</a>.
+            <a onClick={handleTermsRediredct}>Terms of Service</a>.
           </p>
           <Button
             type="submit"

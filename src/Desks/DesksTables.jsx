@@ -25,7 +25,7 @@ const transformApiDataToDesks = (data, period) => {
   return data.map((item) => ({
     type: item.Product_Name.split("-")[0].trim(),
     description: item.Description,
-    price: `${item.Unit_Price} All`,
+    price: `${item.Unit_Price}`,
     capacity: item.Capacity,
     access:
       period === "Daily"
@@ -180,7 +180,10 @@ const DesksTables = ({ type }) => {
 
           <div className={styles.cardSection}>
             <div className={styles.rateLabel}>Daily rate</div>
-            <div className={styles.price}>{desk.price}</div>
+
+            <div className={styles.price}>
+              {desk.price ? Number(desk.price).toLocaleString() : 0} ALL
+            </div>
             <div className={styles.access}>{desk.access}</div>
           </div>
 
@@ -301,7 +304,12 @@ const DesksTables = ({ type }) => {
                       {deskData[activeTab].map((desk, index) => (
                         <td key={index}>
                           <div className={styles.rateLabel}>Daily rate</div>
-                          <div className={styles.price}>{desk.price}</div>
+                          <div className={styles.price}>
+                            {desk.price
+                              ? Number(desk.price).toLocaleString()
+                              : 0}{" "}
+                            ALL
+                          </div>
                           <div className={styles.access}>{desk.access}</div>
                         </td>
                       ))}

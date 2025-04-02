@@ -8,15 +8,15 @@ import { transformWorkspacesResponse } from "../../util/transformers";
 import { useNavigate } from "react-router-dom";
 import info from "../../assets/info.svg";
 import infowhite from "../../assets/infowhite.svg";
-import { address } from "framer-motion/client";
+import { address, label } from "framer-motion/client";
 // Get today's date in YYYY-MM-DD format
 const today = new Date().toISOString().split("T")[0];
 
 // Define booking periods
 const bookingPeriods = [
   { value: "Daily", label: "Daily" },
-  { value: "Weekly", label: "Weekly" },
   { value: "Monthly", label: "Monthly" },
+  { value: "Annually", label: "Annually" },
 ];
 
 // Yup schema with validation for date
@@ -28,27 +28,39 @@ const validationSchema = Yup.object({
     .min(today, "Date must be today or later"),
   businessName: Yup.string()
     .required("Business name is required")
-    .min(5, "First name must be at least 5 characters"),
+    .min(5, "Name must be at least 5 characters"),
   nipt: Yup.string()
     .required("ID number is required")
     .matches(
       /^[A-Z][0-9]{8}[A-Z]$/,
       "NIPT must be in format: A12345678B (letter, 8 digits, letter)"
     ),
-  phoneNumber: Yup.string().required("Phone number is required"),
-  // .matches(
-  // //   /^(?:\+355|0)[2-9][0-9]{7}$/,
-  //   "Phone number must be in the format: +355 68 123 4567 or 068 123 4567"
-  // ),
+  phoneNumber: Yup.string()
+    .required("Phone number is required")
+    .matches(
+      /^(?:\+355|0)(?:6|4|5)[0-9]{8}$/,
+      "Phone number must be in the format: +3556XXXXXXXX or 06XXXXXXXX"
+    ),
   email: Yup.string()
     .email("Invalid email address")
-    .required("Email is required"),
+    .matches(
+      /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+      "Email must have a valid domain (e.g., .com, .net, etc.)"
+    ),
+
   city: Yup.string().required("City is required"),
   street: Yup.string().required("Address is required"),
+  selectedType: Yup.string().required("Type is required"),
 });
 
 const API_BASE_URL =
   "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod";
+
+const types = [
+  { value: "business", label: "Business" },
+
+  { value: "individual", label: "Individual" },
+];
 
 export default function BookOffice() {
   const [workspaces, setWorkspaces] = useState([]);
@@ -79,6 +91,7 @@ export default function BookOffice() {
       email: "",
       street: "",
       city: "",
+      selectedType: "business",
     },
     validationSchema,
     validateOnChange: false,
@@ -89,13 +102,13 @@ export default function BookOffice() {
         console.log("I am submitting");
         // Create user
         const userData = {
-          name: values.businessName,
+          name: values.selectedType === "business" ? "" : values.businessName,
           lastName: values.businessName,
           email: values.email,
           company: values.businessName,
           referral: "Private Office Form",
-          id: values.nipt,
-          nipt: values.nipt,
+          id: values.selectedType === "business" ? "" : values.nipt,
+          nipt: values.selectedType === "individual" ? "" : values.nipt,
           phone: values.phoneNumber,
           city: values.city,
           street: values.street,
@@ -150,11 +163,7 @@ export default function BookOffice() {
         console.log("Find the user id ", userResponse);
         navigate(`/booking-success`, {
           state: {
-            selectedWorkspace: _selectedWorkspace,
-            selectDate: values.selectedDate,
-            endDate: endDate,
-            period: values.bookingPeriod,
-            price: price,
+            type: "private",
           },
         });
       } catch (error) {
@@ -181,6 +190,10 @@ export default function BookOffice() {
 
   const handleWorkspaceSelect = (workspaceId) => {
     setFieldValue("selectedWorkspace", workspaceId);
+  };
+
+  const handleTypeSelect = (type) => {
+    setFieldValue("selectedType", type);
   };
 
   const [isLoading, setIsLoading] = useState(false);
@@ -412,11 +425,33 @@ export default function BookOffice() {
           )}
           <div className={styles.divider} />
           <h1 className={styles.subHeading}>Personal Information</h1>
-
+          <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+            <div className={styles.workspaceButtons}>
+              {types.map((_type) => (
+                <button
+                  key={_type.value}
+                  type="button"
+                  className={`${styles.workspaceButton} ${
+                    values.selectedType === _type.value
+                      ? styles.workspaceButtonActive
+                      : ""
+                  }`}
+                  onClick={() => handleTypeSelect(_type.value)}
+                >
+                  {_type.label}
+                </button>
+              ))}
+            </div>
+            {errors.selectedType && touched.selectedType && (
+              <div className={styles.error}>{errors.selectedType}</div>
+            )}
+          </div>
           <div className={styles.formSection}>
             <div className={styles.formGroup}>
               <label htmlFor="businessName" className={styles.label}>
-                Business Name
+                {values.selectedType === "business"
+                  ? "Business Name"
+                  : "Individual"}
               </label>
               <input
                 type="text"
@@ -425,7 +460,11 @@ export default function BookOffice() {
                 value={values.businessName}
                 onChange={handleChange}
                 className={styles.input}
-                placeholder="Hubitat SH.P.K"
+                placeholder={
+                  values.selectedType === "business"
+                    ? "Hubitat SH.P.K"
+                    : "John Doe"
+                }
                 autoComplete="given-name"
               />
               {errors.businessName && touched.businessName && (
@@ -435,7 +474,7 @@ export default function BookOffice() {
 
             <div className={styles.formGroup}>
               <label htmlFor="nipt" className={styles.label}>
-                NIPT
+                {values.selectedType === "business" ? "NIPT" : "Id Number"}
               </label>
               <input
                 type="text"
@@ -457,13 +496,13 @@ export default function BookOffice() {
                 Phone Number
               </label>
               <input
-                type="text"
+                type="tel"
                 id="phoneNumber"
                 name="phoneNumber"
                 value={values.phoneNumber}
                 onChange={handleChange}
                 className={styles.input}
-                placeholder="355xxxxxxxxx"
+                placeholder="Phone Number"
                 autoComplete="phoneNumber"
               />
               {errors.phoneNumber && touched.phoneNumber && (
@@ -536,7 +575,9 @@ export default function BookOffice() {
           <div className={styles.footer}>
             <div className={styles.priceContainer}>
               <span>Total to pay</span>
-              <span className={styles.price}>{price} ALL</span>
+              <span className={styles.price}>
+                {price ? Number(price).toLocaleString() : 0} ALL
+              </span>
             </div>
             <button
               type="submit"
