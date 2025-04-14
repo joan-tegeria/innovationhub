@@ -494,7 +494,7 @@ export default function BookDesk() {
     type="date"
     id="birthday"
     name="birthday"
-    value={values.birthday || ''}
+    // value={values.birthday || ''}
     onChange={handleChange}
     className={styles.input}
      placeholder="YYYY-MM-DD"

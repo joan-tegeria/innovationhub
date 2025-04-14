@@ -323,6 +323,7 @@ export default function BookOffice() {
     <div className={styles.background}>
       <div className={styles.container}>
         <h1 className={styles.title}>Get a Quote</h1>
+        <div className={styles.titleDivider} />
         <form onSubmit={handleSubmit} className={styles.form} autoComplete="on">
           {/* <div className={styles.divider} /> */}
           <h1 className={styles.subHeading}>Space Information</h1>
@@ -332,7 +333,7 @@ export default function BookOffice() {
               Select the office you are interested:
             </label>
             <div className={styles.workspaceButtons}>
-              {workspaces.map((workspace) => (
+              {[...workspaces].reverse().map((workspace) => (
                 <button
                   key={workspace.value}
                   type="button"
@@ -431,7 +432,7 @@ export default function BookOffice() {
               <label htmlFor="businessName" className={styles.label}>
                 {values.selectedType === "business"
                   ? "Business Name"
-                  : "Individual"}
+                  : "Full Name"}
               </label>
               <input
                 type="text"
@@ -442,8 +443,8 @@ export default function BookOffice() {
                 className={styles.input}
                 placeholder={
                   values.selectedType === "business"
-                    ? "Hubitat SH.P.K"
-                    : "John Doe"
+                    ? "Business Name"
+                    : "Full Name"
                 }
                 autoComplete="given-name"
               />
@@ -502,7 +503,7 @@ export default function BookOffice() {
                 onChange={handleChange}
                 className={styles.input}
                 autoComplete="email"
-                placeholder="hubitat@gmail.com"
+                placeholder=" Email Address"
               />
               {errors.email && touched.email && (
                 <div className={styles.error}>{errors.email}</div>
@@ -524,7 +525,7 @@ export default function BookOffice() {
                 value={values.street}
                 onChange={handleChange}
                 className={styles.input}
-                placeholder="Muhamet Gjollesha"
+                placeholder="Street"
                 autoComplete="street-name"
               />
               {errors.street && touched.street && (
@@ -541,7 +542,7 @@ export default function BookOffice() {
                 id="city"
                 name="city"
                 value={values.city}
-                placeholder="Tirana"
+                placeholder="City"
                 onChange={handleChange}
                 className={styles.input}
                 autoComplete="city"
@@ -554,7 +555,7 @@ export default function BookOffice() {
           <div className={styles.divider} />
           <div className={styles.footer}>
             <div className={styles.priceContainer}>
-              <span>Total to pay</span>
+              <span>Estimated cost</span>
               <span className={styles.price}>
                 {price ? Number(price).toLocaleString() : 0} ALL
               </span>
@@ -564,7 +565,7 @@ export default function BookOffice() {
               className={styles.submitButton}
               disabled={isSubmitting || !isAvailable}
             >
-              {isSubmitting ? "Creating..." : "Book Now"}
+              {isSubmitting ? "Creating..." : "Send request"}
             </button>
           </div>
         </form>

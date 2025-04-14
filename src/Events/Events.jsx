@@ -86,7 +86,7 @@ export default function Events() {
       startTime: "",
       endDate: "",
       endTime: "",
-      eventPurpose: "Conference",
+      eventPurpose: "Select event purpose",
       numberOfGuests: "",
       notes: "",
     },
@@ -241,7 +241,7 @@ export default function Events() {
       <p className={styles.subtitle}>
         Discover the perfect workspace or event venue for your needs.
       </p>
-
+      <div className={styles.titleDivider} />
       {customValidationError && (
         <div className={styles.validationError}>{customValidationError}</div>
       )}
@@ -250,7 +250,7 @@ export default function Events() {
         {/* Your Information */}
         <div className={styles.section}>
           <h2 style={{ fontSize: "16px", fontWeight: "bold" }}>
-            Your Information
+          General Information
           </h2>
           <div className={styles.row}>
             <div className={styles.formGroup}>
@@ -261,7 +261,7 @@ export default function Events() {
                 id="fullName"
                 name="fullName"
                 type="text"
-                placeholder="John Doe"
+                placeholder="Full name"
                 className={styles.input}
                 value={formik.values.fullName}
                 onChange={formik.handleChange}
@@ -279,7 +279,7 @@ export default function Events() {
                 id="companyName"
                 name="companyName"
                 type="text"
-                placeholder="John SHPK"
+                placeholder="Company name"
                 className={styles.input}
                 value={formik.values.companyName}
                 onChange={formik.handleChange}
@@ -299,7 +299,7 @@ export default function Events() {
                 id="email"
                 name="email"
                 type="email"
-                placeholder="John@gmail.com"
+                placeholder="Email"
                 className={styles.input}
                 value={formik.values.email}
                 onChange={formik.handleChange}
@@ -317,7 +317,7 @@ export default function Events() {
                 id="phoneNumber"
                 name="phoneNumber"
                 type="text"
-                placeholder="06XXXXXXXX"
+                placeholder="Phone number"
                 className={styles.input}
                 value={formik.values.phoneNumber}
                 onChange={formik.handleChange}
@@ -331,6 +331,7 @@ export default function Events() {
         </div>
 
         {/* Event Information */}
+        <div className={styles.titleDivider} />
         <div className={styles.section}>
           <h2 style={{ fontSize: "16px", fontWeight: "bold" }}>
             Event Information
@@ -422,7 +423,7 @@ export default function Events() {
                 id="eventName"
                 name="eventName"
                 type="text"
-                placeholder="Tech Conference"
+                placeholder="Event name"
                 className={styles.input}
                 value={formik.values.eventName}
                 onChange={formik.handleChange}
@@ -444,6 +445,7 @@ export default function Events() {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
               >
+                <option value="">Select event purpose</option>
                 {eventPurposeOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
@@ -519,7 +521,7 @@ export default function Events() {
             )}
           </div>
         </div>
-
+        <div className={styles.titleDivider} />
         {/* Buttons */}
         <div className={styles.actions}>
           <button type="button" className={styles.cancel} onClick={handleReset}>

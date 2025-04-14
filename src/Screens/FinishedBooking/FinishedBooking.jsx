@@ -16,25 +16,47 @@ export default function FinishedBooking() {
       ? "Your quote request is sent!"
       : "Your payment is made successfully.";
 
+  // const handleReturnHome = (e) => {
+  //   e.preventDefault();
+  //   const link = "http://35.176.180.59/";
+
+  //   // Try to communicate with parent window if in iframe
+  //   if (window.parent !== window) {
+  //     try {
+  //       // Send message to parent window
+  //       window.parent.postMessage(
+  //         { type: "openLInkInside", link: "http://35.176.180.59/" },
+  //         "*"
+  //       );
+  //     } catch (error) {
+  //       // Fallback to direct window.open if postMessage fails
+  //       window.open(link);
+  //     }
+  //   } else {
+  //     // If not in iframe, open directly
+  //     window.open(link);
+  //   }
+  // };
+
+
   const handleReturnHome = (e) => {
     e.preventDefault();
-    const link = "http://35.176.180.59/";
-
+    
     // Try to communicate with parent window if in iframe
     if (window.parent !== window) {
       try {
-        // Send message to parent window
+        // Send message to parent window to navigate back
         window.parent.postMessage(
-          { type: "openLInkInside", link: "http://35.176.180.59/" },
+          { type: "navigateBack" }, 
           "*"
         );
       } catch (error) {
-        // Fallback to direct window.open if postMessage fails
-        window.open(link);
+        // Fallback to browser history
+        window.history.back();
       }
     } else {
-      // If not in iframe, open directly
-      window.open(link);
+      // If not in iframe, just use browser history to go back
+      window.history.back();
     }
   };
 
@@ -66,7 +88,7 @@ export default function FinishedBooking() {
           style={{ width: 220, height: 42 }}
           onClick={handleReturnHome}
         >
-          Go to home
+            Start new booking
         </Button>
       </div>
     </div>

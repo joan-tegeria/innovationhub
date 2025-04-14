@@ -5,6 +5,17 @@
   padding: 40px;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ccc;
+  margin-bottom: 20px;
+}
+
+
+.titleDivider {
+  margin-bottom: 20px;
+  margin-top: 20px;
+  width: 100%;
+  height: 1px;
+  background-color: #ccc;
 }
 
 /* Media queries for responsive form container */
@@ -61,7 +72,7 @@ h1 {
 .subtitle {
   color: #666;
   font-size: 16px;
-  margin-bottom: 40px;
+  margin-top: 20px;
 }
 
 @media screen and (max-width: 480px) {
@@ -71,9 +82,9 @@ h1 {
   }
 }
 
-.section {
+/* .section {
   margin-bottom: 40px;
-}
+} */
 
 @media screen and (max-width: 480px) {
   .section {
@@ -157,7 +168,7 @@ textarea {
 .actions {
   display: flex;
   justify-content: space-between;
-  margin-top: 40px;
+  /* margin-top: 40px; */
 }
 
 @media screen and (max-width: 480px) {
