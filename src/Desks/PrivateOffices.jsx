@@ -39,6 +39,7 @@ const PrivateOffices = () => {
   const [activeTab, setActiveTab] = useState("daily");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
   const [deskData, setDeskData] = useState({
     daily: [],
     monthly: [],
@@ -46,6 +47,22 @@ const PrivateOffices = () => {
   });
 
   const tabs = ["daily", "monthly", "annually"];
+
+  // Check for mobile view on initial render and window resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 767);
+    };
+
+    // Initial check
+    checkMobile();
+
+    // Add resize listener
+    window.addEventListener("resize", checkMobile);
+
+    // Cleanup
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const handleBooking = (deskType) => {
     console.log(deskType);
@@ -159,70 +176,82 @@ const PrivateOffices = () => {
               No options available for this time period.
             </div>
           ) : (
-            deskData[activeTab].map((desk, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: 0 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 * index }}
-                className={styles.card}
-              >
-                <div style={{ position: "relative" }}>
-                  <img
-                    src={
-                      "http://35.176.180.59/wp-content/uploads/2024/11/image-15.png"
-                    }
-                    alt={desk.type}
-                    className={styles.imgContainer}
-                  />
-
-                  <div className={styles.numberBox}>
-                    <svg
-                      width="10"
-                      height="13"
-                      viewBox="0 0 10 13"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M5.0251 5.58732C6.15163 5.58732 7.06486 4.67409 7.06486 3.54757C7.06486 2.42104 6.15163 1.50781 5.0251 1.50781C3.89858 1.50781 2.98535 2.42104 2.98535 3.54757C2.98535 4.67409 3.89858 5.58732 5.0251 5.58732Z"
-                        stroke="black"
-                        strokeWidth="1.09701"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M1 11.4923C1.00713 10.8101 1.18706 10.1407 1.523 9.54686C2.23095 8.29528 3.59059 7.50055 5.02811 7.49744C6.46562 7.50055 7.82526 8.29528 8.53321 9.54686C8.86915 10.1407 9.04908 10.8101 9.05621 11.4923"
-                        stroke="black"
-                        strokeWidth="1.09701"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-
-                    <span>{desk.Capacity ? desk.Capacity : 1}</span>
+            <>
+              {isMobile && (
+                <div className={styles.scrollIndicator}>
+                  <div className={styles.scrollText}>
+                    Scroll for more options
                   </div>
+                  <div className={styles.scrollArrow}>→</div>
                 </div>
-                <div className={styles.cardContent}>
-                  <span className={styles.cardTitle}>{desk.type}</span>
-                  <span className={styles.description}>{desk.description}</span>
-                  <div className={styles.cardInfo}>
-                    <span className={styles.rateLabel}>
-                      {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}{" "}
-                      rate
+              )}
+              {deskData[activeTab].map((desk, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: 0 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 * index }}
+                  className={styles.card}
+                >
+                  <div style={{ position: "relative" }}>
+                    <img
+                      src={
+                        "http://35.176.180.59/wp-content/uploads/2024/11/image-15.png"
+                      }
+                      alt={desk.type}
+                      className={styles.imgContainer}
+                    />
+
+                    <div className={styles.numberBox}>
+                      <svg
+                        width="10"
+                        height="13"
+                        viewBox="0 0 10 13"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M5.0251 5.58732C6.15163 5.58732 7.06486 4.67409 7.06486 3.54757C7.06486 2.42104 6.15163 1.50781 5.0251 1.50781C3.89858 1.50781 2.98535 2.42104 2.98535 3.54757C2.98535 4.67409 3.89858 5.58732 5.0251 5.58732Z"
+                          stroke="black"
+                          strokeWidth="1.09701"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M1 11.4923C1.00713 10.8101 1.18706 10.1407 1.523 9.54686C2.23095 8.29528 3.59059 7.50055 5.02811 7.49744C6.46562 7.50055 7.82526 8.29528 8.53321 9.54686C8.86915 10.1407 9.04908 10.8101 9.05621 11.4923"
+                          stroke="black"
+                          strokeWidth="1.09701"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+
+                      <span>{desk.Capacity ? desk.Capacity : 1}</span>
+                    </div>
+                  </div>
+                  <div className={styles.cardContent}>
+                    <span className={styles.cardTitle}>{desk.type}</span>
+                    <span className={styles.description}>
+                      {desk.description}
                     </span>
-                    <span className={styles.price}>{desk.price}</span>
-                    <span className={styles.access}>{desk.access}</span>
+                    <div className={styles.cardInfo}>
+                      <span className={styles.rateLabel}>
+                        {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}{" "}
+                        rate
+                      </span>
+                      <span className={styles.price}>{desk.price}</span>
+                      <span className={styles.access}>{desk.access}</span>
+                    </div>
+                    <button
+                      className={styles.button}
+                      onClick={() => handleBooking(desk.type)}
+                    >
+                      Book Now
+                    </button>
                   </div>
-                  <button
-                    className={styles.button}
-                    onClick={() => handleBooking(desk.type)}
-                  >
-                    Book Now
-                  </button>
-                </div>
-              </motion.div>
-            ))
+                </motion.div>
+              ))}
+            </>
           )}
         </motion.div>
       </AnimatePresence>

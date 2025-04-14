@@ -164,10 +164,12 @@ const DedicatedDesks = () => {
             deskData[activeTab].map((desk, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, x: 0 }}
+                initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 * index }}
+                transition={{ delay: 0.05 * index }}
                 className={styles.card}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
                 <div style={{ position: "relative" }}>
                   <img

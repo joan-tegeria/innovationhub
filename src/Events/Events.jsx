@@ -235,7 +235,9 @@ export default function Events() {
 
   return (
     <div className={styles.formContainer}>
-      <h1>Ready to Get Started?</h1>
+      <h1 style={{ fontSize: "24px", fontWeight: "bold" }}>
+        Ready to Get Started?
+      </h1>
       <p className={styles.subtitle}>
         Discover the perfect workspace or event venue for your needs.
       </p>
@@ -247,7 +249,9 @@ export default function Events() {
       <form id="eventForm" onSubmit={formik.handleSubmit} autoComplete="on">
         {/* Your Information */}
         <div className={styles.section}>
-          <h2>Your Information</h2>
+          <h2 style={{ fontSize: "16px", fontWeight: "bold" }}>
+            Your Information
+          </h2>
           <div className={styles.row}>
             <div className={styles.formGroup}>
               <label className={styles.label} htmlFor="fullName">
@@ -328,7 +332,9 @@ export default function Events() {
 
         {/* Event Information */}
         <div className={styles.section}>
-          <h2>Event Information</h2>
+          <h2 style={{ fontSize: "16px", fontWeight: "bold" }}>
+            Event Information
+          </h2>
           <div className={styles.row}>
             <div className={styles.formGroup}>
               <label className={styles.label} htmlFor="startDate">
@@ -517,7 +523,7 @@ export default function Events() {
         {/* Buttons */}
         <div className={styles.actions}>
           <button type="button" className={styles.cancel} onClick={handleReset}>
-            Cancel
+            Clear
           </button>
           <button type="submit" className={styles.submit}>
             Request a quote

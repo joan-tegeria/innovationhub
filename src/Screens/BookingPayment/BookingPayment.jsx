@@ -68,6 +68,8 @@ export default function BookingPayment() {
   const [errorMessage, setErrorMessage] = useState(null);
   const [invoiceId, setInvoiceId] = useState("");
   const [paymentFailed, setPaymentFailed] = useState(false);
+  const [saleOrderId, setSaleOrderId] = useState("");
+  const [bookResponse, setBookResponse] = useState("");
 
   // Payment modal state
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -192,6 +194,8 @@ export default function BookingPayment() {
 
       // Store invoice ID for later use (when confirming payment)
       setInvoiceId(bookingResponse.data.invoiceId);
+      setSaleOrderId(bookingResponse.data.saleOrderId);
+      setBookResponse(bookingResponse.data.bookedResponse);
 
       // Get payment URL from response
       const paymentUrl = `${bookingResponse.data.paymentSession}&mode=frameless`;
@@ -209,8 +213,9 @@ export default function BookingPayment() {
         setShowPaymentModal(true);
       }, 100);
     } catch (error) {
+      setBookingInitiated(true);
       console.error("Error during booking/payment:", error);
-      setErrorMessage(error.message || "Failed to process booking and payment");
+      setErrorMessage("Failed to process booking and payment");
     } finally {
       setLoading(false);
     }
@@ -320,7 +325,12 @@ export default function BookingPayment() {
             api
               .put(
                 `${API_BASE_URL}/invoice/${invoiceId}`,
-                { status: "Approved", order: orderIdentification },
+                {
+                  status: "Approved",
+                  order: orderIdentification,
+                  saleOrder: saleOrderId,
+                  booking: bookResponse,
+                },
                 {
                   headers: { Authorization: `${tokenType} ${accessToken}` },
                 }
@@ -337,6 +347,7 @@ export default function BookingPayment() {
               })
               .catch((error) => {
                 console.error("Error updating invoice:", error);
+                setBookingInitiated(true);
                 setErrorMessage(
                   "Payment completed but failed to update booking status"
                 );
@@ -367,7 +378,10 @@ export default function BookingPayment() {
         }
       } catch (error) {
         console.error("Error processing payment message:", error);
-        setErrorMessage("Error processing payment response");
+        setBookingInitiated(true);
+        setErrorMessage(
+          error.response?.data?.message || "An Error occurred please try again"
+        );
       }
     };
 
@@ -465,9 +479,19 @@ export default function BookingPayment() {
                       <Chip
                         label={couponCode}
                         onDelete={removeCoupon}
-                        color="primary"
-                        variant="outlined"
-                        style={{ height: 48, fontSize: 16 }}
+                        sx={{
+                          height: 48,
+                          fontSize: 16,
+                          backgroundColor: "white",
+                          color: "#eb3778",
+                          border: "1px solid #eb3778",
+                          "& .MuiChip-deleteIcon": {
+                            color: "#eb3778",
+                            "&:hover": {
+                              color: "#ff5486",
+                            },
+                          },
+                        }}
                       />
                     </div>
                   ) : (
@@ -510,7 +534,7 @@ export default function BookingPayment() {
                   </span>
                 </div>
                 <div className={styles.subtotalRow}>
-                  <span>Subtotal:</span>
+                  <span>Discounted value:</span>
                   <span className={styles.subtotalAmount}>
                     -{formatCurrency(validCoupon)}
                   </span>

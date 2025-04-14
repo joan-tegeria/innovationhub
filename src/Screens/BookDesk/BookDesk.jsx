@@ -5,9 +5,10 @@ import styles from "./BookDesk.module.css"; // Import the CSS module
 import api from "../../util/axiosConfig";
 import { useAuth } from "../../context/Auth";
 import { transformWorkspacesResponse } from "../../util/transformers";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import info from "../../assets/info.svg";
 import infowhite from "../../assets/infowhite.svg";
+import background from "../../assets/pdeskback.png";
 // Get today's date in YYYY-MM-DD format
 const today = new Date().toISOString().split("T")[0];
 
@@ -63,6 +64,7 @@ const validationSchema = Yup.object({
       "ID must be in format: A12345678B (letter, 8 digits, letter)"
     ),
   email: Yup.string()
+    .required("Email is required")
     .email("Invalid email address")
     .matches(
       /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
@@ -75,14 +77,16 @@ const API_BASE_URL =
 
 export default function BookDesk() {
   const [workspaces, setWorkspaces] = useState([]);
-  const [isAvailable, setIsAvailable] = useState(false);
+  const [isAvailable, setIsAvailable] = useState(true);
   const [randomSeat, setRandomSeat] = useState(null);
   const [price, setPrice] = useState(0);
   const [priceId, setPriceId] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [infoMessage, setInfoMessage] = useState("");
   const navigate = useNavigate();
+  const { type } = useParams(); // Get the type parameter from URL
   const [endDate, setEndDate] = useState("");
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const {
     values,
     handleChange,
@@ -180,10 +184,10 @@ export default function BookDesk() {
       new Date(Date.now()).toISOString().split("T")[0]
     );
     setFieldValue("bookingPeriod", "Daily");
-    // checkOfficeAvailability(
-    //   new Date(Date.now() + 86400000).toISOString().split("T")[0],
-    //   "Daily"
-    // );
+    checkOfficeAvailability(
+      new Date(Date.now() + 86400000).toISOString().split("T")[0],
+      "Daily"
+    );
     setFieldValue(
       "birthday",
       new Date(new Date().setFullYear(new Date().getFullYear() - 18))
@@ -200,8 +204,38 @@ export default function BookDesk() {
   const { accessToken, tokenType, tokenLoading } = useAuth();
 
   useEffect(() => {
-    fetchDeskNames();
-  }, [tokenLoading]);
+    const fetchData = async () => {
+      console.log(type);
+      if (!tokenLoading) {
+        try {
+          setIsLoading(true);
+          const response = await api.get(`${API_BASE_URL}/shared`, {
+            headers: { Authorization: `${tokenType} ${accessToken}` },
+          });
+          const transformed = transformWorkspacesResponse(
+            response.data.data || []
+          );
+          setWorkspaces(transformed);
+
+          if (type.toLowerCase() === "dedicated") {
+            setSelectedIndex(1);
+            setFieldValue("selectedWorkspace", transformed[1].value);
+          } else if (type.toLowerCase() === "flexible") {
+            setSelectedIndex(0);
+            setFieldValue("selectedWorkspace", transformed[0].value);
+          }
+          setIsLoading(false);
+        } catch (error) {
+          setInfoMessage("The access to the space is not avaliable");
+          setIsAvailable(false);
+          setIsLoading(false);
+          console.log(error);
+        }
+      }
+    };
+
+    fetchData();
+  }, [tokenLoading, type]);
 
   useEffect(() => {
     if (
@@ -213,29 +247,6 @@ export default function BookDesk() {
     }
   }, [values.selectedDate, values.bookingPeriod, values.selectedWorkspace]);
 
-  const fetchDeskNames = async () => {
-    if (!tokenLoading) {
-      try {
-        setIsLoading(true);
-        const response = await api.get(`${API_BASE_URL}/shared`, {
-          headers: { Authorization: `${tokenType} ${accessToken}` },
-        });
-        const transformed = transformWorkspacesResponse(
-          response.data.data || []
-        );
-        setWorkspaces(transformed);
-
-        if (transformed.length > 0) {
-          setFieldValue("selectedWorkspace", transformed[1].value);
-        }
-        setIsLoading(false);
-      } catch (error) {
-        setIsLoading(false);
-        console.log(error);
-      }
-    }
-  };
-
   const checkOfficeAvailability = async (startDate, bookingPeriod) => {
     try {
       const fromDate = new Date(startDate);
@@ -245,11 +256,11 @@ export default function BookDesk() {
       switch (bookingPeriod) {
         case "Daily":
           toDate = new Date(fromDate);
-          toDate.setDate(fromDate.getDate() + 1);
+          toDate.setDate(fromDate.getDate());
           break;
         case "Weekly":
           toDate = new Date(fromDate);
-          toDate.setDate(fromDate.getDate() + 7);
+          toDate.setDate(fromDate.getDate() + 6);
           break;
         case "Monthly":
           toDate = new Date(fromDate);
@@ -260,41 +271,41 @@ export default function BookDesk() {
           toDate.setDate(fromDate.getDate() + 1);
       }
 
-      const formattedFromDate =
-        fromDate.toISOString().split("T")[0] + `T00:00:00+02:00`;
-      const formattedToDate =
-        toDate.toISOString().split("T")[0] + `T00:00:00+02:00`;
+      const formattedFromDate = fromDate.toISOString().split("T")[0];
+      const formattedToDate = toDate.toISOString().split("T")[0];
 
-      setEndDate(toDate.toISOString().split("T")[0]);
-      const response = await api.get(
-        `${API_BASE_URL}/shared/${
-          values.selectedWorkspace[0]
-        }?from=${encodeURIComponent(formattedFromDate)}&to=${encodeURIComponent(
-          formattedToDate
-        )}`,
-        {
-          headers: { Authorization: `${tokenType} ${accessToken}` },
-        }
-      );
-
-      if (
-        response.data.availableSeats &&
-        response.data.availableSeats.length > 0
-      ) {
-        setInfoMessage("The access to the space is avaliable");
-        setIsAvailable(true);
-        setRandomSeat(
-          response.data.availableSeats[
-            Math.floor(Math.random() * response.data.availableSeats.length)
-          ]
+      if (values.selectedWorkspace[0]) {
+        setEndDate(toDate.toISOString().split("T")[0]);
+        const response = await api.get(
+          `${API_BASE_URL}/shared/${
+            values.selectedWorkspace[0]
+          }?from=${encodeURIComponent(
+            formattedFromDate
+          )}&to=${encodeURIComponent(formattedToDate)}`,
+          {
+            headers: { Authorization: `${tokenType} ${accessToken}` },
+          }
         );
-      } else {
-        setInfoMessage("The access to the space is not avaliable");
-        setIsAvailable(false);
-        setRandomSeat(null);
-      }
 
-      return response.data.availableSeats?.length > 0;
+        if (
+          response.data.availableSeats &&
+          response.data.availableSeats.length > 0
+        ) {
+          setInfoMessage("The access to the space is avaliable");
+          setIsAvailable(true);
+          setRandomSeat(
+            response.data.availableSeats[
+              Math.floor(Math.random() * response.data.availableSeats.length)
+            ]
+          );
+        } else {
+          setInfoMessage("The access to the space is not avaliable");
+          setIsAvailable(false);
+          setRandomSeat(null);
+        }
+
+        return response.data.availableSeats?.length > 0;
+      }
     } catch (error) {
       console.error("Error checking availability:", error);
       return false;
@@ -352,7 +363,7 @@ export default function BookDesk() {
       <div className={styles.container}>
         <h1 className={styles.title}>Ready to Get Started?</h1>
         <form onSubmit={handleSubmit} className={styles.form} autoComplete="on">
-          <div className={styles.divider} />
+          {/* <div className={styles.divider} /> */}
           <h1 className={styles.subHeading}>Space Information</h1>
 
           <div className={`${styles.formGroup} ${styles.fullWidth}`}>

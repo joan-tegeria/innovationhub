@@ -51,14 +51,17 @@ export default function FinishedBooking() {
           variant="contained"
           sx={{
             backgroundColor: "#EB3778",
-            "&:hover": {
-              backgroundColor: "#d62e69",
-            },
+
             fontFamily: "Termina Test",
             textTransform: "none",
             marginTop: "25px",
             borderRadius: "4px",
             padding: "10px 20px",
+            boxShadow: "none",
+            "&:hover": {
+              backgroundColor: "#ff5486",
+              boxShadow: "none",
+            },
           }}
           style={{ width: 220, height: 42 }}
           onClick={handleReturnHome}

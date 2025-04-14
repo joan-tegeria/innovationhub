@@ -2,11 +2,10 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 // import "./App.css";
 // import BookingApp from "./BookingApp";
-import PersonalDesk from "./PersonalDesk";
-import BookingProvider from "./context/BookingContext";
+
 import Home from "./Home";
 import ContactUs from "./ContactUs";
-import FullOffice from "./FullOffice";
+
 import Events from "./Events";
 import { AuthProvider } from "./context/Auth";
 import Desks from "./Desks/Desks";
@@ -70,53 +69,51 @@ function App() {
 
   return (
     <AuthProvider>
-      <BookingProvider>
-        <BrowserRouter>
-          <Routes>
-            {/* Define the main route for "/personaldesk" */}
-            <Route path="/pdesk" element={<PersonalDesk />} />
+      <BrowserRouter>
+        <Routes>
+          {/* Main Routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/contact" element={<ContactUs />} />
+          <Route path="/events" element={<Events />} />
+          <Route path="/membershipplans" element={<MembershipPlans />} />
+          <Route path="/partners" element={<Partners />} />
+          <Route path="/eventslist" element={<EventTable />} />
 
-            {/* Optionally, you can add a fallback route or home route */}
-            <Route path="/fullOffice" element={<FullOffice />} />
-            <Route path="/bookDesk" element={<BookDesk />} />
-            <Route path="/bookOffice" element={<BookOffice />} />
-            <Route path="/" element={<Home />} />
-            <Route path="/contact" element={<ContactUs />} />
+          {/* Desk Routes */}
+          <Route path="/desks" element={<Desks />}>
+            <Route index element={<Navigate to="/desks/dedicated" replace />} />
+            <Route path=":type" element={<Desks />} />
+          </Route>
+          <Route path="/dedicated-desks" element={<DedicatedDesks />} />
+          <Route path="/private-offices" element={<PrivateOffices />} />
 
-            {/* Routes for the desk components */}
-            <Route path="/desks" element={<Desks />}>
-              <Route
-                index
-                element={<Navigate to="/desks/dedicated" replace />}
-              />
-              <Route path=":type" element={<Desks />} />
-            </Route>
+          {/* Desk Tables Routes */}
+          <Route path="/desks-table">
+            <Route
+              index
+              element={<Navigate to="/desks-table/dedicated" replace />}
+            />
+            <Route
+              path="dedicated"
+              element={<DesksTables type="dedicated" />}
+            />
+            <Route path="private" element={<DesksTables type="private" />} />
+          </Route>
 
-            {/* Direct routes to the specific desk components */}
-            <Route path="/dedicated-desks" element={<DedicatedDesks />} />
-            <Route path="/private-offices" element={<PrivateOffices />} />
+          {/* Booking Flow Routes */}
+          <Route path="/bookDesk">
+            <Route
+              index
+              element={<Navigate to="/bookDesk/flexible" replace />}
+            />
 
-            <Route path="/desks-table">
-              <Route
-                index
-                element={<Navigate to="/desks-table/dedicated" replace />}
-              />
-              <Route
-                path="dedicated"
-                element={<DesksTables type="dedicated" />}
-              />
-              <Route path="private" element={<DesksTables type="private" />} />
-            </Route>
-
-            <Route path="/events" element={<Events />} />
-            <Route path="/membershipplans" element={<MembershipPlans />} />
-            <Route path="/partners" element={<Partners />} />
-            <Route path="/eventslist" element={<EventTable />} />
-            <Route path="/booking/payment" element={<BookingPayment />} />
-            <Route path="/booking-success" element={<FinishedBooking />} />
-          </Routes>
-        </BrowserRouter>
-      </BookingProvider>
+            <Route path=":type" element={<BookDesk />} />
+          </Route>
+          <Route path="/bookOffice" element={<BookOffice />} />
+          <Route path="/booking/payment" element={<BookingPayment />} />
+          <Route path="/booking-success" element={<FinishedBooking />} />
+        </Routes>
+      </BrowserRouter>
     </AuthProvider>
   );
 }

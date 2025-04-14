@@ -31,15 +31,20 @@ function Home() {
 
   if (!isAuthenticated) {
     return (
-      <div className={styles.container}>
-        <form onSubmit={handlePasswordSubmit}>
+      <div className={styles.authContainer}>
+        <form className={styles.authForm} onSubmit={handlePasswordSubmit}>
+          <h2 className={styles.authTitle}>Authentication Required</h2>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter password"
+            placeholder="Enter administrator password"
+            className={styles.authInput}
+            autoFocus
           />
-          <button type="submit">Submit</button>
+          <button type="submit" className={styles.authButton}>
+            Authenticate
+          </button>
         </form>
       </div>
     );
@@ -102,9 +107,7 @@ function Home() {
         <button onClick={() => navigate("/dedicated-desks")}>
           Dedicated Desks
         </button>
-        <button onClick={() => navigate("/private-offices")}>
-          Private Offices
-        </button>
+
         <button onClick={() => navigate("/desks-table")}>Desks Table</button>
         <button onClick={() => navigate("/events")}>Events</button>
         <button onClick={() => navigate("/membershipplans")}>

@@ -142,7 +142,7 @@ const ContactForm = () => {
           variant="filled"
           sx={{ width: "100%" }}
         >
-          Message Sent!
+          Your message has been successfully sent! We'll contact you via email.
         </Alert>
       </Snackbar>
       <div className={styles.formTitleContainer}>

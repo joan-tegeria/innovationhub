@@ -42,6 +42,7 @@ const validationSchema = Yup.object({
       "Phone number must be in the format: +3556XXXXXXXX or 06XXXXXXXX"
     ),
   email: Yup.string()
+    .required("Email is required")
     .email("Invalid email address")
     .matches(
       /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
@@ -64,7 +65,7 @@ const types = [
 
 export default function BookOffice() {
   const [workspaces, setWorkspaces] = useState([]);
-  const [isAvailable, setIsAvailable] = useState(false);
+  const [isAvailable, setIsAvailable] = useState(true);
   const [randomSeat, setRandomSeat] = useState(null);
   const [price, setPrice] = useState(0);
   const [priceId, setPriceId] = useState(null);
@@ -245,11 +246,12 @@ export default function BookOffice() {
       switch (bookingPeriod) {
         case "Daily":
           toDate = new Date(fromDate);
-          toDate.setDate(fromDate.getDate() + 1);
+
+          // toDate.setDate(fromDate.getDate());
           break;
         case "Weekly":
           toDate = new Date(fromDate);
-          toDate.setDate(fromDate.getDate() + 7);
+          toDate.setDate(fromDate.getDate() + 6);
           break;
         case "Monthly":
           toDate = new Date(fromDate);
@@ -264,29 +266,7 @@ export default function BookOffice() {
         fromDate.toISOString().split("T")[0] + `T00:00:00+02:00`;
       const formattedToDate =
         toDate.toISOString().split("T")[0] + `T00:00:00+02:00`;
-
       setEndDate(toDate.toISOString().split("T")[0]);
-      const response = await api.get(
-        `${API_BASE_URL}/private/${
-          values.selectedWorkspace[0]
-        }?from=${encodeURIComponent(formattedFromDate)}&to=${encodeURIComponent(
-          formattedToDate
-        )}`,
-        {
-          headers: { Authorization: `${tokenType} ${accessToken}` },
-        }
-      );
-
-      if (response.data.data === "Available") {
-        setInfoMessage("The access to the space is avaliable");
-        setIsAvailable(true);
-      } else {
-        setInfoMessage("The access to the space is not avaliable");
-        setIsAvailable(false);
-        setRandomSeat(null);
-      }
-
-      return response.data.availableSeats?.length > 0;
     } catch (error) {
       console.error("Error checking availability:", error);
       return false;
@@ -344,7 +324,7 @@ export default function BookOffice() {
       <div className={styles.container}>
         <h1 className={styles.title}>Get a Quote</h1>
         <form onSubmit={handleSubmit} className={styles.form} autoComplete="on">
-          <div className={styles.divider} />
+          {/* <div className={styles.divider} /> */}
           <h1 className={styles.subHeading}>Space Information</h1>
 
           <div className={`${styles.formGroup} ${styles.fullWidth}`}>
@@ -413,7 +393,7 @@ export default function BookOffice() {
               <div className={styles.error}>{errors.selectedDate}</div>
             )}
           </div>
-          {infoMessage !== "" && (
+          {/* {infoMessage !== "" && (
             <div
               className={
                 isAvailable ? styles.infoContainer : styles.infoContainerErr
@@ -422,7 +402,7 @@ export default function BookOffice() {
               <img src={isAvailable ? info : infowhite} alt="" />
               <span>{infoMessage}</span>
             </div>
-          )}
+          )} */}
           <div className={styles.divider} />
           <h1 className={styles.subHeading}>Personal Information</h1>
           <div className={`${styles.formGroup} ${styles.fullWidth}`}>

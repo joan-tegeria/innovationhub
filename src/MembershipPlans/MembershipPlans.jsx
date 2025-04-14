@@ -93,6 +93,7 @@ const PlanCard = ({ plan }) => (
       </div>
       <button
         className={styles.planButton}
+        style={{ borderRadius: 4 }}
         onClick={() => handleButtonClick(plan)}
       >
         {plan.buttonText}

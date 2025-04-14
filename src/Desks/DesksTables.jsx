@@ -75,21 +75,6 @@ const DesksTables = ({ type }) => {
   const isMobile = width <= 768;
   const tableRef = useRef(null);
 
-  const handleBooking = (deskType) => {
-    const url =
-      deskType.toLowerCase() === "the solo"
-        ? "http://35.176.180.59/dedicated-desk/"
-        : deskType.toLowerCase() === "the duo"
-        ? "http://35.176.180.59/flexible-desk/"
-        : "http://35.176.180.59/private-offices/";
-
-    if (window.self !== window.top) {
-      window.parent.location.href = url;
-    } else {
-      window.location.href = url;
-    }
-  };
-
   if (!type) {
     return <Navigate to="/desks/dedicated" replace />;
   }
