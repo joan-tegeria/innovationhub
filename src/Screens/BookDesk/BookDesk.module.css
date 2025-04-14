@@ -36,7 +36,7 @@
   margin: 0 auto;
   margin-top: 1px;
   padding: 2rem;
-  padding-top: 70px;
+  padding-top: 32px;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   /* border: 1px solid #999999; */
   box-sizing: border-box;
@@ -66,7 +66,6 @@
 
 .title {
   color: #333;
-  margin-bottom: 32px;
   text-align: left;
   font-size: 27.32px;
   font-weight: 700;
@@ -146,7 +145,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.3s;
-  margin-top: 1rem;
+ 
 }
 
 @media screen and (max-width: 600px) {
@@ -168,7 +167,7 @@
 }
 .workspaceButtons {
   display: flex;
-  gap: 1rem;
+  gap: 1.5rem;
   margin-bottom: 0.5rem;
 }
 
@@ -210,8 +209,15 @@
   border-color: #eb3778;
   color: #eb3778;
 }
-
 .divider {
+  width: 100%;
+  height: 1px;
+  background-color: #999999;
+}
+
+
+.titleDivider {
+  margin-bottom: 32px;
   width: 100%;
   height: 1px;
   background-color: #999999;
@@ -280,7 +286,10 @@
 .priceContainer {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
 }
+
 
 .priceContainer:first-child {
   color: #999999;
@@ -295,10 +304,11 @@
 .infoContainer {
   display: flex;
   justify-content: flex-start;
+  color: #339319;
   align-items: center;
   gap: 8px;
-  border: 1px solid #999999;
-  background-color: #e4e3e3;
+  border: 1px solid  #339319;
+  background-color: rgba(51, 147, 25, 0.05);
   padding: 15px;
   width: 100%;
   border-radius: 3px;

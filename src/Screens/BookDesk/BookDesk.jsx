@@ -9,6 +9,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import info from "../../assets/info.svg";
 import infowhite from "../../assets/infowhite.svg";
 import background from "../../assets/pdeskback.png";
+import RestartBookingModal from "../BookModal/RestartBookingModal.jsx";
 // Get today's date in YYYY-MM-DD format
 const today = new Date().toISOString().split("T")[0];
 
@@ -107,7 +108,7 @@ export default function BookDesk() {
       email: "",
     },
     validationSchema,
-    validateOnChange: false,
+    validateOnChange: true,
     validateOnBlur: true,
     onSubmit: async (values) => {
       setIsSubmitting(true);
@@ -226,7 +227,9 @@ export default function BookDesk() {
           }
           setIsLoading(false);
         } catch (error) {
-          setInfoMessage("The access to the space is not avaliable");
+          setInfoMessage(
+            "This space isn’t available on your selected dates. Please choose a different start date."
+          );
           setIsAvailable(false);
           setIsLoading(false);
           console.log(error);
@@ -362,6 +365,7 @@ export default function BookDesk() {
     <div className={styles.background}>
       <div className={styles.container}>
         <h1 className={styles.title}>Ready to Get Started?</h1>
+        <div className={styles.titleDivider} />
         <form onSubmit={handleSubmit} className={styles.form} autoComplete="on">
           {/* <div className={styles.divider} /> */}
           <h1 className={styles.subHeading}>Space Information</h1>
@@ -400,7 +404,7 @@ export default function BookDesk() {
               onChange={handleChange}
               className={styles.select}
             >
-              <option value="">Select a booking period</option>
+              {/* <option value="">Select a booking period</option> */}
               {bookingPeriods.map((period) => (
                 <option key={period.value} value={period.value}>
                   {period.label}
@@ -414,7 +418,7 @@ export default function BookDesk() {
 
           <div className={styles.formGroup}>
             <label htmlFor="selectedDate" className={styles.label}>
-              Date
+              Start Date
             </label>
             <input
               type="date"
@@ -487,21 +491,22 @@ export default function BookDesk() {
                 Birthday
               </label>
               <input
-                type="date"
-                id="birthday"
-                name="birthday"
-                value={values.birthday}
-                onChange={handleChange}
-                className={styles.input}
-                autoComplete="bday"
-                max={
-                  new Date(
-                    new Date().setFullYear(new Date().getFullYear() - 18)
-                  )
-                    .toISOString()
-                    .split("T")[0]
-                }
-              />
+    type="date"
+    id="birthday"
+    name="birthday"
+    value={values.birthday || ''}
+    onChange={handleChange}
+    className={styles.input}
+     placeholder="YYYY-MM-DD"
+    autoComplete="bday"
+    max={
+      new Date(
+        new Date().setFullYear(new Date().getFullYear() - 18)
+      )
+        .toISOString()
+        .split("T")[0]
+    }
+  />
               {errors.birthday && touched.birthday && (
                 <div className={styles.error}>{errors.birthday}</div>
               )}
@@ -553,6 +558,7 @@ export default function BookDesk() {
                 {price ? Number(price).toLocaleString() : 0} ALL
               </span>
             </div>
+
             <button
               type="submit"
               className={styles.submitButton}
@@ -562,6 +568,8 @@ export default function BookDesk() {
             </button>
           </div>
         </form>
+
+        {/* <RestartBookingModal/> */}
       </div>
     </div>
   );

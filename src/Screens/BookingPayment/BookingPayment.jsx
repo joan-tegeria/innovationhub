@@ -5,6 +5,7 @@ import styles from "./BookingPayment.module.css";
 import api from "../../util/axiosConfig";
 import { useAuth } from "../../context/Auth";
 import PaymentModal from "../../components/PaymentModal";
+import Danger from "../../assets/Danger.svg";
 
 /**
  * BookingPayment Component
@@ -130,7 +131,7 @@ export default function BookingPayment() {
     // Only show cancelled message if it wasn't a success and no specific error is already set
     if (paymentStatus !== "success" && !errorMessage) {
       setTimeout(() => {
-        setErrorMessage("Payment was cancelled.");
+        setErrorMessage("Your payment has been canceled.");
         setPaymentFailed(true);
       }, 100);
     }
@@ -362,7 +363,7 @@ export default function BookingPayment() {
 
           case "cancel":
             console.log("Payment cancelled");
-            setErrorMessage("Payment was cancelled.");
+            setErrorMessage("Your payment has been canceled.");
             setPaymentFailed(true);
             break;
 
@@ -417,7 +418,7 @@ export default function BookingPayment() {
         {/* Header */}
         <h1 className={styles.mainTitle}>Payment</h1>
         <p className={styles.subtitle}>Complete payment information</p>
-
+        <div className={styles.subTitleDivider} />
         {loading ? (
           <div className={styles.loadingContainer}>
             <div className={styles.spinner}></div>
@@ -471,8 +472,17 @@ export default function BookingPayment() {
               <h2 className={styles.sectionTitle}>
                 Do you have a discount code?
               </h2>
-              <span style={{ fontSize: 14 }}>
-                Apply it at checkout to get a special discount on your order.
+              <span style={{ fontSize: 14, color: "rgba(34, 34, 34, 1)" }}>
+                Apply it at checkout to get a special discount on your order. If
+                not click{" "}
+                <span
+                  style={{
+                    textDecoration: "underline",
+                    color: "rgba(34, 34, 34, 1)",
+                  }}
+                >
+                  here
+                </span>
                 <div className={styles.couponInputContainer}>
                   {validCoupon ? (
                     <div className={styles.couponChip}>
@@ -541,20 +551,13 @@ export default function BookingPayment() {
                 </div>
               </div>
             )}
-
-            {/* Total Section */}
-            <div className={styles.totalSection}>
-              <div className={styles.totalRow}>
-                <span>TOTAL:</span>
-                <span className={styles.totalAmount}>
-                  {formatCurrency(bookingDetails?.price?.total || 0)}
-                </span>
-              </div>
-            </div>
-            {/* Error Messages */}
             {errorMessage && (
               <div className={styles.errorMessage}>
-                {errorMessage}
+                <div style={{ display: "flex", alignItems: "center", gap: 15 }}>
+                  <img src={Danger} alt="" />
+                  {errorMessage}
+                </div>
+
                 {bookingInitiated && (
                   <button
                     onClick={() => {
@@ -568,11 +571,11 @@ export default function BookingPayment() {
                     }}
                     className={styles.resetButton}
                     style={{
-                      marginLeft: "10px",
-                      padding: "5px 10px",
-                      backgroundColor: "transparent",
-                      border: "1px solid #f44336",
-                      color: "#f44336",
+                      marginTop: "6px",
+                      padding: "10px 22px",
+                      backgroundColor: "rgba(255, 255, 255, 1)",
+                      border: "1px solid rgba(34, 34, 34, 1)",
+                      color: "rgba(34, 34, 34, 1)",
                       borderRadius: "4px",
                       cursor: "pointer",
                       fontSize: "14px",
@@ -583,6 +586,17 @@ export default function BookingPayment() {
                 )}
               </div>
             )}
+
+            {/* Total Section */}
+            <div className={styles.totalSection}>
+              <div className={styles.totalRow}>
+                <span>TOTAL:</span>
+                <span className={styles.totalAmount}>
+                  {formatCurrency(bookingDetails?.price?.total || 0)}
+                </span>
+              </div>
+            </div>
+            {/* Error Messages */}
 
             {/* Payment Button */}
             <button
@@ -598,7 +612,22 @@ export default function BookingPayment() {
                 ? "Resume Payment"
                 : "Proceed to Payment"}
             </button>
-
+            <button
+              style={{
+                marginTop: "12px",
+                height: "50px",
+                width: "100%",
+                backgroundColor: "rgba(255, 255, 255, 1)",
+                border: "1px solid rgba(34, 34, 34, 1)",
+                color: "rgba(34, 34, 34, 1)",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontSize: "14px",
+              }}
+              onClick={() => navigate("/bookDesk/flexible")}
+            >
+              Back
+            </button>
             {/* Payment Modal */}
             {showPaymentModal && paymentUrl && (
               <PaymentModal
