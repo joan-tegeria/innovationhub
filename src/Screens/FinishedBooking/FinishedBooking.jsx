@@ -2,10 +2,11 @@ import React from "react";
 import styles from "./Finished.module.css";
 import Success from "../../assets/form_success.svg";
 import { Button } from "@mui/material";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function FinishedBooking() {
   const location = useLocation();
+  const navigate = useNavigate()
 
   // Get type from location state with a default value
   const { type = "personal" } = location.state || {};
@@ -39,24 +40,89 @@ export default function FinishedBooking() {
   // };
 
 
+  // const handleReturnHome = (e) => {
+  //   e.preventDefault();
+    
+  //   // Check if we're in an iframe
+  //   const isInIframe = window !== window.parent;
+    
+  //   if (isInIframe) {
+  //     try {
+  //       // Send message to parent window to navigate back
+  //       window.parent.postMessage(
+  //         { type: "navigateBack", timestamp: Date.now() }, 
+  //         "*" // Consider restricting this to your domain in production
+  //       );
+        
+  //       // Set a timeout to fall back to history.back() if no response from parent
+  //       const timeoutId = setTimeout(() => {
+  //         console.log("No response from parent, using fallback navigation");
+  //         window.history.back();
+  //       }, 300); // Short timeout to keep the UX responsive
+        
+  //       // Listen for confirmation from parent (optional)
+  //       const messageListener = (event) => {
+  //         if (event.data?.type === "navigateBackConfirmed") {
+  //           clearTimeout(timeoutId);
+  //           window.removeEventListener("message", messageListener);
+  //         }
+  //       };
+        
+  //       window.addEventListener("message", messageListener);
+  //     } catch (error) {
+  //       console.error("Error communicating with parent window:", error);
+  //       window.history.back();
+  //     }
+  //   } else {
+  //     // Try to use the router first if available
+  //     if (typeof window.navigateToHome === 'function') {
+  //       window.navigateToHome();
+  //     } else if (typeof window.location.replace === 'function') {
+  //       // If specific home URL is known, use it
+  //       window.location.replace('/');
+  //     } else {
+  //       // Last resort: browser history
+  //       window.history.back();
+  //     }
+  //   }
+  // };
+
   const handleReturnHome = (e) => {
     e.preventDefault();
     
-    // Try to communicate with parent window if in iframe
-    if (window.parent !== window) {
+    // Check if we're in an iframe
+    const isInIframe = window !== window.parent;
+    
+    if (isInIframe) {
       try {
-        // Send message to parent window to navigate back
+        // Send message to parent window to navigate to root path
         window.parent.postMessage(
-          { type: "navigateBack" }, 
-          "*"
+          { type: "navigateTo", path: "/", timestamp: Date.now() }, 
+          "*" // Consider restricting this to your domain in production
         );
+        
+        // Set a timeout to fall back to direct navigation if no response from parent
+        const timeoutId = setTimeout(() => {
+          console.log("No response from parent, using fallback navigation");
+          window.location.href = "/";
+        }, 300); // Short timeout to keep the UX responsive
+        
+        // Listen for confirmation from parent (optional)
+        const messageListener = (event) => {
+          if (event.data?.type === "navigateConfirmed") {
+            clearTimeout(timeoutId);
+            window.removeEventListener("message", messageListener);
+          }
+        };
+        
+        window.addEventListener("message", messageListener);
       } catch (error) {
-        // Fallback to browser history
-        window.history.back();
+        console.error("Error communicating with parent window:", error);
+        window.location.href = "/";
       }
     } else {
-      // If not in iframe, just use browser history to go back
-      window.history.back();
+      // Direct navigation to root path
+      window.location.href = "/";
     }
   };
 

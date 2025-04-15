@@ -1,9 +1,22 @@
 import React from "react";
 import styles from "./RestartBoking.module.css";
-import CalendarModal from '../../assets/CalendarModal.svg'
+import CalendarModal from "../../assets/CalendarModal.svg";
+import { useNavigate } from "react-router-dom";
 
+export default function RestartBookingModal({
+  isOpen,
+  onClose,
+  message,
+}) {
+  if (!isOpen) return null;
 
-export default function RestartBookingModal() {
+  const navigate = useNavigate();
+
+  const handleRestart = () => {
+    onClose();
+    navigate("/bookDesk/flexible");
+  };
+
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modalContainer}>
@@ -11,11 +24,13 @@ export default function RestartBookingModal() {
         <div className={styles.titleDivider}></div>
         <img src={CalendarModal} alt="" />
         <div>
-          We're sorry for any inconvenience, but in order to proceed, you'll need
-          to restart your booking from the beginning.
+          {message ||
+            "We're sorry for any inconvenience, but in order to proceed, you'll need to restart your booking from the beginning."}
         </div>
         <div className={styles.titleDivider}></div>
-        <button className={styles.button}>Restart</button>
+        <button className={styles.button} onClick={handleRestart}>
+          Restart
+        </button>
       </div>
     </div>
   );

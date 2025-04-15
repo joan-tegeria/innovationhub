@@ -8,8 +8,7 @@ import { transformWorkspacesResponse } from "../../util/transformers";
 import { useNavigate, useParams } from "react-router-dom";
 import info from "../../assets/info.svg";
 import infowhite from "../../assets/infowhite.svg";
-import background from "../../assets/pdeskback.png";
-import RestartBookingModal from "../BookModal/RestartBookingModal.jsx";
+
 // Get today's date in YYYY-MM-DD format
 const today = new Date().toISOString().split("T")[0];
 
@@ -87,6 +86,7 @@ export default function BookDesk() {
   const navigate = useNavigate();
   const { type } = useParams(); // Get the type parameter from URL
   const [endDate, setEndDate] = useState("");
+  const [checkingAvailability, setCheckingAvailability] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const {
     values,
@@ -180,10 +180,10 @@ export default function BookDesk() {
   });
 
   useEffect(() => {
-    setFieldValue(
-      "selectedDate",
-      new Date(Date.now()).toISOString().split("T")[0]
-    );
+    // setFieldValue(
+    //   "selectedDate",
+    //   new Date(Date.now()).toISOString().split("T")[0]
+    // );
     setFieldValue("bookingPeriod", "Daily");
     checkOfficeAvailability(
       new Date(Date.now() + 86400000).toISOString().split("T")[0],
@@ -424,7 +424,7 @@ export default function BookDesk() {
               type="date"
               id="selectedDate"
               name="selectedDate"
-              value={values.selectedDate}
+              // value={values.selectedDate}
               onChange={handleChange}
               className={styles.input}
               autoComplete="off"
@@ -434,7 +434,7 @@ export default function BookDesk() {
               <div className={styles.error}>{errors.selectedDate}</div>
             )}
           </div>
-          {infoMessage !== "" && (
+          {isLoading ? <p>isLoading</p> : infoMessage !== "" && values.selectedDate && (
             <div
               className={
                 isAvailable ? styles.infoContainer : styles.infoContainerErr
@@ -491,22 +491,22 @@ export default function BookDesk() {
                 Birthday
               </label>
               <input
-    type="date"
-    id="birthday"
-    name="birthday"
-    // value={values.birthday || ''}
-    onChange={handleChange}
-    className={styles.input}
-     placeholder="YYYY-MM-DD"
-    autoComplete="bday"
-    max={
-      new Date(
-        new Date().setFullYear(new Date().getFullYear() - 18)
-      )
-        .toISOString()
-        .split("T")[0]
-    }
-  />
+                type="date"
+                id="birthday"
+                name="birthday"
+                // value={values.birthday || ''}
+                onChange={handleChange}
+                className={styles.input}
+                placeholder="YYYY-MM-DD"
+                autoComplete="bday"
+                max={
+                  new Date(
+                    new Date().setFullYear(new Date().getFullYear() - 18)
+                  )
+                    .toISOString()
+                    .split("T")[0]
+                }
+              />
               {errors.birthday && touched.birthday && (
                 <div className={styles.error}>{errors.birthday}</div>
               )}
@@ -568,8 +568,6 @@ export default function BookDesk() {
             </button>
           </div>
         </form>
-
-        {/* <RestartBookingModal/> */}
       </div>
     </div>
   );

@@ -235,7 +235,7 @@ export default function Events() {
 
   return (
     <div className={styles.formContainer}>
-      <h1 style={{ fontSize: "24px", fontWeight: "bold" }}>
+      <h1 className={styles.title}>
         Ready to Get Started?
       </h1>
       <p className={styles.subtitle}>

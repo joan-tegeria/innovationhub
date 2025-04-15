@@ -6,6 +6,7 @@ import api from "../../util/axiosConfig";
 import { useAuth } from "../../context/Auth";
 import PaymentModal from "../../components/PaymentModal";
 import Danger from "../../assets/Danger.svg";
+import RestartBookingModal from "../BookModal/RestartBookingModal.jsx";
 
 /**
  * BookingPayment Component
@@ -62,7 +63,7 @@ export default function BookingPayment() {
     endDate,
     workspaceLabel,
   ]);
-
+  
   // =========== STATE MANAGEMENT ===========
   const [loading, setLoading] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState(null);
@@ -71,17 +72,17 @@ export default function BookingPayment() {
   const [paymentFailed, setPaymentFailed] = useState(false);
   const [saleOrderId, setSaleOrderId] = useState("");
   const [bookResponse, setBookResponse] = useState("");
-
+  
   // Payment modal state
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentUrl, setPaymentUrl] = useState(null);
   const [bookingInitiated, setBookingInitiated] = useState(false);
-
+  
   // Coupon state
   const [couponCode, setCouponCode] = useState("");
   const [couponLoading, setCouponLoading] = useState(false);
   const [validCoupon, setValidCoupon] = useState(null);
-
+  
   // Booking details state
   const [bookingDetails, setBookingDetails] = useState({
     workspace: {
@@ -105,26 +106,26 @@ export default function BookingPayment() {
   // =========== UTILITY FUNCTIONS ===========
   /**
    * Format currency in ALL (Albanian Lek)
-   */
-  const formatCurrency = (value) => {
-    return (
-      new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "ALL",
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2,
+  */
+ const formatCurrency = (value) => {
+   return (
+     new Intl.NumberFormat("en-US", {
+       style: "currency",
+       currency: "ALL",
+       minimumFractionDigits: 0,
+       maximumFractionDigits: 2,
       })
         .format(value)
         .replace("ALL", "")
         .trim() + " ALL"
-    );
-  };
-
-  // =========== HANDLERS ===========
-  /**
-   * Close the payment modal and handle post-close actions
-   */
-  const handleClosePayment = useCallback(() => {
+      );
+    };
+    
+    // =========== HANDLERS ===========
+    /**
+     * Close the payment modal and handle post-close actions
+    */
+   const handleClosePayment = useCallback(() => {
     console.log("Closing payment modal");
     setShowPaymentModal(false);
 
@@ -136,91 +137,197 @@ export default function BookingPayment() {
       }, 100);
     }
   }, [paymentStatus, errorMessage]);
-
+  
   /**
    * Handle the payment process
    * 1. Create booking
    * 2. Get payment URL
    * 3. Open payment modal
-   */
-  const handlePayment = async (e) => {
-    e.preventDefault();
-    setPaymentStatus(null);
-    setErrorMessage(null);
-    setPaymentFailed(false);
-    setShowPaymentModal(false); // Reset modal state
+  */
+ const [backendErrorMessage, setBackendErrorMessage] = useState(null);
+const [backendErrorStatus, setBackendErrorStatus] = useState(null);
+const [showErrorModal, setShowErrorModal] = useState(false);
 
-    // If we already have a payment URL, just show the modal without calling the API again
-    if (bookingInitiated && paymentUrl) {
-      console.log("Reopening payment modal with existing payment URL");
+
+
+const handlePayment = async (e) => {
+  e.preventDefault();
+  setPaymentStatus(null);
+  setErrorMessage(null);
+  setPaymentFailed(false);
+  setShowPaymentModal(false); // Reset modal state
+  // Add new states to handle specific error responses
+  setBackendErrorMessage(null);
+  setBackendErrorStatus(null);
+
+  // If we already have a payment URL, just show the modal without calling the API again
+  if (bookingInitiated && paymentUrl) {
+    console.log("Reopening payment modal with existing payment URL");
+    setShowPaymentModal(true);
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    console.log("Starting payment process...");
+
+    // Prepare booking data
+    const bookingData = {
+      username: userName,
+      user: userId,
+      room: workspaceId[0],
+      from: startDate,
+      to: endDate,
+      seat: seatId.toString(),
+      referral: "Shared Office Form",
+      booked: period,
+      discount: validCoupon ? validCoupon : 0,
+      type: period === "Multi Pass" ? "Multi Pass" : "Single Pass",
+    };
+
+    console.log("Sending booking request with data:", bookingData);
+
+    // Create the booking and get invoice
+    const bookingResponse = await api.post(
+      `${API_BASE_URL}/shared`,
+      bookingData,
+      {
+        headers: { Authorization: `${tokenType} ${accessToken}` },
+      }
+    );
+
+    console.log("Booking response received:", bookingResponse.data);
+
+    if (!bookingResponse.data?.invoiceId) {
+      throw new Error("Failed to generate invoice for booking");
+    }
+
+    // Store invoice ID for later use (when confirming payment)
+    setInvoiceId(bookingResponse.data.invoiceId);
+    setSaleOrderId(bookingResponse.data.saleOrderId);
+    setBookResponse(bookingResponse.data.bookedResponse);
+
+    // Get payment URL from response
+    const paymentUrl = `${bookingResponse.data.paymentSession}&mode=frameless`;
+
+    if (!paymentUrl) {
+      throw new Error("No payment URL received from server");
+    }
+
+    console.log("Opening payment modal with URL:", paymentUrl);
+    setPaymentUrl(paymentUrl);
+    setBookingInitiated(true);
+
+    // Small delay before showing modal
+    setTimeout(() => {
       setShowPaymentModal(true);
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      console.log("Starting payment process...");
-
-      // Prepare booking data
-      const bookingData = {
-        username: userName,
-        user: userId,
-        room: workspaceId[0],
-        from: startDate,
-        to: endDate,
-        seat: seatId.toString(),
-        referral: "Shared Office Form",
-        booked: period,
-        discount: validCoupon ? validCoupon : 0,
-        type: period === "Multi Pass" ? "Multi Pass" : "Single Pass",
-      };
-
-      console.log("Sending booking request with data:", bookingData);
-
-      // Create the booking and get invoice
-      const bookingResponse = await api.post(
-        `${API_BASE_URL}/shared`,
-        bookingData,
-        {
-          headers: { Authorization: `${tokenType} ${accessToken}` },
-        }
-      );
-
-      console.log("Booking response received:", bookingResponse.data);
-
-      if (!bookingResponse.data?.invoiceId) {
-        throw new Error("Failed to generate invoice for booking");
-      }
-
-      // Store invoice ID for later use (when confirming payment)
-      setInvoiceId(bookingResponse.data.invoiceId);
-      setSaleOrderId(bookingResponse.data.saleOrderId);
-      setBookResponse(bookingResponse.data.bookedResponse);
-
-      // Get payment URL from response
-      const paymentUrl = `${bookingResponse.data.paymentSession}&mode=frameless`;
-
-      if (!paymentUrl) {
-        throw new Error("No payment URL received from server");
-      }
-
-      console.log("Opening payment modal with URL:", paymentUrl);
-      setPaymentUrl(paymentUrl);
-      setBookingInitiated(true);
-
-      // Small delay before showing modal
-      setTimeout(() => {
-        setShowPaymentModal(true);
-      }, 100);
-    } catch (error) {
-      setBookingInitiated(true);
-      console.error("Error during booking/payment:", error);
+    }, 100);
+  } catch (error) {
+    setBookingInitiated(true);
+    console.error("Error during booking/payment:", error);
+    
+    // Check for 400 error with message and status
+    if (error.response && error.response.status === 400) {
+      // Set backend error message and status from response
+      const backendMessage = error.response.data.message || "Unknown backend error";
+      const backendStatus = error.response.data.status || "error";
+      
+      setBackendErrorMessage(backendMessage);
+      setBackendErrorStatus(backendStatus);
+      
+      // Show error modal based on backend response
+      setShowErrorModal(true);
+    } else {
+      // Default error handling for other types of errors
       setErrorMessage("Failed to process booking and payment");
-    } finally {
-      setLoading(false);
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+//  const handlePayment = async (e) => {
+//     e.preventDefault();
+//     setPaymentStatus(null);
+//     setErrorMessage(null);
+//     setPaymentFailed(false);
+//     setShowPaymentModal(false); // Reset modal state
+
+//     // If we already have a payment URL, just show the modal without calling the API again
+//     if (bookingInitiated && paymentUrl) {
+//       console.log("Reopening payment modal with existing payment URL");
+//       setShowPaymentModal(true);
+//       return;
+//     }
+
+//     setLoading(true);
+
+//     try {
+//       console.log("Starting payment process...");
+
+//       // Prepare booking data
+//       const bookingData = {
+//         username: userName,
+//         user: userId,
+//         room: workspaceId[0],
+//         from: startDate,
+//         to: endDate,
+//         seat: seatId.toString(),
+//         referral: "Shared Office Form",
+//         booked: period,
+//         discount: validCoupon ? validCoupon : 0,
+//         type: period === "Multi Pass" ? "Multi Pass" : "Single Pass",
+//       };
+
+//       console.log("Sending booking request with data:", bookingData);
+
+//       // Create the booking and get invoice
+//       const bookingResponse = await api.post(
+//         `${API_BASE_URL}/shared`,
+//         bookingData,
+//         {
+//           headers: { Authorization: `${tokenType} ${accessToken}` },
+//         }
+//       );
+
+//       console.log("Booking response received:", bookingResponse.data);
+
+//       if (!bookingResponse.data?.invoiceId) {
+//         throw new Error("Failed to generate invoice for booking");
+//       }
+
+//       // Store invoice ID for later use (when confirming payment)
+//       setInvoiceId(bookingResponse.data.invoiceId);
+//       setSaleOrderId(bookingResponse.data.saleOrderId);
+//       setBookResponse(bookingResponse.data.bookedResponse);
+
+//       // Get payment URL from response
+//       const paymentUrl = `${bookingResponse.data.paymentSession}&mode=frameless`;
+
+//       if (!paymentUrl) {
+//         throw new Error("No payment URL received from server");
+//       }
+
+//       console.log("Opening payment modal with URL:", paymentUrl);
+//       setPaymentUrl(paymentUrl);
+//       setBookingInitiated(true);
+
+//       // Small delay before showing modal
+//       setTimeout(() => {
+//         setShowPaymentModal(true);
+//       }, 100);
+//     } catch (error) {
+//       setBookingInitiated(true);
+//       console.error("Error during booking/payment:", error);
+//       setErrorMessage("Failed to process booking and payment");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+
 
   /**
    * Apply a coupon code to the current booking
@@ -356,15 +463,67 @@ export default function BookingPayment() {
             break;
 
           case "failure":
-            console.log("Payment failed");
-            setErrorMessage("Payment failed. Please try again.");
-            setPaymentFailed(true);
+            // console.log("Payment failed");
+            // setErrorMessage("Payment failed. Please try again.");
+            // setPaymentFailed(true);
+            // break;
+            api
+              .put(
+                `${API_BASE_URL}/invoice/${invoiceId}`,
+                {
+                  status: "Cancelled",
+                  order: orderIdentification,
+                  saleOrder: saleOrderId,
+                  booking: bookResponse,
+                },
+                {
+                  headers: { Authorization: `${tokenType} ${accessToken}` },
+                }
+              )
+              .then(() => {
+                console.log("Invoice updated as Refused");
+                setErrorMessage("Payment failed. Please try again.");
+                setPaymentFailed(true);
+              })
+              .catch((error) => {
+                console.error("Error updating invoice to Refused:", error);
+                setBookingInitiated(true);
+                setErrorMessage(
+                  "Payment failed and could not update invoice status"
+                );
+              });
             break;
 
           case "cancel":
-            console.log("Payment cancelled");
-            setErrorMessage("Your payment has been canceled.");
-            setPaymentFailed(true);
+            // console.log("Payment cancelled");
+            // setErrorMessage("Your payment has been canceled.");
+            // setPaymentFailed(true);
+            // break;
+            api
+              .put(
+                `${API_BASE_URL}/invoice/${invoiceId}`,
+                {
+                  status: "Cancelled",
+                  order: orderIdentification,
+                  saleOrder: saleOrderId,
+                  booking: bookResponse,
+                },
+                {
+                  headers: { Authorization: `${tokenType} ${accessToken}` },
+                }
+              )
+              .then(() => {
+                console.log("Invoice updated as Cancelled (cancelled)");
+                setErrorMessage("Your payment has been canceled.");
+                setPaymentFailed(true);
+              })
+              .catch((error) => {
+                console.error("Error updating invoice to Cancelled:", error);
+                setBookingInitiated(true);
+                setErrorMessage(
+                  "Payment was cancelled but failed to update invoice status"
+                );
+              });
             break;
 
           case "exception":
@@ -473,16 +632,7 @@ export default function BookingPayment() {
                 Do you have a discount code?
               </h2>
               <span style={{ fontSize: 14, color: "rgba(34, 34, 34, 1)" }}>
-                Apply it at checkout to get a special discount on your order. If
-                not click{" "}
-                <span
-                  style={{
-                    textDecoration: "underline",
-                    color: "rgba(34, 34, 34, 1)",
-                  }}
-                >
-                  here
-                </span>
+                Apply it at checkout to get a special discount on your order.
                 <div className={styles.couponInputContainer}>
                   {validCoupon ? (
                     <div className={styles.couponChip}>
@@ -553,37 +703,42 @@ export default function BookingPayment() {
             )}
             {errorMessage && (
               <div className={styles.errorMessage}>
-                <div style={{ display: "flex", alignItems: "center", gap: 15 }}>
-                  <img src={Danger} alt="" />
-                  {errorMessage}
-                </div>
+                <img
+                  src={Danger}
+                  alt=""
+                  style={{ height: "20px", width: "20px" }}
+                />
+                {errorMessage}
 
-                {bookingInitiated && (
-                  <button
-                    onClick={() => {
-                      setBookingInitiated(false);
-                      setPaymentUrl(null);
-                      setInvoiceId("");
-                      setErrorMessage(null);
-                      setPaymentFailed(false);
-                      // Navigate back to the deskBook page
-                      navigate("/bookDesk");
-                    }}
-                    className={styles.resetButton}
-                    style={{
-                      marginTop: "6px",
-                      padding: "10px 22px",
-                      backgroundColor: "rgba(255, 255, 255, 1)",
-                      border: "1px solid rgba(34, 34, 34, 1)",
-                      color: "rgba(34, 34, 34, 1)",
-                      borderRadius: "4px",
-                      cursor: "pointer",
-                      fontSize: "14px",
-                    }}
-                  >
-                    Reset Application
-                  </button>
-                )}
+                {bookingInitiated &&
+                  errorMessage !== "Please enter a coupon code" && (
+                    <button
+                      onClick={() => {
+                        setBookingInitiated(false);
+                        setPaymentUrl(null);
+                        setInvoiceId("");
+                        setErrorMessage(null);
+                        setPaymentFailed(false);
+                        // Navigate back to the deskBook page
+                        navigate("/bookDesk");
+                      }}
+                      className={styles.resetButton}
+                      style={{
+                        marginTop: "6px",
+                        padding: "10px 22px",
+                        backgroundColor: "rgba(255, 255, 255, 1)",
+                        border: "1px solid rgba(34, 34, 34, 1)",
+                        color: "rgba(34, 34, 34, 1)",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        width: "50%",
+                        fontSize: "14px",
+                        alignSelf: "center",
+                      }}
+                    >
+                      Reset Application
+                    </button>
+                  )}
               </div>
             )}
 
@@ -622,7 +777,8 @@ export default function BookingPayment() {
                 color: "rgba(34, 34, 34, 1)",
                 borderRadius: "4px",
                 cursor: "pointer",
-                fontSize: "14px",
+                fontSize: "16px",
+                fontWeight: "400",
               }}
               onClick={() => navigate("/bookDesk/flexible")}
             >
@@ -646,6 +802,15 @@ export default function BookingPayment() {
           </>
         )}
       </div>
+
+      {showErrorModal && (
+  <RestartBookingModal
+    isOpen={showErrorModal}
+    onClose={() => setShowErrorModal(false)}
+    message={backendErrorMessage}
+    status={backendErrorStatus}
+  />
+)}
     </div>
   );
 }

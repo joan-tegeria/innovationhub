@@ -227,7 +227,7 @@ export default function BookOffice() {
         setWorkspaces(transformed);
 
         if (transformed.length > 0) {
-          setFieldValue("selectedWorkspace", transformed[1].value);
+          setFieldValue("selectedWorkspace", transformed[3].value);
         }
         setIsLoading(false);
       } catch (error) {
@@ -455,7 +455,7 @@ export default function BookOffice() {
 
             <div className={styles.formGroup}>
               <label htmlFor="nipt" className={styles.label}>
-                {values.selectedType === "business" ? "NIPT" : "Id Number"}
+                {values.selectedType === "business" ? "NIPT" : "ID Number"}
               </label>
               <input
                 type="text"
