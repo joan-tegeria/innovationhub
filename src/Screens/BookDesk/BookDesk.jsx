@@ -189,12 +189,12 @@ export default function BookDesk() {
       new Date(Date.now() + 86400000).toISOString().split("T")[0],
       "Daily"
     );
-    setFieldValue(
-      "birthday",
-      new Date(new Date().setFullYear(new Date().getFullYear() - 18))
-        .toISOString()
-        .split("T")[0]
-    );
+    // setFieldValue(
+    //   "birthday",
+    //   new Date(new Date().setFullYear(new Date().getFullYear() - 18))
+    //     .toISOString()
+    //     .split("T")[0]
+    // );
   }, []);
 
   const handleWorkspaceSelect = (workspaceId) => {
@@ -424,7 +424,7 @@ export default function BookDesk() {
               type="date"
               id="selectedDate"
               name="selectedDate"
-              // value={values.selectedDate}
+              value={values.selectedDate}
               onChange={handleChange}
               className={styles.input}
               autoComplete="off"
@@ -494,7 +494,7 @@ export default function BookDesk() {
                 type="date"
                 id="birthday"
                 name="birthday"
-                // value={values.birthday || ''}
+                value={values.birthday || ''}
                 onChange={handleChange}
                 className={styles.input}
                 placeholder="YYYY-MM-DD"

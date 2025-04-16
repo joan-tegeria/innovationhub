@@ -87,25 +87,28 @@ export default function FinishedBooking() {
   //   }
   // };
 
-  const handleReturnHome = (e) => {
+  const handleNavigation = (e) => {
     e.preventDefault();
+    
+    const targetUrl = "http://35.176.180.59/";
     
     // Check if we're in an iframe
     const isInIframe = window !== window.parent;
     
     if (isInIframe) {
       try {
-        // Send message to parent window to navigate to root path
+        // Send message to parent window to navigate to the target URL
         window.parent.postMessage(
-          { type: "navigateTo", path: "/", timestamp: Date.now() }, 
+          { type: "navigateToRoot", path: targetUrl, timestamp: Date.now() }, 
           "*" // Consider restricting this to your domain in production
         );
         
         // Set a timeout to fall back to direct navigation if no response from parent
         const timeoutId = setTimeout(() => {
           console.log("No response from parent, using fallback navigation");
-          window.location.href = "/";
-        }, 300); // Short timeout to keep the UX responsive
+          // Use replace to avoid adding to browser history
+          window.location.replace(targetUrl);
+        }, 300);
         
         // Listen for confirmation from parent (optional)
         const messageListener = (event) => {
@@ -118,11 +121,12 @@ export default function FinishedBooking() {
         window.addEventListener("message", messageListener);
       } catch (error) {
         console.error("Error communicating with parent window:", error);
-        window.location.href = "/";
+        // Use replace to avoid adding to browser history
+        window.location.replace(targetUrl);
       }
     } else {
-      // Direct navigation to root path
-      window.location.href = "/";
+      // Use replace to avoid adding to browser history
+      window.location.replace(targetUrl);
     }
   };
 
@@ -152,7 +156,7 @@ export default function FinishedBooking() {
             },
           }}
           style={{ width: 220, height: 42 }}
-          onClick={handleReturnHome}
+          onClick={handleNavigation}
         >
             Start new booking
         </Button>
