@@ -14,7 +14,7 @@ import RestartBookingModal from "../BookModal/RestartBookingModal.jsx";
  */
 export default function BookingPayment() {
   // Navigation and route params
-  const { bookingId } = useParams();
+  // const { bookingId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const { accessToken, tokenType } = useAuth();
@@ -35,6 +35,7 @@ export default function BookingPayment() {
     userName,
     endDate,
     workspaceLabel,
+    bookingId
   } = location.state || {};
 
   // Log initial params
@@ -62,6 +63,7 @@ export default function BookingPayment() {
     userName,
     endDate,
     workspaceLabel,
+
   ]);
   
   // =========== STATE MANAGEMENT ===========
@@ -144,9 +146,9 @@ export default function BookingPayment() {
    * 2. Get payment URL
    * 3. Open payment modal
   */
- const [backendErrorMessage, setBackendErrorMessage] = useState(null);
-const [backendErrorStatus, setBackendErrorStatus] = useState(null);
-const [showErrorModal, setShowErrorModal] = useState(false);
+//  const [backendErrorMessage, setBackendErrorMessage] = useState(null);
+// const [backendErrorStatus, setBackendErrorStatus] = useState(null);
+// const [showErrorModal, setShowErrorModal] = useState(false);
 
 
 
@@ -155,10 +157,9 @@ const handlePayment = async (e) => {
   setPaymentStatus(null);
   setErrorMessage(null);
   setPaymentFailed(false);
-  setShowPaymentModal(false); // Reset modal state
-  // Add new states to handle specific error responses
-  setBackendErrorMessage(null);
-  setBackendErrorStatus(null);
+  setShowPaymentModal(false); 
+  // setBackendErrorMessage(null);
+  // setBackendErrorStatus(null);
 
   // If we already have a payment URL, just show the modal without calling the API again
   if (bookingInitiated && paymentUrl) {
@@ -177,19 +178,15 @@ const handlePayment = async (e) => {
       username: userName,
       user: userId,
       room: workspaceId[0],
-      from: startDate,
-      to: endDate,
-      seat: seatId.toString(),
-      referral: "Shared Office Form",
       booked: period,
       discount: validCoupon ? validCoupon : 0,
-      type: period === "Multi Pass" ? "Multi Pass" : "Single Pass",
+      bookingId: bookingId,
     };
 
     console.log("Sending booking request with data:", bookingData);
 
     // Create the booking and get invoice
-    const bookingResponse = await api.post(
+    const bookingResponse = await api.put(
       `${API_BASE_URL}/shared`,
       bookingData,
       {
@@ -228,20 +225,20 @@ const handlePayment = async (e) => {
     console.error("Error during booking/payment:", error);
     
     // Check for 400 error with message and status
-    if (error.response && error.response.status === 400) {
-      // Set backend error message and status from response
-      const backendMessage = error.response.data.message || "Unknown backend error";
-      const backendStatus = error.response.data.status || "error";
+    // if (error.response && error.response.status === 400) {
+    //   // Set backend error message and status from response
+    //   const backendMessage = error.response.data.message || "Unknown backend error";
+    //   const backendStatus = error.response.data.status || "error";
       
-      setBackendErrorMessage(backendMessage);
-      setBackendErrorStatus(backendStatus);
+    //   setBackendErrorMessage(backendMessage);
+    //   setBackendErrorStatus(backendStatus);
       
-      // Show error modal based on backend response
-      setShowErrorModal(true);
-    } else {
-      // Default error handling for other types of errors
-      setErrorMessage("Failed to process booking and payment");
-    }
+    //   // Show error modal based on backend response
+    //   setShowErrorModal(true);
+    // } else {
+    //   // Default error handling for other types of errors
+    //   setErrorMessage("Failed to process booking and payment");
+    // }
   } finally {
     setLoading(false);
   }
@@ -803,14 +800,14 @@ const handlePayment = async (e) => {
         )}
       </div>
 
-      {showErrorModal && (
+      {/* {showErrorModal && (
   <RestartBookingModal
     isOpen={showErrorModal}
     onClose={() => setShowErrorModal(false)}
     message={backendErrorMessage}
     status={backendErrorStatus}
   />
-)}
+)} */}
     </div>
   );
 }

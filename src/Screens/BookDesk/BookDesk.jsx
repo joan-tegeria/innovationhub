@@ -8,6 +8,7 @@ import { transformWorkspacesResponse } from "../../util/transformers";
 import { useNavigate, useParams } from "react-router-dom";
 import info from "../../assets/info.svg";
 import infowhite from "../../assets/infowhite.svg";
+import RestartBookingModal from "../BookModal/RestartBookingModal";
 
 // Get today's date in YYYY-MM-DD format
 const today = new Date().toISOString().split("T")[0];
@@ -88,6 +89,11 @@ export default function BookDesk() {
   const [endDate, setEndDate] = useState("");
   const [checkingAvailability, setCheckingAvailability] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const [backendErrorMessage, setBackendErrorMessage] = useState(null);
+  const [backendErrorStatus, setBackendErrorStatus] = useState(null);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+
   const {
     values,
     handleChange,
@@ -114,6 +120,9 @@ export default function BookDesk() {
       setIsSubmitting(true);
       try {
         // Create user
+
+        setBackendErrorMessage(null);
+        setBackendErrorStatus(null);
         const userData = {
           name: values.first_name,
           lastName: values.last_name,
@@ -121,18 +130,6 @@ export default function BookDesk() {
           birthday: values.birthday || "",
           id: values.idNumber || "",
         };
-
-        const userResponse = await api.post(
-          `${API_BASE_URL}/account`,
-          userData,
-          {
-            headers: { Authorization: `${tokenType} ${accessToken}` },
-          }
-        );
-
-        // if (!userResponse.data?.data?.id) {
-        //   throw new Error("Failed to create user account");
-        // }
 
         const _selectedWorkspace = workspaces.find((workspace) => {
           if (
@@ -146,17 +143,40 @@ export default function BookDesk() {
           return false;
         });
 
-        console.log("🚀 ~ useEffect ~ selected workspace:", _selectedWorkspace);
+        // Prepare booking data with the user ID we just got
+        const bookingData = {
+          username: `${values.first_name} ${values.last_name}`,
+          room: values.selectedWorkspace[0],
+          from: values.selectedDate,
+          to: endDate,
+          seat: randomSeat.toString(),
+          // referral: "Shared Office Form",
+          booked: values.bookingPeriod,
+          type:
+            values.bookingPeriod === "Multi Pass"
+              ? "Multi Pass"
+              : "Single Pass",
+        };
 
-        if (_selectedWorkspace) {
-          console.log("Selected workspace label:", _selectedWorkspace.label);
-        }
+        const [bookingResponse, accountResponse] = await Promise.all([
+          api.post(`${API_BASE_URL}/shared`, bookingData, {
+            headers: { Authorization: `${tokenType} ${accessToken}` },
+          }),
+          api.post(`${API_BASE_URL}/account`, userData, {
+            headers: { Authorization: `${tokenType} ${accessToken}` },
+          }),
+        ]);
 
-        // Navigate to payment page with all necessary information as state
-        console.log("Find the user id ", userResponse);
+        console.log(
+          "Booking response received:",
+          bookingResponse.data,
+          accountResponse.data
+        );
+
+        // Navigate to payment page with all necessary information
         navigate(`/booking/payment`, {
           state: {
-            userId: userResponse.data.data,
+            userId: accountResponse.data.data,
             workspaceId: values.selectedWorkspace,
             priceId: priceId,
             startDate: values.selectedDate,
@@ -167,12 +187,29 @@ export default function BookDesk() {
             userName: `${values.first_name} ${values.last_name}`,
             endDate: endDate,
             workspaceLabel: _selectedWorkspace,
+            bookingId: bookingResponse.data.bookingId,
           },
         });
       } catch (error) {
-        console.error("Error during user creation:", error);
+        console.error("Error during user creation or booking:", error);
         console.log(error);
-        // You might want to show an error message to the user here
+        // Error handling
+        if (error.response && error.response.status === 400) {
+          // Set backend error message and status from response
+          const backendMessage = error.response.data.message || "Unknown backend error";
+          const backendStatus = error.response.data.status || "error";
+          
+          setBackendErrorMessage(backendMessage);
+          setBackendErrorStatus(backendStatus);
+         
+          
+          // Show error modal based on backend response
+          setShowErrorModal(true);
+        }  else {
+          // Default error handling for other types of errors
+          setErrorMessage("Failed to process booking and payment");
+        }
+        
       } finally {
         setIsSubmitting(false);
       }
@@ -361,6 +398,13 @@ export default function BookDesk() {
     );
   }
 
+
+  const handleResetFields = () => {
+    setFieldValue("selectedDate", "");
+    setFieldValue("bookingPeriod", "Daily");
+    setShowErrorModal(false)
+  };
+
   return (
     <div className={styles.background}>
       <div className={styles.container}>
@@ -434,15 +478,20 @@ export default function BookDesk() {
               <div className={styles.error}>{errors.selectedDate}</div>
             )}
           </div>
-          {isLoading ? <p>isLoading</p> : infoMessage !== "" && values.selectedDate && (
-            <div
-              className={
-                isAvailable ? styles.infoContainer : styles.infoContainerErr
-              }
-            >
-              <img src={isAvailable ? info : infowhite} alt="" />
-              <span>{infoMessage}</span>
-            </div>
+          {isLoading ? (
+            <p>isLoading</p>
+          ) : (
+            infoMessage !== "" &&
+            values.selectedDate && (
+              <div
+                className={
+                  isAvailable ? styles.infoContainer : styles.infoContainerErr
+                }
+              >
+                <img src={isAvailable ? info : infowhite} alt="" />
+                <span>{infoMessage}</span>
+              </div>
+            )
           )}
           <div className={styles.divider} />
           <h1 className={styles.subHeading}>Personal Information</h1>
@@ -494,7 +543,7 @@ export default function BookDesk() {
                 type="date"
                 id="birthday"
                 name="birthday"
-                value={values.birthday || ''}
+                value={values.birthday || ""}
                 onChange={handleChange}
                 className={styles.input}
                 placeholder="YYYY-MM-DD"
@@ -569,6 +618,15 @@ export default function BookDesk() {
           </div>
         </form>
       </div>
+      {showErrorModal && (
+        <RestartBookingModal
+          isOpen={showErrorModal}
+          onClose={() => setShowErrorModal(false)}
+          message={backendErrorMessage}
+          status={backendErrorStatus}
+          onReset={handleResetFields}
+        />
+      )}
     </div>
   );
 }

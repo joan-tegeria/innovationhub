@@ -106,7 +106,6 @@ function App() {
               index
               element={<Navigate to="/bookDesk/flexible" replace />}
             />
-
             <Route path=":type" element={<BookDesk />} />
           </Route>
           <Route path="/bookOffice" element={<BookOffice />} />

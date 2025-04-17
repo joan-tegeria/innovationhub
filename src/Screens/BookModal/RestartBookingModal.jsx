@@ -1,20 +1,18 @@
 import React from "react";
 import styles from "./RestartBoking.module.css";
 import CalendarModal from "../../assets/CalendarModal.svg";
-import { useNavigate } from "react-router-dom";
 
 export default function RestartBookingModal({
   isOpen,
   onClose,
   message,
+  onReset
 }) {
   if (!isOpen) return null;
 
-  const navigate = useNavigate();
-
   const handleRestart = () => {
     onClose();
-    navigate("/bookDesk/flexible");
+    onReset()
   };
 
   return (
@@ -29,7 +27,7 @@ export default function RestartBookingModal({
         </div>
         <div className={styles.titleDivider}></div>
         <button className={styles.button} onClick={handleRestart}>
-          Restart
+          Reset
         </button>
       </div>
     </div>
