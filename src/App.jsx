@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-// import "./App.css";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
+import "./App.css";
 // import BookingApp from "./BookingApp";
 
 import Home from "./Home";
 import ContactUs from "./ContactUs";
+import Footer from "./components/Footer";
 
 import Events from "./Events";
 import { AuthProvider } from "./context/Auth";
@@ -22,8 +29,26 @@ import BookDesk from "./Screens/BookDesk";
 import BookingPayment from "./Screens/BookingPayment/BookingPayment";
 import FinishedBooking from "./Screens/FinishedBooking/FinishedBooking";
 import BookOffice from "./Screens/BookOffice";
+import Navbar from "./components/Navbar";
 
-function App() {
+// Wrapper component to handle conditional rendering of Navbar and Footer
+const AppContent = () => {
+  const location = useLocation();
+
+  // Define routes where Navbar and Footer should appear
+  const showNavAndFooter = [
+    "/events",
+    "/bookDesk",
+    "/bookOffice",
+    "/booking/payment",
+    "/booking-success",
+  ];
+
+  // Check if current path starts with any of the routes in showNavAndFooter
+  const shouldShowNavAndFooter = showNavAndFooter.some((route) =>
+    location.pathname.startsWith(route)
+  );
+
   // Function to send the current height to the parent
   const sendHeightToParent = () => {
     const height = document.documentElement.scrollHeight;
@@ -68,8 +93,9 @@ function App() {
   }, []); // Empty dependency array ensures this runs only on mount
 
   return (
-    <AuthProvider>
-      <BrowserRouter>
+    <div className="app-container">
+      {shouldShowNavAndFooter && <Navbar />}
+      <main className="main-content">
         <Routes>
           {/* Main Routes */}
           <Route path="/" element={<Home />} />
@@ -77,7 +103,7 @@ function App() {
           <Route path="/events" element={<Events />} />
           <Route path="/membershipplans" element={<MembershipPlans />} />
           <Route path="/partners" element={<Partners />} />
-          <Route path="/eventslist" element={<EventTable />} />
+          <Route path="/listevents" element={<EventTable />} />
 
           {/* Desk Routes */}
           <Route path="/desks" element={<Desks />}>
@@ -112,6 +138,17 @@ function App() {
           <Route path="/booking/payment" element={<BookingPayment />} />
           <Route path="/booking-success" element={<FinishedBooking />} />
         </Routes>
+      </main>
+      {shouldShowNavAndFooter && <Footer />}
+    </div>
+  );
+};
+
+function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <AppContent />
       </BrowserRouter>
     </AuthProvider>
   );

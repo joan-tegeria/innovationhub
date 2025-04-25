@@ -30,11 +30,11 @@ export default function FinishedBooking() {
         );
       } catch (error) {
         // Fallback to direct window.open if postMessage fails
-        window.open(link);
+        window.location.href = link;
       }
     } else {
       // If not in iframe, open directly
-      window.open(link);
+      window.location.href = link;
     }
   };
 
@@ -66,7 +66,7 @@ export default function FinishedBooking() {
           style={{ width: 220, height: 42 }}
           onClick={handleReturnHome}
         >
-            Start new booking
+            Back to home
         </Button>
       </div>
     </div>

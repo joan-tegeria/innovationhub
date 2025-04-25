@@ -1,12 +1,10 @@
 .background {
-  position: fixed;
-  top: 0;
-  left: 0;
+  position: relative;
   background-image: url("../../assets/pdeskback.png");
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
-  width: 100vw;
+  width: 100%;
   height: 100vh;
   min-height: 100vh;
   display: flex;
@@ -14,6 +12,18 @@
   align-items: center;
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px); /* For Safari support */
+}
+
+/* Add media query to remove background on mobile */
+@media screen and (max-width: 768px) {
+  .background {
+    background-image: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    height: auto;
+    min-height: auto;
+    padding: 20px 0;
+  }
 }
 
 .background::before {
@@ -29,6 +39,13 @@
   -webkit-backdrop-filter: blur(5px);
 }
 
+/* Update the overlay for mobile */
+@media screen and (max-width: 768px) {
+  .background::before {
+    display: none;
+  }
+}
+
 .container {
   position: relative;
   z-index: 2; /* Place container above the overlay */
@@ -36,13 +53,10 @@
   margin: 0 auto;
   margin-top: 1px;
 
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-
   box-sizing: border-box;
   padding: 32px;
 
   background-color: white;
-
 }
 /* Add responsive container sizing */
 @media screen and (max-width: 860px) {
@@ -144,7 +158,6 @@
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.3s;
- 
 }
 
 @media screen and (max-width: 600px) {
@@ -213,7 +226,6 @@
   height: 1px;
   background-color: #999999;
 }
-
 
 .titleDivider {
   margin-bottom: 20px;
@@ -289,7 +301,6 @@
   gap: 4px;
 }
 
-
 .priceContainer:first-child {
   color: #999999;
   font-size: 14px;
@@ -306,7 +317,7 @@
   color: #339319;
   align-items: center;
   gap: 8px;
-  border: 1px solid  #339319;
+  border: 1px solid #339319;
   background-color: rgba(51, 147, 25, 0.05);
   padding: 15px;
   width: 100%;
@@ -351,10 +362,9 @@
   animation: spin 1s ease-in-out infinite;
 }
 
-.title{
+.title {
   font-size: 18px;
 }
-
 
 @keyframes spin {
   0% {

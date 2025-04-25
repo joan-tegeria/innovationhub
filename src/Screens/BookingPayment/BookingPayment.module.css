@@ -1,16 +1,29 @@
 .background {
   position: relative;
-  background-image: url("http://35.176.180.59/wp-content/uploads/2024/12/back.png");
+  background-image: url("../../assets/pdeskback.png");
   background-repeat: no-repeat;
-  object-fit: cover;
+  background-position: center;
   background-size: cover;
   width: 100%;
-  height: 100%;
-
-  min-height: 1000px;
+  height: 100vh;
+  min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px); /* For Safari support */
+}
+
+/* Add media query to remove background on mobile */
+@media screen and (max-width: 768px) {
+  .background {
+    background-image: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    height: auto;
+    min-height: auto;
+    padding: 20px 0;
+  }
 }
 
 .background::before {
@@ -20,9 +33,19 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Black overlay with 50% opacity */
+  background-color: rgba(0, 0, 0, 0.4); /* Slightly reduced opacity */
   z-index: 1;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
+
+/* Update the overlay for mobile */
+@media screen and (max-width: 768px) {
+  .background::before {
+    display: none;
+  }
+}
+
 .formBody {
   max-width: 600px;
   z-index: 2;
@@ -45,7 +68,6 @@
 .subtitle {
   font-size: 16px;
   color: #666;
-
 }
 
 .sectionTitle {
@@ -232,14 +254,13 @@
   cursor: not-allowed;
 }
 
-.backButton{
+.backButton {
   background-color: "white";
   width: 100%;
   border: 1px solid #ccc;
   height: 50px;
   margin-top: 10px;
 }
-
 
 .errorMessage {
   display: flex;
@@ -274,7 +295,6 @@
   border-top-color: #eb3778; /* Pink color matching the submit button */
   animation: spin 1s ease-in-out infinite;
 }
-
 
 @keyframes spin {
   0% {

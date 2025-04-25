@@ -74,3 +74,9 @@ span,
 div {
   font-family: "Termina", sans-serif !important;
 }
+
+input[type="date"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}

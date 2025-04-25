@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { CircularProgress, Chip } from "@mui/material";
 import styles from "./BookingPayment.module.css";
@@ -35,7 +35,7 @@ export default function BookingPayment() {
     userName,
     endDate,
     workspaceLabel,
-    bookingId
+    bookingId,
   } = location.state || {};
 
   // Log initial params
@@ -63,10 +63,10 @@ export default function BookingPayment() {
     userName,
     endDate,
     workspaceLabel,
-
   ]);
-  
+
   // =========== STATE MANAGEMENT ===========
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
@@ -74,17 +74,24 @@ export default function BookingPayment() {
   const [paymentFailed, setPaymentFailed] = useState(false);
   const [saleOrderId, setSaleOrderId] = useState("");
   const [bookResponse, setBookResponse] = useState("");
-  
+
   // Payment modal state
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentUrl, setPaymentUrl] = useState(null);
   const [bookingInitiated, setBookingInitiated] = useState(false);
-  
+  const modalTimeoutRef = useRef(null);
+
   // Coupon state
   const [couponCode, setCouponCode] = useState("");
   const [couponLoading, setCouponLoading] = useState(false);
   const [validCoupon, setValidCoupon] = useState(null);
-  
+
+  useEffect(() => {
+    setTimeout(() => {
+      setIsButtonDisabled(true);
+    }, 600000);
+  }, []);
+
   // Booking details state
   const [bookingDetails, setBookingDetails] = useState({
     workspace: {
@@ -108,28 +115,34 @@ export default function BookingPayment() {
   // =========== UTILITY FUNCTIONS ===========
   /**
    * Format currency in ALL (Albanian Lek)
-  */
- const formatCurrency = (value) => {
-   return (
-     new Intl.NumberFormat("en-US", {
-       style: "currency",
-       currency: "ALL",
-       minimumFractionDigits: 0,
-       maximumFractionDigits: 2,
+   */
+  const formatCurrency = (value) => {
+    return (
+      new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "ALL",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
       })
         .format(value)
         .replace("ALL", "")
         .trim() + " ALL"
-      );
-    };
-    
-    // =========== HANDLERS ===========
-    /**
-     * Close the payment modal and handle post-close actions
-    */
-   const handleClosePayment = useCallback(() => {
+    );
+  };
+
+  // =========== HANDLERS ===========
+  /**
+   * Close the payment modal and handle post-close actions
+   */
+  const handleClosePayment = useCallback(() => {
     console.log("Closing payment modal");
     setShowPaymentModal(false);
+
+    // Clear the timeout when modal is closed manually
+    if (modalTimeoutRef.current) {
+      clearTimeout(modalTimeoutRef.current);
+      modalTimeoutRef.current = null;
+    }
 
     // Only show cancelled message if it wasn't a success and no specific error is already set
     if (paymentStatus !== "success" && !errorMessage) {
@@ -139,192 +152,111 @@ export default function BookingPayment() {
       }, 100);
     }
   }, [paymentStatus, errorMessage]);
-  
+
   /**
    * Handle the payment process
    * 1. Create booking
    * 2. Get payment URL
    * 3. Open payment modal
-  */
-//  const [backendErrorMessage, setBackendErrorMessage] = useState(null);
-// const [backendErrorStatus, setBackendErrorStatus] = useState(null);
-// const [showErrorModal, setShowErrorModal] = useState(false);
+   */
+  const handlePayment = async (e) => {
+    e.preventDefault();
+    setPaymentStatus(null);
+    setErrorMessage(null);
+    setPaymentFailed(false);
+    setShowPaymentModal(false);
 
-
-
-const handlePayment = async (e) => {
-  e.preventDefault();
-  setPaymentStatus(null);
-  setErrorMessage(null);
-  setPaymentFailed(false);
-  setShowPaymentModal(false); 
-  // setBackendErrorMessage(null);
-  // setBackendErrorStatus(null);
-
-  // If we already have a payment URL, just show the modal without calling the API again
-  if (bookingInitiated && paymentUrl) {
-    console.log("Reopening payment modal with existing payment URL");
-    setShowPaymentModal(true);
-    return;
-  }
-
-  setLoading(true);
-
-  try {
-    console.log("Starting payment process...");
-
-    // Prepare booking data
-    const bookingData = {
-      username: userName,
-      user: userId,
-      room: workspaceId[0],
-      booked: period,
-      discount: validCoupon ? validCoupon : 0,
-      bookingId: bookingId,
-    };
-
-    console.log("Sending booking request with data:", bookingData);
-
-    // Create the booking and get invoice
-    const bookingResponse = await api.put(
-      `${API_BASE_URL}/shared`,
-      bookingData,
-      {
-        headers: { Authorization: `${tokenType} ${accessToken}` },
-      }
-    );
-
-    console.log("Booking response received:", bookingResponse.data);
-
-    if (!bookingResponse.data?.invoiceId) {
-      throw new Error("Failed to generate invoice for booking");
+    // Clear any existing timeout
+    if (modalTimeoutRef.current) {
+      clearTimeout(modalTimeoutRef.current);
+      modalTimeoutRef.current = null;
     }
 
-    // Store invoice ID for later use (when confirming payment)
-    setInvoiceId(bookingResponse.data.invoiceId);
-    setSaleOrderId(bookingResponse.data.saleOrderId);
-    setBookResponse(bookingResponse.data.bookedResponse);
-
-    // Get payment URL from response
-    const paymentUrl = `${bookingResponse.data.paymentSession}&mode=frameless`;
-
-    if (!paymentUrl) {
-      throw new Error("No payment URL received from server");
-    }
-
-    console.log("Opening payment modal with URL:", paymentUrl);
-    setPaymentUrl(paymentUrl);
-    setBookingInitiated(true);
-
-    // Small delay before showing modal
-    setTimeout(() => {
+    // If we already have a payment URL, just show the modal without calling the API again
+    if (bookingInitiated && paymentUrl) {
+      console.log("Reopening payment modal with existing payment URL");
       setShowPaymentModal(true);
-    }, 100);
-  } catch (error) {
-    setBookingInitiated(true);
-    console.error("Error during booking/payment:", error);
-    
-    // Check for 400 error with message and status
-    // if (error.response && error.response.status === 400) {
-    //   // Set backend error message and status from response
-    //   const backendMessage = error.response.data.message || "Unknown backend error";
-    //   const backendStatus = error.response.data.status || "error";
-      
-    //   setBackendErrorMessage(backendMessage);
-    //   setBackendErrorStatus(backendStatus);
-      
-    //   // Show error modal based on backend response
-    //   setShowErrorModal(true);
-    // } else {
-    //   // Default error handling for other types of errors
-    //   setErrorMessage("Failed to process booking and payment");
-    // }
-  } finally {
-    setLoading(false);
-  }
-};
 
+      // Set a new timeout for 10 minutes
+      modalTimeoutRef.current = setTimeout(() => {
+        console.log(
+          "Modal timeout reached - closing payment modal due to inactivity"
+        );
+        setErrorMessage("Payment modal closed due to inactivity");
+        handleClosePayment();
+      }, 10 * 60 * 1000); // 10 minutes in milliseconds
 
-//  const handlePayment = async (e) => {
-//     e.preventDefault();
-//     setPaymentStatus(null);
-//     setErrorMessage(null);
-//     setPaymentFailed(false);
-//     setShowPaymentModal(false); // Reset modal state
+      return;
+    }
 
-//     // If we already have a payment URL, just show the modal without calling the API again
-//     if (bookingInitiated && paymentUrl) {
-//       console.log("Reopening payment modal with existing payment URL");
-//       setShowPaymentModal(true);
-//       return;
-//     }
+    setLoading(true);
 
-//     setLoading(true);
+    try {
+      console.log("Starting payment process...");
 
-//     try {
-//       console.log("Starting payment process...");
+      // Prepare booking data
+      const bookingData = {
+        username: userName,
+        user: userId,
+        room: workspaceId[0],
+        booked: period,
+        discount: validCoupon ? validCoupon : 0,
+        bookingId: bookingId,
+      };
 
-//       // Prepare booking data
-//       const bookingData = {
-//         username: userName,
-//         user: userId,
-//         room: workspaceId[0],
-//         from: startDate,
-//         to: endDate,
-//         seat: seatId.toString(),
-//         referral: "Shared Office Form",
-//         booked: period,
-//         discount: validCoupon ? validCoupon : 0,
-//         type: period === "Multi Pass" ? "Multi Pass" : "Single Pass",
-//       };
+      console.log("Sending booking request with data:", bookingData);
 
-//       console.log("Sending booking request with data:", bookingData);
+      // Create the booking and get invoice
+      const bookingResponse = await api.put(
+        `${API_BASE_URL}/shared`,
+        bookingData,
+        {
+          headers: { Authorization: `${tokenType} ${accessToken}` },
+        }
+      );
 
-//       // Create the booking and get invoice
-//       const bookingResponse = await api.post(
-//         `${API_BASE_URL}/shared`,
-//         bookingData,
-//         {
-//           headers: { Authorization: `${tokenType} ${accessToken}` },
-//         }
-//       );
+      console.log("Booking response received:", bookingResponse.data);
 
-//       console.log("Booking response received:", bookingResponse.data);
+      if (!bookingResponse.data?.invoiceId) {
+        throw new Error("Failed to generate invoice for booking");
+      }
 
-//       if (!bookingResponse.data?.invoiceId) {
-//         throw new Error("Failed to generate invoice for booking");
-//       }
+      // Store invoice ID for later use (when confirming payment)
+      setInvoiceId(bookingResponse.data.invoiceId);
+      setSaleOrderId(bookingResponse.data.saleOrderId);
+      setBookResponse(bookingResponse.data.bookedResponse);
 
-//       // Store invoice ID for later use (when confirming payment)
-//       setInvoiceId(bookingResponse.data.invoiceId);
-//       setSaleOrderId(bookingResponse.data.saleOrderId);
-//       setBookResponse(bookingResponse.data.bookedResponse);
+      // Get payment URL from response
+      const paymentUrl = `${bookingResponse.data.paymentSession}&mode=frameless`;
 
-//       // Get payment URL from response
-//       const paymentUrl = `${bookingResponse.data.paymentSession}&mode=frameless`;
+      if (!paymentUrl) {
+        throw new Error("No payment URL received from server");
+      }
 
-//       if (!paymentUrl) {
-//         throw new Error("No payment URL received from server");
-//       }
+      console.log("Opening payment modal with URL:", paymentUrl);
+      setPaymentUrl(paymentUrl);
+      setBookingInitiated(true);
 
-//       console.log("Opening payment modal with URL:", paymentUrl);
-//       setPaymentUrl(paymentUrl);
-//       setBookingInitiated(true);
+      // Small delay before showing modal
+      setTimeout(() => {
+        setShowPaymentModal(true);
 
-//       // Small delay before showing modal
-//       setTimeout(() => {
-//         setShowPaymentModal(true);
-//       }, 100);
-//     } catch (error) {
-//       setBookingInitiated(true);
-//       console.error("Error during booking/payment:", error);
-//       setErrorMessage("Failed to process booking and payment");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-
+        // Set timeout for 10 minutes to close the modal if no action is taken
+        modalTimeoutRef.current = setTimeout(() => {
+          console.log(
+            "Modal timeout reached - closing payment modal due to inactivity"
+          );
+          setErrorMessage("Payment modal closed due to inactivity");
+          handleClosePayment();
+        },  10 * 60 * 1000); // 10 minutes in milliseconds
+      }, 100);
+    } catch (error) {
+      setBookingInitiated(true);
+      console.error("Error during booking/payment:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   /**
    * Apply a coupon code to the current booking
@@ -399,6 +331,12 @@ const handlePayment = async (e) => {
         data: event.data,
       });
 
+      // Reset the timeout on any message received from the payment iframe
+      if (modalTimeoutRef.current) {
+        clearTimeout(modalTimeoutRef.current);
+        modalTimeoutRef.current = null;
+      }
+
       // Verify the origin
       if (!event.origin.includes("raiaccept.com")) {
         console.log("Ignoring message from unknown origin:", event.origin);
@@ -409,6 +347,18 @@ const handlePayment = async (e) => {
         const data = event.data;
         if (data?.name !== "orderResult") {
           console.log("Ignoring non-orderResult message");
+
+          // Set a new timeout after receiving a non-orderResult message
+          if (showPaymentModal) {
+            modalTimeoutRef.current = setTimeout(() => {
+              console.log(
+                "Modal timeout reached - closing payment modal due to inactivity"
+              );
+              setErrorMessage("Payment modal closed due to inactivity");
+              handleClosePayment();
+            },  10 * 60 * 1000); // 10 minutes in milliseconds
+          }
+
           return;
         }
 
@@ -549,7 +499,15 @@ const handlePayment = async (e) => {
     return () => {
       window.removeEventListener("message", messageHandler);
     };
-  }, [navigate, invoiceId, API_BASE_URL, tokenType, accessToken]);
+  }, [
+    navigate,
+    invoiceId,
+    API_BASE_URL,
+    tokenType,
+    accessToken,
+    handleClosePayment,
+    showPaymentModal,
+  ]);
 
   /**
    * Log important state changes
@@ -562,6 +520,16 @@ const handlePayment = async (e) => {
       error: errorMessage,
     });
   }, [showPaymentModal, paymentUrl, paymentStatus, errorMessage]);
+
+  // Cleanup timeout on component unmount
+  useEffect(() => {
+    return () => {
+      if (modalTimeoutRef.current) {
+        clearTimeout(modalTimeoutRef.current);
+        modalTimeoutRef.current = null;
+      }
+    };
+  }, []);
 
   // =========== RENDER ===========
   // if (loading) {
@@ -754,7 +722,9 @@ const handlePayment = async (e) => {
             <button
               onClick={handlePayment}
               className={styles.paymentButton}
-              disabled={paymentStatus === "success" || paymentFailed}
+              disabled={
+                paymentStatus === "success" || paymentFailed || isButtonDisabled
+              }
             >
               {paymentStatus === "success"
                 ? "Payment Completed"
