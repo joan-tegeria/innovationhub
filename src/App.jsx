@@ -57,12 +57,20 @@ const AppContent = () => {
 
   // Send height when component mounts or resizes
   useEffect(() => {
+    // Set viewport height for mobile devices
+    const setViewportHeight = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty("--vh", `${vh}px`);
+    };
+
     // Send height initially
     sendHeightToParent();
+    setViewportHeight();
 
     // Listen for window resizing and send height again
     const handleResize = () => {
       sendHeightToParent();
+      setViewportHeight();
     };
 
     // Prevent scroll position from changing when date picker opens

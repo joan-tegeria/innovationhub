@@ -1,5 +1,6 @@
 .app-container {
-  min-height: 100vh;
+  min-height: 100vh; /* Fallback for browsers that do not support CSS variables */
+  min-height: calc(var(--vh, 1vh) * 100);
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -7,11 +8,15 @@
 
 .main-content {
   flex: 1;
-
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
+  /* Add padding to prevent content from being hidden under navbar and footer */
+  padding-top: 70px; /* Space for navbar */
+  /* padding-bottom: 20px; Space for footer */
+  min-height: calc(100vh - 70px); /* Fallback */
+  min-height: calc((var(--vh, 1vh) * 100) - 70px); /* Using CSS variable */
 }
 
 .main-content > * {
@@ -26,6 +31,7 @@ body {
   font-family: "Termina Test", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 
 * {
@@ -41,4 +47,12 @@ body {
 * {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
+}
+
+/* Media query for smaller screens */
+@media screen and (max-width: 768px) {
+  .main-content {
+    padding-top: 60px; /* Smaller space for navbar */
+    padding-bottom: 15px; /* Smaller space for footer */
+  }
 }

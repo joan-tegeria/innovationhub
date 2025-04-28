@@ -196,19 +196,16 @@ export default function BookingPayment() {
 
       // Prepare booking data
       const bookingData = {
-        username: userName,
-        user: userId,
-        room: workspaceId[0],
-        booked: period,
-        discount: validCoupon ? validCoupon : 0,
         bookingId: bookingId,
+        contact: userId,
+        discount: validCoupon ? validCoupon : 0,
       };
 
       console.log("Sending booking request with data:", bookingData);
 
       // Create the booking and get invoice
-      const bookingResponse = await api.put(
-        `${API_BASE_URL}/shared`,
+      const bookingResponse = await api.post(
+        `${API_BASE_URL}/generatePayment`,
         bookingData,
         {
           headers: { Authorization: `${tokenType} ${accessToken}` },
@@ -216,15 +213,6 @@ export default function BookingPayment() {
       );
 
       console.log("Booking response received:", bookingResponse.data);
-
-      if (!bookingResponse.data?.invoiceId) {
-        throw new Error("Failed to generate invoice for booking");
-      }
-
-      // Store invoice ID for later use (when confirming payment)
-      setInvoiceId(bookingResponse.data.invoiceId);
-      setSaleOrderId(bookingResponse.data.saleOrderId);
-      setBookResponse(bookingResponse.data.bookedResponse);
 
       // Get payment URL from response
       const paymentUrl = `${bookingResponse.data.paymentSession}&mode=frameless`;
@@ -248,7 +236,7 @@ export default function BookingPayment() {
           );
           setErrorMessage("Payment modal closed due to inactivity");
           handleClosePayment();
-        },  10 * 60 * 1000); // 10 minutes in milliseconds
+        }, 10 * 60 * 1000); // 10 minutes in milliseconds
       }, 100);
     } catch (error) {
       setBookingInitiated(true);
@@ -356,7 +344,7 @@ export default function BookingPayment() {
               );
               setErrorMessage("Payment modal closed due to inactivity");
               handleClosePayment();
-            },  10 * 60 * 1000); // 10 minutes in milliseconds
+            }, 10 * 60 * 1000); // 10 minutes in milliseconds
           }
 
           return;
@@ -377,36 +365,11 @@ export default function BookingPayment() {
           case "success":
             console.log("Payment successful, updating invoice status");
             // Update the invoice status
-            api
-              .put(
-                `${API_BASE_URL}/invoice/${invoiceId}`,
-                {
-                  status: "Approved",
-                  order: orderIdentification,
-                  saleOrder: saleOrderId,
-                  booking: bookResponse,
-                },
-                {
-                  headers: { Authorization: `${tokenType} ${accessToken}` },
-                }
-              )
-              .then(() => {
-                console.log("Invoice updated successfully");
-                // Navigate to success page
-
-                navigate(`/booking-success`, {
-                  state: {
-                    type: "personal",
-                  },
-                });
-              })
-              .catch((error) => {
-                console.error("Error updating invoice:", error);
-                setBookingInitiated(true);
-                setErrorMessage(
-                  "Payment completed but failed to update booking status"
-                );
-              });
+            navigate(`/booking-success`, {
+              state: {
+                type: "personal",
+              },
+            });
             break;
 
           case "failure":

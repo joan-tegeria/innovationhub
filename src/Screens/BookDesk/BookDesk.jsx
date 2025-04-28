@@ -94,10 +94,6 @@ export default function BookDesk() {
   const [backendErrorStatus, setBackendErrorStatus] = useState(null);
   const [showErrorModal, setShowErrorModal] = useState(false);
 
-  
-
-
-
   const {
     values,
     handleChange,
@@ -123,11 +119,20 @@ export default function BookDesk() {
     onSubmit: async (values) => {
       setIsSubmitting(true);
       try {
-        // Create user
-
         setBackendErrorMessage(null);
         setBackendErrorStatus(null);
-        const userData = {
+
+        // Create combined data object for a single API call
+        const combinedData = {
+          room: values.selectedWorkspace[0],
+          from: values.selectedDate,
+          to: endDate,
+          seat: randomSeat.toString(),
+          booked: values.bookingPeriod,
+          type:
+            values.bookingPeriod === "Multi Pass"
+              ? "Multi Pass"
+              : "Single Pass",
           name: values.first_name,
           lastName: values.last_name,
           email: values.email,
@@ -135,61 +140,40 @@ export default function BookDesk() {
           id: values.idNumber || "",
         };
 
-        const _selectedWorkspace = workspaces.find((workspace) => {
-          if (
-            Array.isArray(workspace.value) &&
-            Array.isArray(values.selectedWorkspace)
-          ) {
-            return workspace.value.some((val) =>
-              values.selectedWorkspace.includes(val)
-            );
+        // Make a single API call
+        const bookingResponse = await api.post(
+          `${API_BASE_URL}/shared`,
+          combinedData,
+          {
+            headers: { Authorization: `${tokenType} ${accessToken}` },
           }
-          return false;
-        });
-
-        // Ensure _selectedWorkspace is properly defined before using it
-        const selectedWorkspaceLabel =
-          _selectedWorkspace?.label ||
-          workspaces.find(
-            (ws) => String(ws.value) === String(values.selectedWorkspace)
-          )?.label ||
-          "Unknown Workspace";
-
-        // Prepare booking data with the user ID we just got
-        const bookingData = {
-          username: `${values.first_name} ${values.last_name}`,
-          room: values.selectedWorkspace[0],
-          from: values.selectedDate,
-          to: endDate,
-          seat: randomSeat.toString(),
-          // referral: "Shared Office Form",
-          booked: values.bookingPeriod,
-          type:
-            values.bookingPeriod === "Multi Pass"
-              ? "Multi Pass"
-              : "Single Pass",
-        };
-
-        const [bookingResponse, accountResponse] = await Promise.all([
-          api.post(`${API_BASE_URL}/shared`, bookingData, {
-            headers: { Authorization: `${tokenType} ${accessToken}` },
-          }),
-          api.post(`${API_BASE_URL}/account`, userData, {
-            headers: { Authorization: `${tokenType} ${accessToken}` },
-          }),
-        ]);
-
-        console.log(
-          "Booking response received:",
-          bookingResponse.data,
-          accountResponse.data
         );
+
+        console.log("Booking response received:", bookingResponse.data);
 
         // Wait to ensure all state updates have been applied
         const prepareNavigation = async () => {
+          // Find selected workspace label
+          const selectedWorkspaceLabel =
+            workspaces.find((ws) => {
+              if (
+                Array.isArray(ws.value) &&
+                Array.isArray(values.selectedWorkspace)
+              ) {
+                return ws.value.some((val) =>
+                  values.selectedWorkspace.includes(val)
+                );
+              }
+              return false;
+            })?.label ||
+            workspaces.find(
+              (ws) => String(ws.value) === String(values.selectedWorkspace)
+            )?.label ||
+            "Unknown Workspace";
+
           // Store all the data we'll need in local variables to avoid state timing issues
           const navigationData = {
-            userId: accountResponse.data?.data,
+            userId: bookingResponse.data?.contact,
             workspaceId: values.selectedWorkspace,
             priceId,
             startDate: values.selectedDate,
