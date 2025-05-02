@@ -77,7 +77,7 @@ const DedicatedDesks = () => {
             : "Monthly";
 
         const response = await api.get(
-          `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod//products?category=Dedicated&period=${period}`
+          `https://66eujsebp8.execute-api.eu-central-1.amazonaws.com/prod//products?category=Dedicated&period=${period}`
         );
         console.log(response.data.data);
 

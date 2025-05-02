@@ -5,13 +5,13 @@
   background-position: center;
   background-size: cover;
   width: 100%;
-  height: 100vh;
-  min-height: 100vh;
+  min-height: calc(100vh - 160px); /* Subtract space for navbar and footer */
   display: flex;
   justify-content: center;
   align-items: center;
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px); /* For Safari support */
+  padding: 60px 0; /* Increased padding to create space without scrolling */
 }
 
 /* Add media query to remove background on mobile */
@@ -22,7 +22,7 @@
     -webkit-backdrop-filter: none;
     height: auto;
     min-height: auto;
-    padding: 20px 0;
+    padding: 80px 0 100px; /* Further increased padding for mobile to ensure no overlap */
   }
 }
 
@@ -50,13 +50,12 @@
   position: relative;
   z-index: 2; /* Place container above the overlay */
   width: 820px;
-  margin: 0 auto;
-  margin-top: 1px;
-
+  margin: 40px auto; /* Add margin top and bottom for spacing */
   box-sizing: border-box;
   padding: 32px;
-
   background-color: white;
+  max-height: none; /* Remove max height constraint */
+  overflow-y: visible; /* Remove scrolling */
 }
 /* Add responsive container sizing */
 @media screen and (max-width: 860px) {
@@ -65,6 +64,17 @@
     padding: 1.5rem;
     padding-left: 25px;
     padding-right: 25px;
+    margin: 30px auto; /* Adjusted spacing for tablets */
+    max-height: none;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .container {
+    padding: 1rem;
+    padding-left: 15px;
+    padding-right: 15px;
+    margin: 20px auto; /* Adjusted spacing for mobile */
   }
 }
 
@@ -74,14 +84,6 @@
   width: 100%;
   height: 1px;
   background-color: #ccc;
-}
-
-@media screen and (max-width: 480px) {
-  .container {
-    padding: 1rem;
-    padding-left: 15px;
-    padding-right: 15px;
-  }
 }
 
 .title {
@@ -103,6 +105,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 1.5rem;
+  width: 100%;
 }
 
 @media screen and (max-width: 480px) {
@@ -283,6 +286,8 @@
   width: 100%;
   justify-content: space-between;
   align-items: center;
+  margin-top: 30px; /* Increased top margin */
+  padding-bottom: 10px;
 }
 
 @media screen and (max-width: 600px) {
@@ -290,6 +295,8 @@
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
+    margin-top: 25px;
+    padding-bottom: 15px;
   }
 
   .priceContainer {
@@ -349,8 +356,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: calc(100vh - 160px); /* Match the background height calculation */
   width: 100%;
+  padding: 60px 0; /* Match background padding */
 }
 
 .spinner {

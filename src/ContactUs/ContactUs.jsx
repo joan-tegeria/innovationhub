@@ -51,7 +51,7 @@ const ContactForm = () => {
 
       try {
         const response = await fetch(
-          "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/contact",
+          "https://66eujsebp8.execute-api.eu-central-1.amazonaws.com/prod/contact",
           {
             method: "POST",
             headers: {

@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
     const fetchAuthToken = async () => {
       try {
         const response = await api.post(
-          "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/oauth2/token?grant_type=client_credentials",
+          "https://66eujsebp8.execute-api.eu-central-1.amazonaws.com/prod/oauth2/token?grant_type=client_credentials",
           null,
           {
             headers: {

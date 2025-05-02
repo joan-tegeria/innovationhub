@@ -5,13 +5,13 @@
   background-position: center;
   background-size: cover;
   width: 100%;
-  height: 100vh;
-  min-height: 100vh;
+  min-height: calc(100vh - 160px); /* Subtract space for navbar and footer */
   display: flex;
   justify-content: center;
   align-items: center;
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px); /* For Safari support */
+  padding: 60px 0; /* Increased padding to create space without scrolling */
 }
 
 /* Add media query to remove background on mobile */
@@ -22,7 +22,7 @@
     -webkit-backdrop-filter: none;
     height: auto;
     min-height: auto;
-    padding: 20px 0;
+    padding: 80px 0 100px; /* Further increased padding for mobile to ensure no overlap */
   }
 }
 
@@ -50,13 +50,12 @@
   position: relative;
   z-index: 2; /* Place container above the overlay */
   width: 820px;
-  margin: 0 auto;
-  margin-top: 1px;
-
+  margin: 40px auto; /* Add margin top and bottom for spacing */
   box-sizing: border-box;
   padding: 32px;
-
   background-color: white;
+  max-height: none; /* Remove max height constraint */
+  overflow-y: visible; /* Remove scrolling */
 }
 /* Add responsive container sizing */
 @media screen and (max-width: 860px) {
@@ -65,6 +64,8 @@
     padding: 1.5rem;
     padding-left: 25px;
     padding-right: 25px;
+    margin: 30px auto; /* Adjusted spacing for tablets */
+    max-height: none;
   }
 }
 
@@ -73,11 +74,21 @@
     padding: 1rem;
     padding-left: 15px;
     padding-right: 15px;
+    margin: 20px auto; /* Adjusted spacing for mobile */
   }
+}
+
+.titleDivider {
+  margin-bottom: 20px;
+  margin-top: 32px;
+  width: 100%;
+  height: 1px;
+  background-color: #ccc;
 }
 
 .title {
   color: #333;
+  /* margin-bottom: 32px; */
   text-align: left;
   font-size: 27.32px;
   font-weight: 700;
@@ -94,6 +105,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 1.5rem;
+  width: 100%;
 }
 
 @media screen and (max-width: 480px) {
@@ -106,7 +118,6 @@
   flex: 1 1 calc(50% - 0.75rem); /* 50% width minus half the gap */
   display: flex;
   flex-direction: column;
-  margin-bottom: 0;
 }
 
 @media screen and (max-width: 600px) {
@@ -120,15 +131,14 @@
 }
 
 .label {
-  /* margin-bottom: 0.5rem; */
+  margin-bottom: 0.5rem;
   font-weight: 400;
   color: #222222;
   font-size: 14px;
 }
 
 .input {
-  /* padding: 0.75rem; */
-  width: 100%;
+  padding: 0.75rem;
   border: 1px solid #999999;
   border-radius: 4px;
   font-size: 1rem;
@@ -158,6 +168,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.3s;
+  margin-top: 1rem;
 }
 
 @media screen and (max-width: 600px) {
@@ -179,7 +190,7 @@
 }
 .workspaceButtons {
   display: flex;
-  gap: 1.5rem;
+  gap: 1rem;
   margin-bottom: 0.5rem;
 }
 
@@ -221,23 +232,17 @@
   border-color: #eb3778;
   color: #eb3778;
 }
+
 .divider {
   width: 100%;
   height: 1px;
   background-color: #999999;
-}
-
-.titleDivider {
-  margin-bottom: 20px;
-  margin-top: 20px;
-  width: 100%;
-  height: 1px;
-  background-color: #ccc;
+  margin-top: 10px;
 }
 
 .select {
-  height: 46px;
-  border: 1px solid rgba(153, 153, 153, 1);
+  padding: 0.75rem;
+  border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 1rem;
   background-color: white;
@@ -246,7 +251,8 @@
   background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23999%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
   background-repeat: no-repeat;
   background-position: right 0.7rem top 50%;
-  /* background-size: 0.65rem auto; */
+  background-size: 0.65rem auto;
+  padding-right: 2rem;
 }
 
 .select:focus {
@@ -280,6 +286,8 @@
   width: 100%;
   justify-content: space-between;
   align-items: center;
+  margin-top: 30px; /* Increased top margin */
+  padding-bottom: 10px;
 }
 
 @media screen and (max-width: 600px) {
@@ -287,6 +295,8 @@
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
+    margin-top: 25px;
+    padding-bottom: 15px;
   }
 
   .priceContainer {
@@ -297,8 +307,6 @@
 .priceContainer {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
 }
 
 .priceContainer:first-child {
@@ -314,11 +322,10 @@
 .infoContainer {
   display: flex;
   justify-content: flex-start;
-  color: #339319;
   align-items: center;
   gap: 8px;
-  border: 1px solid #339319;
-  background-color: rgba(51, 147, 25, 0.05);
+  border: 1px solid #999999;
+  background-color: #e4e3e3;
   padding: 15px;
   width: 100%;
   border-radius: 3px;
@@ -349,8 +356,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: calc(100vh - 160px); /* Match the background height calculation */
   width: 100%;
+  padding: 60px 0; /* Match background padding */
 }
 
 .spinner {
@@ -360,10 +368,6 @@
   border-radius: 50%;
   border-top-color: #eb3778; /* Pink color matching the submit button */
   animation: spin 1s ease-in-out infinite;
-}
-
-.title {
-  font-size: 18px;
 }
 
 @keyframes spin {

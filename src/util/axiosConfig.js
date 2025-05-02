@@ -64,7 +64,7 @@ api.interceptors.response.use(
         try {
             // Get new token
             const response = await axios.post(
-                "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/oauth2/token?grant_type=client_credentials",
+                "https://66eujsebp8.execute-api.eu-central-1.amazonaws.com/prod/oauth2/token?grant_type=client_credentials",
                 null,
                 {
                     headers: {

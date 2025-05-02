@@ -74,7 +74,7 @@ const validationSchema = Yup.object({
 });
 
 const API_BASE_URL =
-  "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod";
+  "https://66eujsebp8.execute-api.eu-central-1.amazonaws.com/prod";
 
 export default function BookDesk() {
   const [workspaces, setWorkspaces] = useState([]);
@@ -204,7 +204,7 @@ export default function BookDesk() {
               missingFields
             );
             setBackendErrorMessage(
-              `Missing required fields: ${missingFields.join(", ")}`
+              `We're sorry for any inconvenience, but in order to proceed, you'll need to restart your booking from the beginning.`
             );
             setBackendErrorStatus("error");
             setShowErrorModal(true);

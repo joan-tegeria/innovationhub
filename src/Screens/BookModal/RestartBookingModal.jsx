@@ -27,7 +27,7 @@ export default function RestartBookingModal({
         </div>
         <div className={styles.titleDivider}></div>
         <button className={styles.button} onClick={handleRestart}>
-          Reset
+          Restart
         </button>
       </div>
     </div>

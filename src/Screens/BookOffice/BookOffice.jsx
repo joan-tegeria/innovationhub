@@ -55,7 +55,7 @@ const validationSchema = Yup.object({
 });
 
 const API_BASE_URL =
-  "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod";
+  "https://66eujsebp8.execute-api.eu-central-1.amazonaws.com/prod";
 
 const types = [
   { value: "business", label: "Business" },
@@ -133,7 +133,7 @@ export default function BookOffice() {
         };
         console.log("🚀 ~ onSubmit: ~ bookingData:", bookingData);
         await api.post(
-          "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/private",
+          "https://66eujsebp8.execute-api.eu-central-1.amazonaws.com/prod/private",
           bookingData,
           {
             headers: {

@@ -191,7 +191,7 @@ const EventTable = ({ type }) => {
         const apiPeriod = activeTab === "Half Day" ? "half day" : "full day";
 
         const response = await api.get(
-          `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/products?category=event&period=${apiPeriod}`
+          `https://66eujsebp8.execute-api.eu-central-1.amazonaws.com/prod/products?category=event&period=${apiPeriod}`
         );
 
         // if (category === "Private") {

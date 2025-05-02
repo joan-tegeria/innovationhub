@@ -137,12 +137,12 @@
     margin-left: 16px;
     margin-right: 16px;
   }
-  
+
   .main-footer {
     padding-top: 1rem;
     padding-bottom: 1rem;
   }
-  
+
   .footer-content {
     display: flex;
     flex-direction: column;
@@ -168,7 +168,7 @@
     gap: 0.5rem;
     align-items: center;
   }
-  
+
   .footer-bottom {
     flex-direction: column;
     gap: 1rem;

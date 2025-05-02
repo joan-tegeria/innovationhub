@@ -130,7 +130,7 @@ export default function Events() {
 
       try {
         const { data: userResponse } = await api.post(
-          "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/leads",
+          "https://66eujsebp8.execute-api.eu-central-1.amazonaws.com/prod/leads",
           userData,
           {
             headers: {
@@ -177,7 +177,7 @@ export default function Events() {
         };
 
         await api.post(
-          "https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/event",
+          "https://66eujsebp8.execute-api.eu-central-1.amazonaws.com/prod/event",
           newEvent,
           {
             headers: {
@@ -235,9 +235,7 @@ export default function Events() {
 
   return (
     <div className={styles.formContainer}>
-      <h1 className={styles.title}>
-        Ready to Get Started?
-      </h1>
+      <h1 className={styles.title}>Ready to Get Started?</h1>
       <p className={styles.subtitle}>
         Discover the perfect workspace or event venue for your needs.
       </p>
@@ -250,7 +248,7 @@ export default function Events() {
         {/* Your Information */}
         <div className={styles.section}>
           <h2 style={{ fontSize: "16px", fontWeight: "bold" }}>
-          General Information
+            General Information
           </h2>
           <div className={styles.row}>
             <div className={styles.formGroup}>

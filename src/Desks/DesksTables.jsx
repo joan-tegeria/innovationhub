@@ -101,7 +101,7 @@ const DesksTables = ({ type }) => {
         const category = type === "dedicated" ? "Dedicated" : "Private";
 
         const response = await api.get(
-          `https://nhpvz8wphf.execute-api.eu-central-1.amazonaws.com/prod/products?category=${category}&period=${period}`
+          `https://66eujsebp8.execute-api.eu-central-1.amazonaws.com/prod/products?category=${category}&period=${period}`
         );
 
         if (category === "Private") {
