@@ -3,13 +3,11 @@ import { TextField, Button } from "@mui/material";
 import styles from "./ContactUs.module.css";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
-import { useAuth } from "../context/Auth";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
 const ContactForm = () => {
   const [open, setOpen] = useState(false);
-  const { accessToken, tokenType, tokenLoading } = useAuth();
 
   // Define validation schema
   const validationSchema = Yup.object({
@@ -51,12 +49,11 @@ const ContactForm = () => {
 
       try {
         const response = await fetch(
-          "https://66eujsebp8.execute-api.eu-central-1.amazonaws.com/prod/contact",
+          "https://im7v4sdtrl.execute-api.eu-central-1.amazonaws.com/prod/contact",
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `${tokenType} ${accessToken}`,
             },
             body: JSON.stringify(submitData),
           }
@@ -123,10 +120,6 @@ const ContactForm = () => {
       window.open(link);
     }
   };
-
-  if (!accessToken) {
-    return null;
-  }
 
   return (
     <div className={styles.container}>

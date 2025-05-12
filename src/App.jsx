@@ -14,7 +14,7 @@ import ContactUs from "./ContactUs";
 import Footer from "./components/Footer";
 
 import Events from "./Events";
-import { AuthProvider } from "./context/Auth";
+// import { AuthProvider } from "./context/Auth";
 import Desks from "./Desks/Desks";
 import DedicatedDesks from "./Desks/DedicatedDesks";
 import PrivateOffices from "./Desks/PrivateOffices";
@@ -30,7 +30,7 @@ import BookingPayment from "./Screens/BookingPayment/BookingPayment";
 import FinishedBooking from "./Screens/FinishedBooking/FinishedBooking";
 import BookOffice from "./Screens/BookOffice";
 import Navbar from "./components/Navbar";
-
+import VisitSPace from "./Screens/VIsitSPace/VisitSPace";
 // Wrapper component to handle conditional rendering of Navbar and Footer
 const AppContent = () => {
   const location = useLocation();
@@ -42,6 +42,7 @@ const AppContent = () => {
     "/bookOffice",
     "/booking/payment",
     "/booking-success",
+    "/visitspace",
   ];
 
   // Check if current path starts with any of the routes in showNavAndFooter
@@ -112,6 +113,7 @@ const AppContent = () => {
           <Route path="/membershipplans" element={<MembershipPlans />} />
           <Route path="/partners" element={<Partners />} />
           <Route path="/listevents" element={<EventTable />} />
+          <Route path="/visitspace" element={<VisitSPace />} />
 
           {/* Desk Routes */}
           <Route path="/desks" element={<Desks />}>
@@ -154,11 +156,9 @@ const AppContent = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <AppContent />
-      </BrowserRouter>
-    </AuthProvider>
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
   );
 }
 

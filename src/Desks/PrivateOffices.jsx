@@ -89,7 +89,7 @@ const PrivateOffices = () => {
             : "Annually";
 
         const response = await api.get(
-          `https://66eujsebp8.execute-api.eu-central-1.amazonaws.com/prod//products?category=Private&period=${period}`
+          `https://im7v4sdtrl.execute-api.eu-central-1.amazonaws.com/prod//products?category=Private&period=${period}`
         );
         console.log(response.data.data);
 

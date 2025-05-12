@@ -3,7 +3,6 @@ import { useFormik } from "formik";
 import * as Yup from "yup"; // Import Yup
 import styles from "./BookDesk.module.css"; // Import the CSS module
 import api from "../../util/axiosConfig";
-import { useAuth } from "../../context/Auth";
 import { transformWorkspacesResponse } from "../../util/transformers";
 import { useNavigate, useParams } from "react-router-dom";
 import info from "../../assets/info.svg";
@@ -74,7 +73,7 @@ const validationSchema = Yup.object({
 });
 
 const API_BASE_URL =
-  "https://66eujsebp8.execute-api.eu-central-1.amazonaws.com/prod";
+  "https://im7v4sdtrl.execute-api.eu-central-1.amazonaws.com/prod";
 
 export default function BookDesk() {
   const [workspaces, setWorkspaces] = useState([]);
@@ -143,10 +142,7 @@ export default function BookDesk() {
         // Make a single API call
         const bookingResponse = await api.post(
           `${API_BASE_URL}/shared`,
-          combinedData,
-          {
-            headers: { Authorization: `${tokenType} ${accessToken}` },
-          }
+          combinedData
         );
 
         console.log("Booking response received:", bookingResponse.data);
@@ -271,43 +267,38 @@ export default function BookDesk() {
   };
 
   const [isLoading, setIsLoading] = useState(false);
-  const { accessToken, tokenType, tokenLoading } = useAuth();
 
   useEffect(() => {
     const fetchData = async () => {
       console.log(type);
-      if (!tokenLoading) {
-        try {
-          setIsLoading(true);
-          const response = await api.get(`${API_BASE_URL}/shared`, {
-            headers: { Authorization: `${tokenType} ${accessToken}` },
-          });
-          const transformed = transformWorkspacesResponse(
-            response.data.data || []
-          );
-          setWorkspaces(transformed);
+      try {
+        setIsLoading(true);
+        const response = await api.get(`${API_BASE_URL}/shared`);
+        const transformed = transformWorkspacesResponse(
+          response.data.data || []
+        );
+        setWorkspaces(transformed);
 
-          if (type.toLowerCase() === "dedicated") {
-            setSelectedIndex(1);
-            setFieldValue("selectedWorkspace", transformed[1].value);
-          } else if (type.toLowerCase() === "flexible") {
-            setSelectedIndex(0);
-            setFieldValue("selectedWorkspace", transformed[0].value);
-          }
-          setIsLoading(false);
-        } catch (error) {
-          setInfoMessage(
-            "This space isn't available on your selected dates. Please choose a different start date."
-          );
-          setIsAvailable(false);
-          setIsLoading(false);
-          console.log(error);
+        if (type.toLowerCase() === "dedicated") {
+          setSelectedIndex(1);
+          setFieldValue("selectedWorkspace", transformed[1].value);
+        } else if (type.toLowerCase() === "flexible") {
+          setSelectedIndex(0);
+          setFieldValue("selectedWorkspace", transformed[0].value);
         }
+        setIsLoading(false);
+      } catch (error) {
+        setInfoMessage(
+          "This space isn't available on your selected dates. Please choose a different start date."
+        );
+        setIsAvailable(false);
+        setIsLoading(false);
+        console.log(error);
       }
     };
 
     fetchData();
-  }, [tokenLoading, type]);
+  }, [type]);
 
   useEffect(() => {
     if (
@@ -353,10 +344,7 @@ export default function BookDesk() {
             values.selectedWorkspace[0]
           }?from=${encodeURIComponent(
             formattedFromDate
-          )}&to=${encodeURIComponent(formattedToDate)}`,
-          {
-            headers: { Authorization: `${tokenType} ${accessToken}` },
-          }
+          )}&to=${encodeURIComponent(formattedToDate)}`
         );
 
         if (
@@ -397,8 +385,7 @@ export default function BookDesk() {
       }
 
       const priceResponse = await api.get(
-        `${API_BASE_URL}/prices?product=${selectedWorkspace.label}&period=${bookingPeriod}`,
-        { headers: { Authorization: `${tokenType} ${accessToken}` } }
+        `${API_BASE_URL}/prices?product=${selectedWorkspace.label}&period=${bookingPeriod}`
       );
 
       if (priceResponse.data?.data?.length) {

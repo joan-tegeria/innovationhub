@@ -3,7 +3,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup"; // Import Yup
 import styles from "./BookOffice.module.css"; // Import the CSS module
 import api from "../../util/axiosConfig";
-import { useAuth } from "../../context/Auth";
+// import { useAuth } from "../../context/Auth";
 import { transformWorkspacesResponse } from "../../util/transformers";
 import { useNavigate } from "react-router-dom";
 import info from "../../assets/info.svg";
@@ -55,7 +55,7 @@ const validationSchema = Yup.object({
 });
 
 const API_BASE_URL =
-  "https://66eujsebp8.execute-api.eu-central-1.amazonaws.com/prod";
+  "https://im7v4sdtrl.execute-api.eu-central-1.amazonaws.com/prod";
 
 const types = [
   { value: "business", label: "Business" },
@@ -115,9 +115,7 @@ export default function BookOffice() {
           street: values.street,
         };
 
-        const userResponse = await api.post(`${API_BASE_URL}/leads`, userData, {
-          headers: { Authorization: `${tokenType} ${accessToken}` },
-        });
+        const userResponse = await api.post(`${API_BASE_URL}/leads`, userData);
         console.log("🚀 ~ onSubmit: ~ userResponse:", userResponse.data.data);
 
         const userId = userResponse.data.data;
@@ -133,13 +131,8 @@ export default function BookOffice() {
         };
         console.log("🚀 ~ onSubmit: ~ bookingData:", bookingData);
         await api.post(
-          "https://66eujsebp8.execute-api.eu-central-1.amazonaws.com/prod/private",
-          bookingData,
-          {
-            headers: {
-              Authorization: `${tokenType} ${accessToken}`,
-            },
-          }
+          "https://im7v4sdtrl.execute-api.eu-central-1.amazonaws.com/prod/private",
+          bookingData
         );
 
         const _selectedWorkspace = workspaces.find((workspace) => {
@@ -198,11 +191,10 @@ export default function BookOffice() {
   };
 
   const [isLoading, setIsLoading] = useState(false);
-  const { accessToken, tokenType, tokenLoading } = useAuth();
 
   useEffect(() => {
     fetchDeskNames();
-  }, [tokenLoading]);
+  }, []);
 
   useEffect(() => {
     if (
@@ -215,25 +207,19 @@ export default function BookOffice() {
   }, [values.selectedDate, values.bookingPeriod, values.selectedWorkspace]);
 
   const fetchDeskNames = async () => {
-    if (!tokenLoading) {
-      try {
-        setIsLoading(true);
-        const response = await api.get(`${API_BASE_URL}/private`, {
-          headers: { Authorization: `${tokenType} ${accessToken}` },
-        });
-        const transformed = transformWorkspacesResponse(
-          response.data.data || []
-        );
-        setWorkspaces(transformed);
+    try {
+      setIsLoading(true);
+      const response = await api.get(`${API_BASE_URL}/private`);
+      const transformed = transformWorkspacesResponse(response.data.data || []);
+      setWorkspaces(transformed);
 
-        if (transformed.length > 0) {
-          setFieldValue("selectedWorkspace", transformed[3].value);
-        }
-        setIsLoading(false);
-      } catch (error) {
-        setIsLoading(false);
-        console.log(error);
+      if (transformed.length > 0) {
+        setFieldValue("selectedWorkspace", transformed[3].value);
       }
+      setIsLoading(false);
+    } catch (error) {
+      setIsLoading(false);
+      console.log(error);
     }
   };
 
@@ -286,8 +272,7 @@ export default function BookOffice() {
       }
 
       const priceResponse = await api.get(
-        `${API_BASE_URL}/prices?product=${selectedWorkspace.label}&period=${bookingPeriod}`,
-        { headers: { Authorization: `${tokenType} ${accessToken}` } }
+        `${API_BASE_URL}/prices?product=${selectedWorkspace.label}&period=${bookingPeriod}`
       );
 
       if (priceResponse.data?.data?.length) {

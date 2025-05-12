@@ -191,7 +191,7 @@ const EventTable = ({ type }) => {
         const apiPeriod = activeTab === "Half Day" ? "half day" : "full day";
 
         const response = await api.get(
-          `https://66eujsebp8.execute-api.eu-central-1.amazonaws.com/prod/products?category=event&period=${apiPeriod}`
+          `https://im7v4sdtrl.execute-api.eu-central-1.amazonaws.com/prod/products?category=event&period=${apiPeriod}`
         );
 
         // if (category === "Private") {
@@ -256,7 +256,7 @@ const EventTable = ({ type }) => {
           </div>
 
           <div className={styles.cardSection}>
-            <div className={styles.rateLabel}>Daily rate</div>
+            <div className={styles.rateLabel}>Rate</div>
             <div className={styles.price}>{desk.price}</div>
             <div className={styles.access}>{desk.access}</div>
           </div>
@@ -364,7 +364,7 @@ const EventTable = ({ type }) => {
           <tr>
             {deskData[activeTab].map((desk, index) => (
               <td key={index}>
-                <div className={styles.rateLabel}>Daily rate</div>
+                <div className={styles.rateLabel}>Rate</div>
                 <div className={styles.price} style={{ fontSize: 18 }}>
                   {desk.price}
                 </div>

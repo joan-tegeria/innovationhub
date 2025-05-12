@@ -6,49 +6,7 @@ import styles from "./Home.module.css";
 
 function Home() {
   const navigate = useNavigate();
-  // const [password, setPassword] = useState("");
-  // const [isAuthenticated, setIsAuthenticated] = useState(true);
   const [activeDesksType, setActiveDesksType] = useState("dedicated");
-
-  // useEffect(() => {
-  //   const pass = localStorage.getItem("debugPass");
-  //   if (pass !== "mafia200190200") {
-  //     setIsAuthenticated(false);
-  //   }
-  // }, [isAuthenticated]);
-
-  // const handlePasswordSubmit = (e) => {
-  //   e.preventDefault();
-  //   if (password === "mafia200190200") {
-  //     localStorage.setItem("debugPass", "mafia200190200");
-  //     // Replace 'yourPassword' with the actual password
-
-  //     setIsAuthenticated(true);
-  //   } else {
-  //     alert("Incorrect password");
-  //   }
-  // };
-
-  // if (!isAuthenticated) {
-  //   return (
-  //     <div className={styles.authContainer}>
-  //       <form className={styles.authForm} onSubmit={handlePasswordSubmit}>
-  //         <h2 className={styles.authTitle}>Authentication Required</h2>
-  //         <input
-  //           type="password"
-  //           value={password}
-  //           onChange={(e) => setPassword(e.target.value)}
-  //           placeholder="Enter administrator password"
-  //           className={styles.authInput}
-  //           autoFocus
-  //         />
-  //         <button type="submit" className={styles.authButton}>
-  //           Authenticate
-  //         </button>
-  //       </form>
-  //     </div>
-  //   );
-  // }
 
   return (
     <div className={styles.container}>
@@ -99,15 +57,12 @@ function Home() {
 
       {/* Navigation buttons can be styled and placed appropriately in the layout */}
       <nav className={styles.navigation}>
-        {/* <button onClick={() => navigate("/pdesk")}>Personal Desk</button> */}
         <button onClick={() => navigate("/bookDesk")}>Book Desk</button>
         <button onClick={() => navigate("/contact")}>Contact Us</button>
-        {/* <button onClick={() => navigate("/fullOffice")}>Full Office</button> */}
         <button onClick={() => navigate("/desks")}>Desks</button>
         <button onClick={() => navigate("/dedicated-desks")}>
           Dedicated Desks
         </button>
-
         <button onClick={() => navigate("/desks-table")}>Desks Table</button>
         <button onClick={() => navigate("/events")}>Events</button>
         <button onClick={() => navigate("/membershipplans")}>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styles from "./Events.module.css";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/Auth";
+// import { useAuth } from "../context/Auth";
 import CircularProgress from "@mui/material/CircularProgress";
 import { circularProgressClasses } from "@mui/material/CircularProgress";
 import api from "../util/axiosConfig";
@@ -71,7 +71,7 @@ export default function Events() {
   const [success, setSuccess] = useState(false);
   const [customValidationError, setCustomValidationError] = useState("");
 
-  const { accessToken, tokenType, tokenLoading } = useAuth();
+  // const { accessToken, tokenType, tokenLoading } = useAuth();
   const navigate = useNavigate();
 
   const formik = useFormik({
@@ -130,13 +130,8 @@ export default function Events() {
 
       try {
         const { data: userResponse } = await api.post(
-          "https://66eujsebp8.execute-api.eu-central-1.amazonaws.com/prod/leads",
-          userData,
-          {
-            headers: {
-              Authorization: `${tokenType} ${accessToken}`,
-            },
-          }
+          "https://im7v4sdtrl.execute-api.eu-central-1.amazonaws.com/prod/leads",
+          userData
         );
 
         const userId = userResponse.data;
@@ -177,13 +172,8 @@ export default function Events() {
         };
 
         await api.post(
-          "https://66eujsebp8.execute-api.eu-central-1.amazonaws.com/prod/event",
-          newEvent,
-          {
-            headers: {
-              Authorization: `${tokenType} ${accessToken}`,
-            },
-          }
+          "https://im7v4sdtrl.execute-api.eu-central-1.amazonaws.com/prod/event",
+          newEvent
         );
 
         // Navigate to booking-success page with type "event" instead of showing success UI
@@ -205,10 +195,6 @@ export default function Events() {
     setSuccess(false);
     setCustomValidationError("");
   };
-
-  if (tokenLoading) {
-    return null;
-  }
 
   if (loading) {
     return (
@@ -240,9 +226,6 @@ export default function Events() {
         Discover the perfect workspace or event venue for your needs.
       </p>
       <div className={styles.titleDivider} />
-      {customValidationError && (
-        <div className={styles.validationError}>{customValidationError}</div>
-      )}
 
       <form id="eventForm" onSubmit={formik.handleSubmit} autoComplete="on">
         {/* Your Information */}
@@ -520,6 +503,9 @@ export default function Events() {
           </div>
         </div>
         <div className={styles.titleDivider} />
+        {customValidationError && (
+          <div className={styles.validationError}>{customValidationError}</div>
+        )}
         {/* Buttons */}
         <div className={styles.actions}>
           <button type="button" className={styles.cancel} onClick={handleReset}>

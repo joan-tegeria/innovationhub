@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { CircularProgress, Chip } from "@mui/material";
 import styles from "./BookingPayment.module.css";
 import api from "../../util/axiosConfig";
-import { useAuth } from "../../context/Auth";
+// import { useAuth } from "../../context/Auth";
 import PaymentModal from "../../components/PaymentModal";
 import Danger from "../../assets/Danger.svg";
 import RestartBookingModal from "../BookModal/RestartBookingModal.jsx";
@@ -17,10 +17,10 @@ export default function BookingPayment() {
   // const { bookingId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { accessToken, tokenType } = useAuth();
+  // const { accessToken, tokenType } = useAuth();
 
   const API_BASE_URL =
-    "https://66eujsebp8.execute-api.eu-central-1.amazonaws.com/prod";
+    "https://im7v4sdtrl.execute-api.eu-central-1.amazonaws.com/prod";
 
   // Get the state from navigation
   const {
@@ -206,10 +206,8 @@ export default function BookingPayment() {
       // Create the booking and get invoice
       const bookingResponse = await api.post(
         `${API_BASE_URL}/generatePayment`,
-        bookingData,
-        {
-          headers: { Authorization: `${tokenType} ${accessToken}` },
-        }
+        bookingData
+        // Removed auth headers
       );
 
       console.log("Booking response received:", bookingResponse.data);
@@ -262,10 +260,7 @@ export default function BookingPayment() {
       console.log(`Applying coupon: ${code} for booking ${period}`);
 
       const response = await api.get(
-        `${API_BASE_URL}/coupon?coupon=${code}&id=${priceId}&booking=${period}&quantity=1`,
-        {
-          headers: { Authorization: `${tokenType} ${accessToken}` },
-        }
+        `${API_BASE_URL}/coupon?coupon=${code}&id=${priceId}&booking=${period}&quantity=1`
       );
 
       console.log("Coupon response:", response.data);
@@ -378,18 +373,12 @@ export default function BookingPayment() {
             // setPaymentFailed(true);
             // break;
             api
-              .put(
-                `${API_BASE_URL}/invoice/${invoiceId}`,
-                {
-                  status: "Cancelled",
-                  order: orderIdentification,
-                  saleOrder: saleOrderId,
-                  booking: bookResponse,
-                },
-                {
-                  headers: { Authorization: `${tokenType} ${accessToken}` },
-                }
-              )
+              .put(`${API_BASE_URL}/invoice/${invoiceId}`, {
+                status: "Cancelled",
+                order: orderIdentification,
+                saleOrder: saleOrderId,
+                booking: bookResponse,
+              })
               .then(() => {
                 console.log("Invoice updated as Refused");
                 setErrorMessage("Payment failed. Please try again.");
@@ -410,18 +399,12 @@ export default function BookingPayment() {
             // setPaymentFailed(true);
             // break;
             api
-              .put(
-                `${API_BASE_URL}/invoice/${invoiceId}`,
-                {
-                  status: "Cancelled",
-                  order: orderIdentification,
-                  saleOrder: saleOrderId,
-                  booking: bookResponse,
-                },
-                {
-                  headers: { Authorization: `${tokenType} ${accessToken}` },
-                }
-              )
+              .put(`${API_BASE_URL}/invoice/${invoiceId}`, {
+                status: "Cancelled",
+                order: orderIdentification,
+                saleOrder: saleOrderId,
+                booking: bookResponse,
+              })
               .then(() => {
                 console.log("Invoice updated as Cancelled (cancelled)");
                 setErrorMessage("Your payment has been canceled.");
@@ -462,15 +445,7 @@ export default function BookingPayment() {
     return () => {
       window.removeEventListener("message", messageHandler);
     };
-  }, [
-    navigate,
-    invoiceId,
-    API_BASE_URL,
-    tokenType,
-    accessToken,
-    handleClosePayment,
-    showPaymentModal,
-  ]);
+  }, [navigate, invoiceId, API_BASE_URL, handleClosePayment, showPaymentModal]);
 
   /**
    * Log important state changes

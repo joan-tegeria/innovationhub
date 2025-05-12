@@ -101,7 +101,7 @@ const DesksTables = ({ type }) => {
         const category = type === "dedicated" ? "Dedicated" : "Private";
 
         const response = await api.get(
-          `https://66eujsebp8.execute-api.eu-central-1.amazonaws.com/prod/products?category=${category}&period=${period}`
+          `https://im7v4sdtrl.execute-api.eu-central-1.amazonaws.com/prod/products?category=${category}&period=${period}`
         );
 
         if (category === "Private") {
@@ -164,7 +164,7 @@ const DesksTables = ({ type }) => {
           </div>
 
           <div className={styles.cardSection}>
-            <div className={styles.rateLabel}>Daily rate</div>
+            <div className={styles.rateLabel}>Rate</div>
 
             <div className={styles.price}>
               {desk.price ? Number(desk.price).toLocaleString() : 0} ALL
@@ -288,7 +288,7 @@ const DesksTables = ({ type }) => {
                     <tr>
                       {deskData[activeTab].map((desk, index) => (
                         <td key={index}>
-                          <div className={styles.rateLabel}>Daily rate</div>
+                          <div className={styles.rateLabel}>Rate</div>
                           <div className={styles.price}>
                             {desk.price
                               ? Number(desk.price).toLocaleString()
