@@ -20,7 +20,7 @@ export default function BookingPayment() {
   // const { accessToken, tokenType } = useAuth();
 
   const API_BASE_URL =
-    "https://im7v4sdtrl.execute-api.eu-central-1.amazonaws.com/prod";
+    "https://acas4w1lnk.execute-api.eu-central-1.amazonaws.com/prod";
 
   // Get the state from navigation
   const {

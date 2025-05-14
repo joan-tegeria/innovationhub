@@ -112,7 +112,7 @@ export default function MembershipPlans() {
       try {
         setIsLoading(true);
         const response = await api.get(
-          "https://im7v4sdtrl.execute-api.eu-central-1.amazonaws.com/prod/categories"
+          "https://acas4w1lnk.execute-api.eu-central-1.amazonaws.com/prod/categories"
         );
         const transformedPlans = transformApiDataToPlans(response.data.data);
         // Duplicate the plans array with new unique keys

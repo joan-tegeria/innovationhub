@@ -67,7 +67,8 @@
 }
 
 .navigation {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   flex-wrap: wrap;
   gap: 15px;
   justify-content: center;

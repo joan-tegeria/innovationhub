@@ -12,28 +12,8 @@ function Home() {
     <div className={styles.container}>
       {/* Pricing Tables Section */}
       <section className={styles.pricingSection}>
-        <h2 className={styles.sectionTitle}>Our Pricing Plans</h2>
-        <div className={styles.deskTypeToggle}>
-          <button
-            className={`${styles.toggleButton} ${
-              activeDesksType === "dedicated" ? styles.active : ""
-            }`}
-            onClick={() => setActiveDesksType("dedicated")}
-          >
-            Dedicated Desks
-          </button>
-          <button
-            className={`${styles.toggleButton} ${
-              activeDesksType === "private" ? styles.active : ""
-            }`}
-            onClick={() => setActiveDesksType("private")}
-          >
-            Private Offices
-          </button>
-        </div>
-        <DesksTables type={activeDesksType} />
+      
 
-        {/* Direct links to booking pages */}
         <div className={styles.bookingButtons}>
           <button
             className={styles.bookingButton}
@@ -58,6 +38,8 @@ function Home() {
       {/* Navigation buttons can be styled and placed appropriately in the layout */}
       <nav className={styles.navigation}>
         <button onClick={() => navigate("/bookDesk")}>Book Desk</button>
+
+        <button onClick={() => navigate("/bookOffice")}>Book Office</button>
         <button onClick={() => navigate("/contact")}>Contact Us</button>
         <button onClick={() => navigate("/desks")}>Desks</button>
         <button onClick={() => navigate("/dedicated-desks")}>

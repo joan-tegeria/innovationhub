@@ -130,7 +130,7 @@ export default function Events() {
 
       try {
         const { data: userResponse } = await api.post(
-          "https://im7v4sdtrl.execute-api.eu-central-1.amazonaws.com/prod/leads",
+          "https://acas4w1lnk.execute-api.eu-central-1.amazonaws.com/prod/leads",
           userData
         );
 
@@ -172,7 +172,7 @@ export default function Events() {
         };
 
         await api.post(
-          "https://im7v4sdtrl.execute-api.eu-central-1.amazonaws.com/prod/event",
+          "https://acas4w1lnk.execute-api.eu-central-1.amazonaws.com/prod/event",
           newEvent
         );
 
@@ -220,302 +220,316 @@ export default function Events() {
   }
 
   return (
-    <div className={styles.formContainer}>
-      <h1 className={styles.title}>Ready to Get Started?</h1>
-      <p className={styles.subtitle}>
-        Discover the perfect workspace or event venue for your needs.
-      </p>
-      <div className={styles.titleDivider} />
-
-      <form id="eventForm" onSubmit={formik.handleSubmit} autoComplete="on">
-        {/* Your Information */}
-        <div className={styles.section}>
-          <h2 style={{ fontSize: "16px", fontWeight: "bold" }}>
-            General Information
-          </h2>
-          <div className={styles.row}>
-            <div className={styles.formGroup}>
-              <label className={styles.label} htmlFor="fullName">
-                Full name
-              </label>
-              <input
-                id="fullName"
-                name="fullName"
-                type="text"
-                placeholder="Full name"
-                className={styles.input}
-                value={formik.values.fullName}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-              />
-              {formik.touched.fullName && formik.errors.fullName && (
-                <div className={styles.error}>{formik.errors.fullName}</div>
-              )}
-            </div>
-            <div className={styles.formGroup}>
-              <label className={styles.label} htmlFor="companyName">
-                Company name
-              </label>
-              <input
-                id="companyName"
-                name="companyName"
-                type="text"
-                placeholder="Company name"
-                className={styles.input}
-                value={formik.values.companyName}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-              />
-              {formik.touched.companyName && formik.errors.companyName && (
-                <div className={styles.error}>{formik.errors.companyName}</div>
-              )}
-            </div>
-          </div>
-          <div className={styles.row}>
-            <div className={styles.formGroup}>
-              <label className={styles.label} htmlFor="email">
-                Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="Email"
-                className={styles.input}
-                value={formik.values.email}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-              />
-              {formik.touched.email && formik.errors.email && (
-                <div className={styles.error}>{formik.errors.email}</div>
-              )}
-            </div>
-            <div className={styles.formGroup}>
-              <label className={styles.label} htmlFor="phoneNumber">
-                Phone number
-              </label>
-              <input
-                id="phoneNumber"
-                name="phoneNumber"
-                type="text"
-                placeholder="Phone number"
-                className={styles.input}
-                value={formik.values.phoneNumber}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-              />
-              {formik.touched.phoneNumber && formik.errors.phoneNumber && (
-                <div className={styles.error}>{formik.errors.phoneNumber}</div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Event Information */}
+    <div className={styles.background}>
+      <div className={styles.formContainer}>
+        <h1 className={styles.title}>Ready to Get Started?</h1>
+        <p className={styles.subtitle}>
+          Discover the perfect workspace or event venue for your needs.
+        </p>
         <div className={styles.titleDivider} />
-        <div className={styles.section}>
-          <h2 style={{ fontSize: "16px", fontWeight: "bold" }}>
-            Event Information
-          </h2>
-          <div className={styles.row}>
-            <div className={styles.formGroup}>
-              <label className={styles.label} htmlFor="startDate">
-                Start date
-              </label>
-              <input
-                id="startDate"
-                name="startDate"
-                type="date"
-                className={styles.input}
-                value={formik.values.startDate}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                min={dayjs().format("YYYY-MM-DD")}
-              />
-              {formik.touched.startDate && formik.errors.startDate && (
-                <div className={styles.error}>{formik.errors.startDate}</div>
-              )}
-            </div>
-            <div className={styles.formGroup}>
-              <label className={styles.label} htmlFor="startTime">
-                Start time
-              </label>
-              <input
-                id="startTime"
-                name="startTime"
-                type="time"
-                placeholder="13:00"
-                className={styles.input}
-                value={formik.values.startTime}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-              />
-              {formik.touched.startTime && formik.errors.startTime && (
-                <div className={styles.error}>{formik.errors.startTime}</div>
-              )}
-            </div>
-          </div>
-          <div className={styles.row}>
-            <div className={styles.formGroup}>
-              <label className={styles.label} htmlFor="endDate">
-                End date
-              </label>
-              <input
-                id="endDate"
-                name="endDate"
-                type="date"
-                className={styles.input}
-                value={formik.values.endDate}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                min={formik.values.startDate || dayjs().format("YYYY-MM-DD")}
-                disabled={!formik.values.startDate}
-              />
-              {formik.touched.endDate && formik.errors.endDate && (
-                <div className={styles.error}>{formik.errors.endDate}</div>
-              )}
-            </div>
-            <div className={styles.formGroup}>
-              <label className={styles.label} htmlFor="endTime">
-                End time
-              </label>
-              <input
-                id="endTime"
-                name="endTime"
-                type="time"
-                placeholder="18:00"
-                className={styles.input}
-                value={formik.values.endTime}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                disabled={!formik.values.startDate || !formik.values.endDate}
-              />
-              {formik.touched.endTime && formik.errors.endTime && (
-                <div className={styles.error}>{formik.errors.endTime}</div>
-              )}
-            </div>
-          </div>
-          <div className={styles.row}>
-            <div className={styles.formGroup}>
-              <label className={styles.label} htmlFor="eventName">
-                Event name
-              </label>
-              <input
-                id="eventName"
-                name="eventName"
-                type="text"
-                placeholder="Event name"
-                className={styles.input}
-                value={formik.values.eventName}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-              />
-              {formik.touched.eventName && formik.errors.eventName && (
-                <div className={styles.error}>{formik.errors.eventName}</div>
-              )}
-            </div>
-            <div className={styles.formGroup}>
-              <label className={styles.label} htmlFor="eventPurpose">
-                Event purpose
-              </label>
-              <select
-                id="eventPurpose"
-                name="eventPurpose"
-                className={styles.select}
-                value={formik.values.eventPurpose}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-              >
-                <option value="">Select event purpose</option>
-                {eventPurposeOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              {formik.touched.eventPurpose && formik.errors.eventPurpose && (
-                <div className={styles.error}>{formik.errors.eventPurpose}</div>
-              )}
-            </div>
-          </div>
-          <div className={styles.row}>
-            <div className={styles.formGroup}>
-              <label className={styles.label} htmlFor="eventType">
-                Type of event
-              </label>
-              <select
-                id="eventType"
-                name="eventType"
-                className={styles.select}
-                value={formik.values.eventType}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-              >
-                {eventTypeOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              {formik.touched.eventType && formik.errors.eventType && (
-                <div className={styles.error}>{formik.errors.eventType}</div>
-              )}
-            </div>
-            <div className={styles.formGroup}>
-              <label className={styles.label} htmlFor="numberOfGuests">
-                Number of guests
-              </label>
-              <input
-                id="numberOfGuests"
-                name="numberOfGuests"
-                type="number"
-                placeholder="26"
-                className={styles.input}
-                value={formik.values.numberOfGuests}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                min="1"
-              />
-              {formik.touched.numberOfGuests &&
-                formik.errors.numberOfGuests && (
+
+        <form id="eventForm" onSubmit={formik.handleSubmit} autoComplete="on">
+          {/* Your Information */}
+          <div className={styles.section}>
+            <h2 style={{ fontSize: "16px", fontWeight: "bold" }}>
+              General Information
+            </h2>
+            <div className={styles.row}>
+              <div className={styles.formGroup}>
+                <label className={styles.label} htmlFor="fullName">
+                  Full name
+                </label>
+                <input
+                  id="fullName"
+                  name="fullName"
+                  type="text"
+                  placeholder="Full name"
+                  className={styles.input}
+                  value={formik.values.fullName}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                {formik.touched.fullName && formik.errors.fullName && (
+                  <div className={styles.error}>{formik.errors.fullName}</div>
+                )}
+              </div>
+              <div className={styles.formGroup}>
+                <label className={styles.label} htmlFor="companyName">
+                  Company name
+                </label>
+                <input
+                  id="companyName"
+                  name="companyName"
+                  type="text"
+                  placeholder="Company name"
+                  className={styles.input}
+                  value={formik.values.companyName}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                {formik.touched.companyName && formik.errors.companyName && (
                   <div className={styles.error}>
-                    {formik.errors.numberOfGuests}
+                    {formik.errors.companyName}
                   </div>
                 )}
+              </div>
+            </div>
+            <div className={styles.row}>
+              <div className={styles.formGroup}>
+                <label className={styles.label} htmlFor="email">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="Email"
+                  className={styles.input}
+                  value={formik.values.email}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                {formik.touched.email && formik.errors.email && (
+                  <div className={styles.error}>{formik.errors.email}</div>
+                )}
+              </div>
+              <div className={styles.formGroup}>
+                <label className={styles.label} htmlFor="phoneNumber">
+                  Phone number
+                </label>
+                <input
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  type="text"
+                  placeholder="Phone number"
+                  className={styles.input}
+                  value={formik.values.phoneNumber}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                {formik.touched.phoneNumber && formik.errors.phoneNumber && (
+                  <div className={styles.error}>
+                    {formik.errors.phoneNumber}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-          <div className={styles.formGroup}>
-            <label className={styles.label} htmlFor="notes">
-              Event description and notes
-            </label>
-            <textarea
-              id="notes"
-              name="notes"
-              placeholder="Add notes"
-              className={styles.textarea || styles.input}
-              value={formik.values.notes}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-            />
-            {formik.touched.notes && formik.errors.notes && (
-              <div className={styles.error}>{formik.errors.notes}</div>
-            )}
+
+          {/* Event Information */}
+          <div className={styles.titleDivider} />
+          <div className={styles.section}>
+            <h2 style={{ fontSize: "16px", fontWeight: "bold" }}>
+              Event Information
+            </h2>
+            <div className={styles.row}>
+              <div className={styles.formGroup}>
+                <label className={styles.label} htmlFor="startDate">
+                  Start date
+                </label>
+                <input
+                  id="startDate"
+                  name="startDate"
+                  type="date"
+                  className={styles.input}
+                  value={formik.values.startDate}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  min={dayjs().format("YYYY-MM-DD")}
+                />
+                {formik.touched.startDate && formik.errors.startDate && (
+                  <div className={styles.error}>{formik.errors.startDate}</div>
+                )}
+              </div>
+              <div className={styles.formGroup}>
+                <label className={styles.label} htmlFor="startTime">
+                  Start time
+                </label>
+                <input
+                  id="startTime"
+                  name="startTime"
+                  type="time"
+                  placeholder="13:00"
+                  className={styles.input}
+                  value={formik.values.startTime}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                {formik.touched.startTime && formik.errors.startTime && (
+                  <div className={styles.error}>{formik.errors.startTime}</div>
+                )}
+              </div>
+            </div>
+            <div className={styles.row}>
+              <div className={styles.formGroup}>
+                <label className={styles.label} htmlFor="endDate">
+                  End date
+                </label>
+                <input
+                  id="endDate"
+                  name="endDate"
+                  type="date"
+                  className={styles.input}
+                  value={formik.values.endDate}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  min={formik.values.startDate || dayjs().format("YYYY-MM-DD")}
+                  disabled={!formik.values.startDate}
+                />
+                {formik.touched.endDate && formik.errors.endDate && (
+                  <div className={styles.error}>{formik.errors.endDate}</div>
+                )}
+              </div>
+              <div className={styles.formGroup}>
+                <label className={styles.label} htmlFor="endTime">
+                  End time
+                </label>
+                <input
+                  id="endTime"
+                  name="endTime"
+                  type="time"
+                  placeholder="18:00"
+                  className={styles.input}
+                  value={formik.values.endTime}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  disabled={!formik.values.startDate || !formik.values.endDate}
+                />
+                {formik.touched.endTime && formik.errors.endTime && (
+                  <div className={styles.error}>{formik.errors.endTime}</div>
+                )}
+              </div>
+            </div>
+            <div className={styles.row}>
+              <div className={styles.formGroup}>
+                <label className={styles.label} htmlFor="eventName">
+                  Event name
+                </label>
+                <input
+                  id="eventName"
+                  name="eventName"
+                  type="text"
+                  placeholder="Event name"
+                  className={styles.input}
+                  value={formik.values.eventName}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                {formik.touched.eventName && formik.errors.eventName && (
+                  <div className={styles.error}>{formik.errors.eventName}</div>
+                )}
+              </div>
+              <div className={styles.formGroup}>
+                <label className={styles.label} htmlFor="eventPurpose">
+                  Event purpose
+                </label>
+                <select
+                  id="eventPurpose"
+                  name="eventPurpose"
+                  className={styles.select}
+                  value={formik.values.eventPurpose}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                >
+                  <option value="">Select event purpose</option>
+                  {eventPurposeOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                {formik.touched.eventPurpose && formik.errors.eventPurpose && (
+                  <div className={styles.error}>
+                    {formik.errors.eventPurpose}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className={styles.row}>
+              <div className={styles.formGroup}>
+                <label className={styles.label} htmlFor="eventType">
+                  Type of event
+                </label>
+                <select
+                  id="eventType"
+                  name="eventType"
+                  className={styles.select}
+                  value={formik.values.eventType}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                >
+                  {eventTypeOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                {formik.touched.eventType && formik.errors.eventType && (
+                  <div className={styles.error}>{formik.errors.eventType}</div>
+                )}
+              </div>
+              <div className={styles.formGroup}>
+                <label className={styles.label} htmlFor="numberOfGuests">
+                  Number of guests
+                </label>
+                <input
+                  id="numberOfGuests"
+                  name="numberOfGuests"
+                  type="number"
+                  placeholder="26"
+                  className={styles.input}
+                  value={formik.values.numberOfGuests}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  min="1"
+                />
+                {formik.touched.numberOfGuests &&
+                  formik.errors.numberOfGuests && (
+                    <div className={styles.error}>
+                      {formik.errors.numberOfGuests}
+                    </div>
+                  )}
+              </div>
+            </div>
+            <div className={styles.formGroup}>
+              <label className={styles.label} htmlFor="notes">
+                Event description and notes
+              </label>
+              <textarea
+                id="notes"
+                name="notes"
+                placeholder="Add notes"
+                className={styles.textarea || styles.input}
+                value={formik.values.notes}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+              />
+              {formik.touched.notes && formik.errors.notes && (
+                <div className={styles.error}>{formik.errors.notes}</div>
+              )}
+            </div>
           </div>
-        </div>
-        <div className={styles.titleDivider} />
-        {customValidationError && (
-          <div className={styles.validationError}>{customValidationError}</div>
-        )}
-        {/* Buttons */}
-        <div className={styles.actions}>
-          <button type="button" className={styles.cancel} onClick={handleReset}>
-            Clear
-          </button>
-          <button type="submit" className={styles.submit}>
-            Request a quote
-          </button>
-        </div>
-      </form>
+          <div className={styles.titleDivider} />
+          {customValidationError && (
+            <div className={styles.validationError}>
+              {customValidationError}
+            </div>
+          )}
+          {/* Buttons */}
+          <div className={styles.actions}>
+            <button
+              type="button"
+              className={styles.cancel}
+              onClick={handleReset}
+            >
+              Clear
+            </button>
+            <button type="submit" className={styles.submit}>
+              Request a quote
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
