@@ -368,55 +368,59 @@ export default function BookingPayment() {
             break;
 
           case "failure":
+            setErrorMessage("Payment failed. Please try again.");
+            setPaymentFailed(true);
             // console.log("Payment failed");
             // setErrorMessage("Payment failed. Please try again.");
             // setPaymentFailed(true);
             // break;
-            api
-              .put(`${API_BASE_URL}/invoice/${invoiceId}`, {
-                status: "Cancelled",
-                order: orderIdentification,
-                saleOrder: saleOrderId,
-                booking: bookResponse,
-              })
-              .then(() => {
-                console.log("Invoice updated as Refused");
-                setErrorMessage("Payment failed. Please try again.");
-                setPaymentFailed(true);
-              })
-              .catch((error) => {
-                console.error("Error updating invoice to Refused:", error);
-                setBookingInitiated(true);
-                setErrorMessage(
-                  "Payment failed and could not update invoice status"
-                );
-              });
+            // api
+            //   .put(`${API_BASE_URL}/invoice/${invoiceId}`, {
+            //     status: "Cancelled",
+            //     order: orderIdentification,
+            //     saleOrder: saleOrderId,
+            //     booking: bookResponse,
+            //   })
+            //   .then(() => {
+            //     console.log("Invoice updated as Refused");
+            //     setErrorMessage("Payment failed. Please try again.");
+            //     setPaymentFailed(true);
+            //   })
+            //   .catch((error) => {
+            //     console.error("Error updating invoice to Refused:", error);
+            //     setBookingInitiated(true);
+            //     setErrorMessage(
+            //       "Payment failed and could not update invoice status"
+            //     );
+            //   });
             break;
 
           case "cancel":
+            setErrorMessage("Your payment has been canceled.");
+            setPaymentFailed(true);
             // console.log("Payment cancelled");
             // setErrorMessage("Your payment has been canceled.");
             // setPaymentFailed(true);
             // break;
-            api
-              .put(`${API_BASE_URL}/invoice/${invoiceId}`, {
-                status: "Cancelled",
-                order: orderIdentification,
-                saleOrder: saleOrderId,
-                booking: bookResponse,
-              })
-              .then(() => {
-                console.log("Invoice updated as Cancelled (cancelled)");
-                setErrorMessage("Your payment has been canceled.");
-                setPaymentFailed(true);
-              })
-              .catch((error) => {
-                console.error("Error updating invoice to Cancelled:", error);
-                setBookingInitiated(true);
-                setErrorMessage(
-                  "Payment was cancelled but failed to update invoice status"
-                );
-              });
+            // api
+            //   .put(`${API_BASE_URL}/invoice/${invoiceId}`, {
+            //     status: "Cancelled",
+            //     order: orderIdentification,
+            //     saleOrder: saleOrderId,
+            //     booking: bookResponse,
+            //   })
+            //   .then(() => {
+            //     console.log("Invoice updated as Cancelled (cancelled)");
+            //     setErrorMessage("Your payment has been canceled.");
+            //     setPaymentFailed(true);
+            //   })
+            //   .catch((error) => {
+            //     console.error("Error updating invoice to Cancelled:", error);
+            //     setBookingInitiated(true);
+            //     setErrorMessage(
+            //       "Payment was cancelled but failed to update invoice status"
+            //     );
+            //   });
             break;
 
           case "exception":

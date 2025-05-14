@@ -92,7 +92,7 @@ const Navbar = () => {
   return (
     <div className="custom-nav-container">
       <div className="nav-content">
-        <Link to="http://35.176.180.59/" className="logo-container">
+        <Link to="https://hubitat.al/" className="logo-container">
           <img
             src={logoSrc}
             alt="Innovation Hub"
@@ -103,7 +103,7 @@ const Navbar = () => {
         <div
           className={`nav-items-container ${isMobileMenuOpen ? "active" : ""}`}
         >
-          <Link className="nav-item" to="http://35.176.180.59/">
+          <Link className="nav-item" to="https://hubitat.al/">
             Home
           </Link>
           <div
@@ -113,7 +113,7 @@ const Navbar = () => {
               className={`nav-item our-solutions-nav-item ${
                 activeDropdown === "about" ? "active" : ""
               }`}
-              to="http://35.176.180.59/about"
+              to="https://hubitat.al/about"
               onClick={(e) => toggleDropdown("about", e)}
             >
               About
@@ -132,21 +132,18 @@ const Navbar = () => {
               </svg>
             </Link>
             <div className="dropdown-content">
-              <Link
-                className="dropdown-item"
-                to="http://35.176.180.59/about-us"
-              >
+              <Link className="dropdown-item" to="https://hubitat.al/about-us">
                 About us
               </Link>
               <Link
                 className="dropdown-item"
-                to="http://35.176.180.59/innovation-coworking"
+                to="https://hubitat.al/innovation-coworking"
               >
                 Innovation & Coworking
               </Link>
               <Link
                 className="dropdown-item"
-                to="http://35.176.180.59/plug-and-play"
+                to="https://hubitat.al/plug-and-play"
               >
                 Plug And Play
               </Link>
@@ -161,7 +158,7 @@ const Navbar = () => {
               className={`nav-item our-solutions-nav-item solutions-link ${
                 activeDropdown === "solutions" ? "active" : ""
               }`}
-              to="http://35.176.180.59/services"
+              to="https://hubitat.al/services"
               onClick={(e) => toggleDropdown("solutions", e)}
             >
               Our Solutions
@@ -182,28 +179,28 @@ const Navbar = () => {
             <div className="dropdown-content">
               <Link
                 className="dropdown-item"
-                to="http://35.176.180.59/flexible-desk"
+                to="https://hubitat.al/flexible-desk"
               >
                 Flexible Desk
               </Link>
               <Link
                 className="dropdown-item"
-                to="http://35.176.180.59/dedicated-desk"
+                to="https://hubitat.al/dedicated-desk"
               >
                 Dedicated Desk
               </Link>
               <Link
                 className="dropdown-item"
-                to="http://35.176.180.59/private-offices"
+                to="https://hubitat.al/private-offices"
               >
                 Private Offices
               </Link>
             </div>
           </div>
-          <Link className="nav-item" to="http://35.176.180.59/events-info">
+          <Link className="nav-item" to="https://hubitat.al/events-info">
             Events
           </Link>
-          <Link className="nav-button" to="http://35.176.180.59/#contact">
+          <Link className="nav-button" to="https://hubitat.al/#contact">
             Join us
           </Link>
         </div>

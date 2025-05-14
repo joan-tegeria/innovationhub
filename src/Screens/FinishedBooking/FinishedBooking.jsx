@@ -18,14 +18,14 @@ export default function FinishedBooking() {
 
   const handleReturnHome = (e) => {
     e.preventDefault();
-    const link = "http://35.176.180.59/";
+    const link = "https://hubitat.al/";
 
     // Try to communicate with parent window if in iframe
     if (window.parent !== window) {
       try {
         // Send message to parent window
         window.parent.postMessage(
-          { type: "openLInkInside", link: "http://35.176.180.59/" },
+          { type: "openLInkInside", link: "https://hubitat.al/" },
           "*"
         );
       } catch (error) {
@@ -66,7 +66,7 @@ export default function FinishedBooking() {
           style={{ width: 220, height: 42 }}
           onClick={handleReturnHome}
         >
-            Back to home
+          Back to home
         </Button>
       </div>
     </div>

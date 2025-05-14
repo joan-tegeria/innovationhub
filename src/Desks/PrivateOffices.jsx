@@ -3,7 +3,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import CircularProgress from "@mui/material/CircularProgress";
 import styles from "./PrivateOffices.module.css";
 import api from "../util/axiosConfig";
-
+import poffice4 from "../assets/poffice4.jpg";
+import test from "../assets/poffice1.jpg";
+import poffice2 from "../assets/poffice2.jpg";
+import poffice3 from "../assets/poffice3.jpg";
+import { image } from "framer-motion/client";
 // Add a currency formatter function
 const formatCurrency = (value) => {
   // Format the number using the 'ALL' currency code
@@ -18,10 +22,26 @@ const formatCurrency = (value) => {
   return formattedValue.replace("ALL", "").trim() + " ALL";
 };
 
+const getProductImage = (name) => {
+  switch (name.toLowerCase()) {
+    case "the pod":
+      return "poffice3";
+    case "the solo":
+      return test;
+    case "the duo":
+      return poffice2;
+    case "the suite":
+      return poffice4;
+  }
+};
+
 const transformApiDataToDesks = (data, period) => {
   return data.map((item) => ({
     type: item.Product_Name.split("-")[0].trim(),
     description: item.Description,
+    // image: getProductImage(item.Product_Name.split("-")[0].trim()),
+    image:
+      "https://hubitat.al/wp-content/uploads/2025/01/modern-office-9-3.png",
     price: formatCurrency(item.Unit_Price, item.$currency_symbol),
     Capacity: item.Capacity,
     access:
@@ -66,7 +86,7 @@ const PrivateOffices = () => {
 
   const handleBooking = (deskType) => {
     console.log(deskType);
-    const url = "http://35.176.180.59/private-offices/";
+    const url = "https://hubitat.al/private-offices/";
 
     // If in iframe, use parent window location
     if (window.self !== window.top) {
@@ -195,9 +215,10 @@ const PrivateOffices = () => {
                 >
                   <div style={{ position: "relative" }}>
                     <img
-                      src={
-                        "http://35.176.180.59/wp-content/uploads/2024/11/image-15.png"
-                      }
+                      loading="lazy"
+                      srcset={desk.image || test}
+                      // decoding="async"
+                      sizes="(max-width: 500px)"
                       alt={desk.type}
                       className={styles.imgContainer}
                     />

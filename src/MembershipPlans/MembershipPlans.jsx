@@ -32,7 +32,7 @@ const transformApiDataToPlans = (apiData) => {
         text: facility,
         icon: coffeeIcon,
       })),
-      imageUrl: "http://35.176.180.59/wp-content/uploads/2024/11/image-15.png",
+      imageUrl: "https://hubitat.al/wp-content/uploads/2024/11/image-15.png",
       buttonText: "Get a quote",
     };
   });
@@ -48,13 +48,13 @@ const PlanFeature = ({ icon, text }) => (
 const getRedirectUrl = (title) => {
   switch (title) {
     case "Dedicated Desk":
-      return "http://35.176.180.59/services/dedicated-desk/";
+      return "https://hubitat.al/services/dedicated-desk/";
     case "Event Space":
-      return "http://35.176.180.59/events-info/";
+      return "https://hubitat.al/events-info/";
     case "Private Office":
-      return "http://35.176.180.59/services/private-offices/";
+      return "https://hubitat.al/services/private-offices/";
     default:
-      return "http://35.176.180.59/services"; // Default URL or handle error
+      return "https://hubitat.al/services"; // Default URL or handle error
   }
 };
 

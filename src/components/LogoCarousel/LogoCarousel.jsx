@@ -4,31 +4,31 @@ import styles from "./LogoCarousel.module.css";
 const logos = [
   {
     id: 1,
-    url: "http://35.176.180.59/wp-content/uploads/2025/02/image.png",
+    url: "https://hubitat.al/wp-content/uploads/2025/02/image.png",
     alt: "Plug and Play",
     link: "https://www.plugandplaytechcenter.com/",
   },
   {
     id: 2,
-    url: "http://35.176.180.59/wp-content/uploads/2025/02/Bashkia-Tirane.jpg",
+    url: "https://hubitat.al/wp-content/uploads/2025/02/Bashkia-Tirane.jpg",
     alt: "Bashkia e Tiranes",
     link: "https://www.tirana.al/",
   },
   {
     id: 3,
-    url: "http://35.176.180.59/wp-content/uploads/2025/02/IDEMIA_Smart_Identity_3L_RGB.png",
+    url: "https://hubitat.al/wp-content/uploads/2025/02/IDEMIA_Smart_Identity_3L_RGB.png",
     alt: "Idemia",
     link: "https://www.aadf.org/",
   },
   {
     id: 4,
-    url: "http://35.176.180.59/wp-content/uploads/2025/02/Logo-AADF_-Shkrimi-poshte-01.png",
+    url: "https://hubitat.al/wp-content/uploads/2025/02/Logo-AADF_-Shkrimi-poshte-01.png",
     alt: "AADF",
     link: "https://www.idemia.com/",
   },
   {
     id: 5,
-    url: "http://35.176.180.59/wp-content/uploads/2025/02/image-14.png",
+    url: "https://hubitat.al/wp-content/uploads/2025/02/image-14.png",
     alt: "Piramida",
     link: "https://piramida.edu.al/",
   },

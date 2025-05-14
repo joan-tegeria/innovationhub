@@ -164,10 +164,10 @@ const EventTable = ({ type }) => {
   const handleBooking = (deskType) => {
     const url =
       deskType.toLowerCase() === "the solo"
-        ? "http://35.176.180.59/dedicated-desk/"
+        ? "https://hubitat.al/dedicated-desk/"
         : deskType.toLowerCase() === "the duo"
-        ? "http://35.176.180.59/flexible-desk/"
-        : "http://35.176.180.59/private-offices/";
+        ? "https://hubitat.al/flexible-desk/"
+        : "https://hubitat.al/private-offices/";
 
     if (window.self !== window.top) {
       window.parent.location.href = url;

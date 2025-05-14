@@ -11,19 +11,19 @@ const Footer = () => {
           <div className="footer-section">
             <h3>Company</h3>
             <nav>
-              <Link to="http://35.176.180.59/services">Services</Link>
-              <Link to="http://35.176.180.59/about">About Us</Link>
-              <Link to="http://35.176.180.59/events">Events</Link>
-              <Link to="http://35.176.180.59/plug-and-play">Plug & Play</Link>
+              <Link to="https://hubitat.al/services">Services</Link>
+              <Link to="https://hubitat.al/about">About Us</Link>
+              <Link to="https://hubitat.al/events">Events</Link>
+              <Link to="https://hubitat.al/plug-and-play">Plug & Play</Link>
             </nav>
           </div>
 
           <div className="footer-section">
             <h3>Support</h3>
             <nav>
-              <Link to="http://35.176.180.59/#contactus">Contact Us</Link>
-              <Link to="http://35.176.180.59/visit-space">Visit Us</Link>
-              <Link to="http://35.176.180.59/frequently-asked-questions">
+              <Link to="https://hubitat.al/#contactus">Contact Us</Link>
+              <Link to="https://hubitat.al/visit-space">Visit Us</Link>
+              <Link to="https://hubitat.al/frequently-asked-questions">
                 FAQ
               </Link>
             </nav>
@@ -129,10 +129,8 @@ const Footer = () => {
       <div className="footer-copyright">
         <p>Copyright © InnovationHub. All rights reserved.</p>
         <div className="legal-links">
-          <Link to="http://35.176.180.59/cookies-policy">Cookies Policy</Link>
-          <Link to="http://35.176.180.59/terms-of-service">
-            Terms of Service
-          </Link>
+          <Link to="https://hubitat.al/cookies-policy">Cookies Policy</Link>
+          <Link to="https://hubitat.al/terms-of-service">Terms of Service</Link>
         </div>
       </div>
     </div>

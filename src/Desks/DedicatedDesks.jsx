@@ -51,10 +51,10 @@ const DedicatedDesks = () => {
     console.log(deskType);
     const url =
       deskType.toLowerCase() === "dedicated desk"
-        ? "http://35.176.180.59/dedicated-desk/"
+        ? "https://hubitat.al/dedicated-desk/"
         : deskType.toLowerCase() === "flexible desk"
-        ? "http://35.176.180.59/flexible-desk/"
-        : "http://35.176.180.59/private-offices/";
+        ? "https://hubitat.al/flexible-desk/"
+        : "https://hubitat.al/private-offices/";
 
     // If in iframe, use parent window location
     if (window.self !== window.top) {
@@ -174,7 +174,7 @@ const DedicatedDesks = () => {
                 <div style={{ position: "relative" }}>
                   <img
                     src={
-                      "http://35.176.180.59/wp-content/uploads/2024/11/image-15.png"
+                      "https://hubitat.al/wp-content/uploads/2024/11/image-15.png"
                     }
                     alt={desk.type}
                     className={styles.imgContainer}

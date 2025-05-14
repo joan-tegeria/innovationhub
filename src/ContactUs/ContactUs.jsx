@@ -98,7 +98,7 @@ const ContactForm = () => {
 
   const handleTermsRediredct = (e) => {
     e.preventDefault();
-    const link = "http://35.176.180.59/terms-of-service/";
+    const link = "https://hubitat.al/terms-of-service/";
 
     // Try to communicate with parent window if in iframe
     if (window.parent !== window) {
@@ -107,7 +107,7 @@ const ContactForm = () => {
         window.parent.postMessage(
           {
             type: "openLInkInside",
-            link: "http://35.176.180.59/terms-of-service/",
+            link: "https://hubitat.al/terms-of-service/",
           },
           "*"
         );
