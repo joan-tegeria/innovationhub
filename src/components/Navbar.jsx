@@ -201,7 +201,7 @@ const Navbar = () => {
             Events
           </Link>
           <Link className="nav-button" to="https://hubitat.al/#contact">
-            Join us
+            Contact us
           </Link>
         </div>
         <button className="mobile-menu-button" onClick={toggleMobileMenu}>

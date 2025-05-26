@@ -9,6 +9,11 @@ import { useNavigate } from "react-router-dom";
 import info from "../../assets/info.svg";
 import infowhite from "../../assets/infowhite.svg";
 import { address, label } from "framer-motion/client";
+
+import flags from "react-phone-number-input/flags";
+import "react-phone-number-input/style.css";
+
+import PhoneInput from "react-phone-number-input";
 // Get today's date in YYYY-MM-DD format
 const today = new Date().toISOString().split("T")[0];
 
@@ -39,7 +44,7 @@ const validationSchema = Yup.object({
     .required("Phone number is required")
     .matches(
       /^(?:\+355|0)(?:6|4|5)[0-9]{8}$/,
-      "Phone number must be in the format: +3556XXXXXXXX or 06XXXXXXXX"
+      "The phone number format is incorrect"
     ),
   email: Yup.string()
     .required("Email is required")
@@ -81,6 +86,7 @@ export default function BookOffice() {
     touched,
     setFieldValue,
     isValid,
+    setFieldTouched,
   } = useFormik({
     initialValues: {
       selectedWorkspace: "",
@@ -169,6 +175,10 @@ export default function BookOffice() {
       }
     },
   });
+
+  useEffect(() => {
+    console.log(values);
+  }, [values]);
 
   useEffect(() => {
     setFieldValue(
@@ -461,15 +471,15 @@ export default function BookOffice() {
               <label htmlFor="phoneNumber" className={styles.label}>
                 Phone Number
               </label>
-              <input
-                type="tel"
+              <PhoneInput
                 id="phoneNumber"
                 name="phoneNumber"
+                flags={flags}
+                defaultCountry="AL"
+                placeholder="Enter phone number"
                 value={values.phoneNumber}
-                onChange={handleChange}
-                className={styles.input}
-                placeholder="Phone Number"
-                autoComplete="phoneNumber"
+                onChange={(value) => setFieldValue("phoneNumber", value)}
+                onBlur={() => setFieldTouched("phoneNumber", true)}
               />
               {errors.phoneNumber && touched.phoneNumber && (
                 <div className={styles.error}>{errors.phoneNumber}</div>

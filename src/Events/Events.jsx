@@ -9,6 +9,9 @@ import dayjs from "dayjs";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import Success from "../assets/form_success.svg";
+import PhoneInput from "react-phone-number-input";
+import flags from "react-phone-number-input/flags";
+import "react-phone-number-input/style.css";
 
 const eventPurposeOptions = [
   { value: "Conference", label: "Conference" },
@@ -41,7 +44,7 @@ const validationSchema = Yup.object({
     .required("Phone number is required")
     .matches(
       /^(?:\+355|0)(?:6|4|5)[0-9]{8}$/,
-      "Phone number must be in the format: +3556XXXXXXXX or 06XXXXXXXX"
+      "The phone number format is incorrect"
     ),
   eventName: Yup.string()
     .required("Event name is required")
@@ -297,7 +300,7 @@ export default function Events() {
                 <label className={styles.label} htmlFor="phoneNumber">
                   Phone number
                 </label>
-                <input
+                {/* <input
                   id="phoneNumber"
                   name="phoneNumber"
                   type="text"
@@ -306,6 +309,18 @@ export default function Events() {
                   value={formik.values.phoneNumber}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
+                /> */}
+                <PhoneInput
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  flags={flags}
+                  defaultCountry="AL"
+                  placeholder="Enter phone number"
+                  value={formik.values.phoneNumber}
+                  onChange={(value) =>
+                    formik.setFieldValue("phoneNumber", value)
+                  }
+                  onBlur={() => formik.setFieldTouched("phoneNumber", true)}
                 />
                 {formik.touched.phoneNumber && formik.errors.phoneNumber && (
                   <div className={styles.error}>

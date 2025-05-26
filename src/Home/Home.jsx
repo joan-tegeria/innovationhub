@@ -8,6 +8,9 @@ function Home() {
   const navigate = useNavigate();
   const [activeDesksType, setActiveDesksType] = useState("dedicated");
 
+  
+
+
   return (
     <div className={styles.container}>
       {/* Pricing Tables Section */}

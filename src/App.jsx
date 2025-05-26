@@ -32,6 +32,15 @@ import BookOffice from "./Screens/BookOffice";
 import Navbar from "./components/Navbar";
 import VisitSPace from "./Screens/VIsitSPace/VisitSPace";
 // Wrapper component to handle conditional rendering of Navbar and Footer
+
+const ExternalRedirect = ({ to }) => {
+  useEffect(() => {
+    window.location.href = to;
+  }, [to]);
+
+  return null;
+};
+
 const AppContent = () => {
   const location = useLocation();
 
@@ -107,7 +116,11 @@ const AppContent = () => {
       <main className="main-content">
         <Routes>
           {/* Main Routes */}
-          <Route path="/" element={<Home />} />
+          {/* <Route path="/" element={<Home />} /> */}
+          <Route
+            path="/"
+            element={<ExternalRedirect to="https://hubitat.al/" />}
+          />
           <Route path="/contact" element={<ContactUs />} />
           <Route path="/events" element={<Events />} />
           <Route path="/membershipplans" element={<MembershipPlans />} />

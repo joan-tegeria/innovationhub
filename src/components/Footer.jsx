@@ -11,10 +11,10 @@ const Footer = () => {
           <div className="footer-section">
             <h3>Company</h3>
             <nav>
-              <Link to="https://hubitat.al/services">Services</Link>
+              <Link to="https://hubitat.al/services">Our Solutions</Link>
               <Link to="https://hubitat.al/about">About Us</Link>
               <Link to="https://hubitat.al/events">Events</Link>
-              <Link to="https://hubitat.al/plug-and-play">Plug & Play</Link>
+              <Link to="https://hubitat.al/plug-and-play">Plug and Play</Link>
             </nav>
           </div>
 
@@ -29,7 +29,7 @@ const Footer = () => {
             </nav>
           </div>
 
-          <div className="footer-section">
+          <div className="footer-section" style={{ flex: 2 }}>
             <h3>Contact details</h3>
             <div className="contact-info">
               <div className="contact-item">
@@ -91,9 +91,22 @@ const Footer = () => {
                     </clipPath>
                   </defs>
                 </svg>
-                <span>Bulevardi Dëshmorët e Kombit 5, Tiranë</span>
+                <span>
+                  Innovation Hub, Pyramid of Tirana (Floor -1),  Bulevardi
+                  Dëshmorët e Kombit 5, Tirana
+                </span>
               </div>
             </div>
+          </div>
+          <div className="footer-section">
+            <iframe
+              className="responsive-map"
+              src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d1498.1753321456913!2d19.820230010213727!3d41.32298756977719!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1350316184d25ca1%3A0x567d61b5e8596213!2sInnovation%20Hubitat!5e0!3m2!1sen!2sus!4v1748002033548!5m2!1sen!2sus"
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Innovation Hubitat Map"
+            ></iframe>
           </div>
         </div>
 
@@ -127,7 +140,7 @@ const Footer = () => {
         </div>
       </footer>
       <div className="footer-copyright">
-        <p>Copyright © InnovationHub. All rights reserved.</p>
+        <p>Copyright 2025 © InnovationHub. All rights reserved.</p>
         <div className="legal-links">
           <Link to="https://hubitat.al/cookies-policy">Cookies Policy</Link>
           <Link to="https://hubitat.al/terms-of-service">Terms of Service</Link>

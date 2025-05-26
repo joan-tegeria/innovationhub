@@ -1,166 +1,115 @@
-import React, { useState, useRef, useEffect } from "react";
-import PropTypes from "prop-types";
-import "./PhoneInput.css";
+import { useState, useEffect } from "react";
+import styles from "./PhoneInput.module.css";
+// Country data with flag emojis, country codes, and dial codes
+const countries = [
+  { code: "AL", name: "Albania", dialCode: "+355", flag: "🇦🇱" },
+  { code: "US", name: "United States", dialCode: "+1", flag: "🇺🇸" },
+  { code: "GB", name: "United Kingdom", dialCode: "+44", flag: "🇬🇧" },
+  { code: "DE", name: "Germany", dialCode: "+49", flag: "🇩🇪" },
+  { code: "FR", name: "France", dialCode: "+33", flag: "🇫🇷" },
+  { code: "IT", name: "Italy", dialCode: "+39", flag: "🇮🇹" },
+  { code: "ES", name: "Spain", dialCode: "+34", flag: "🇪🇸" },
+  { code: "GR", name: "Greece", dialCode: "+30", flag: "🇬🇷" },
+  // Add more countries as needed
+];
 
 const PhoneInput = ({
-  value = "",
-  onChange,
-  placeholder = "Phone number",
-  name = "phone",
-  id = "phone-input",
-  required = false,
-  disabled = false,
-  className = "",
+  values,
+  errors,
+  touched,
+  handleChange,
+  setFieldValue,
 }) => {
-  // Countries with their codes - can be expanded
-  const countries = [
-    { code: "+44", name: "United Kingdom", flag: "🇬🇧" },
-    { code: "+1", name: "United States", flag: "🇺🇸" },
-    { code: "+49", name: "Germany", flag: "🇩🇪" },
-    { code: "+33", name: "France", flag: "🇫🇷" },
-    { code: "+39", name: "Italy", flag: "🇮🇹" },
-    { code: "+34", name: "Spain", flag: "🇪🇸" },
-    { code: "+7", name: "Russia", flag: "🇷🇺" },
-  ];
+  // Find Albania by default
+  const defaultCountry = countries.find((country) => country.code === "AL");
+  const [selectedCountry, setSelectedCountry] = useState(defaultCountry);
+  const [phoneNumber, setPhoneNumber] = useState("");
 
-  // Parse initial value
-  const parseInitialValue = (initialValue) => {
-    for (const country of countries) {
-      if (initialValue?.startsWith(country.code)) {
-        return {
-          countryCode: country.code,
-          phoneNumber: initialValue.substring(country.code.length).trim(),
-        };
-      }
-    }
-    // Default to UK code if no match
-    return { countryCode: "+44", phoneNumber: initialValue || "" };
-  };
-
-  const parsedValue = parseInitialValue(value);
-  const [countryCode, setCountryCode] = useState(parsedValue.countryCode);
-  const [phoneNumber, setPhoneNumber] = useState(parsedValue.phoneNumber);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-  const dropdownRef = useRef(null);
-  const inputRef = useRef(null);
-
-  // Close the dropdown when clicking outside
+  // When the country changes, update the full phone number
   useEffect(() => {
-    function handleClickOutside(event) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsDropdownOpen(false);
+    updateFullPhoneNumber(phoneNumber);
+  }, [selectedCountry]);
+
+  // When component mounts, set the default country code in the form values
+  useEffect(() => {
+    if (!values.phoneNumber) {
+      setFieldValue("phoneNumber", selectedCountry.dialCode + " ");
+    } else if (values.phoneNumber && !values.phoneNumber.includes("+")) {
+      // If there's a value but no country code, add the default one
+      setFieldValue(
+        "phoneNumber",
+        selectedCountry.dialCode + " " + values.phoneNumber
+      );
+    } else {
+      // Extract the phone number part (without country code)
+      const numberParts = values.phoneNumber.split(" ");
+      if (numberParts.length > 1) {
+        setPhoneNumber(numberParts.slice(1).join(" "));
+      }
+
+      // Find and set the selected country based on dial code
+      const dialCode = numberParts[0];
+      const country = countries.find((c) => c.dialCode === dialCode);
+      if (country) {
+        setSelectedCountry(country);
       }
     }
+  }, []);
 
-    if (isDropdownOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isDropdownOpen]);
-
-  // Format the phone number to only allow digits
-  const formatNumber = (input) => {
-    return input.replace(/[^\d]/g, "");
+  const handleCountryChange = (e) => {
+    const countryCode = e.target.value;
+    const country = countries.find((c) => c.code === countryCode);
+    setSelectedCountry(country);
   };
 
   const handlePhoneNumberChange = (e) => {
-    const formattedNumber = formatNumber(e.target.value);
-    setPhoneNumber(formattedNumber);
-
-    if (onChange) {
-      onChange({
-        target: {
-          name,
-          value: `${countryCode}${formattedNumber}`,
-        },
-      });
-    }
+    const value = e.target.value;
+    setPhoneNumber(value);
+    updateFullPhoneNumber(value);
   };
 
-  const handleCountryCodeChange = (code) => {
-    setCountryCode(code);
-    setIsDropdownOpen(false);
-
-    if (onChange) {
-      onChange({
-        target: {
-          name,
-          value: `${code}${phoneNumber}`,
-        },
-      });
-    }
-
-    // Focus the input field after selecting a country
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
+  const updateFullPhoneNumber = (number) => {
+    // Combine country code with phone number
+    setFieldValue("phoneNumber", `${selectedCountry.dialCode} ${number}`);
   };
 
   return (
-    <div className={`phone-input-container ${className}`}>
-      <div className="phone-input-wrapper">
-        <div className="country-code-selector" ref={dropdownRef}>
-          <button
-            type="button"
-            className="country-code-button"
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            disabled={disabled}
+    <div className={styles.formGroup}>
+      <label htmlFor="phoneNumber" className={styles.label}>
+        Phone Number
+      </label>
+      <div style={{ display: "flex", gap: "8px" }}>
+        <div style={{ width: "120px" }}>
+          <select
+            value={selectedCountry.code}
+            onChange={handleCountryChange}
+            className={styles.select}
+            style={{ width: "100%", paddingRight: "8px" }}
           >
-            <span>{countryCode}</span>
-            <span className="dropdown-arrow">▼</span>
-          </button>
-
-          {isDropdownOpen && (
-            <div className="country-dropdown">
-              {countries.map((country) => (
-                <button
-                  key={country.code}
-                  type="button"
-                  className={`country-option ${
-                    country.code === countryCode ? "selected" : ""
-                  }`}
-                  onClick={() => handleCountryCodeChange(country.code)}
-                >
-                  <span className="country-flag">{country.flag}</span>
-                  <span>
-                    {country.code} {country.name}
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
+            {countries.map((country) => (
+              <option key={country.code} value={country.code}>
+                {country.flag} {country.dialCode}
+              </option>
+            ))}
+          </select>
         </div>
-
         <input
           type="tel"
-          id={id}
-          name={name}
-          value={phoneNumber}
-          onChange={handlePhoneNumberChange}
-          placeholder={placeholder}
-          className="phone-number-input"
-          disabled={disabled}
-          required={required}
-          ref={inputRef}
+          id="phoneNumber"
+          name="phoneNumberInput"
+          // value={phoneNumber}
+          // onChange={handlePhoneNumberChange}
+          className={styles.input}
+          placeholder="Phone Number"
+          autoComplete="tel"
+          style={{ flexGrow: 1 }}
         />
       </div>
+      {errors.phoneNumber && touched.phoneNumber && (
+        <div className={styles.error}>{errors.phoneNumber}</div>
+      )}
     </div>
   );
-};
-
-PhoneInput.propTypes = {
-  value: PropTypes.string,
-  onChange: PropTypes.func,
-  placeholder: PropTypes.string,
-  name: PropTypes.string,
-  id: PropTypes.string,
-  required: PropTypes.bool,
-  disabled: PropTypes.bool,
-  className: PropTypes.string,
 };
 
 export default PhoneInput;
