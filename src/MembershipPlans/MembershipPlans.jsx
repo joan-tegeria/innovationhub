@@ -7,6 +7,11 @@ import dedicatedIcon from "../assets/dedicated.svg";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import api from "../util/axiosConfig";
+
+import DedicatedDeskImg from "../assets/Dedicated Desk.jpg";
+import EventSpaceImg from "../assets/Event Space.jpg";
+import PrivateOfficeImg from "../assets/Private Office.jpg";
+import FlexibleOfficeImg from "../assets/Flexible Desk.jpg";
 import { CircularProgress } from "@mui/material";
 // Import Swiper styles
 import "swiper/css";
@@ -27,6 +32,7 @@ const transformApiDataToPlans = (apiData) => {
     return {
       title: item.Name,
       price: numericPrice, // Only store the numeric part
+      Payment_Period: item.Payment_Period,
       description: item.Description,
       features: facilities.map((facility) => ({
         text: facility,
@@ -68,10 +74,27 @@ const handleButtonClick = (plan) => {
   }
 };
 
+const getImage = (title) => {
+  switch (title) {
+    case "Dedicated Desk":
+      return DedicatedDeskImg;
+    case "Event Space":
+      return EventSpaceImg;
+    case "Private Office":
+      return PrivateOfficeImg;
+    default:
+      return FlexibleOfficeImg;
+  }
+};
+
 const PlanCard = ({ plan }) => (
   <div className={styles.planCard}>
     <div className={styles.planImageContainer}>
-      <img src={plan.imageUrl} alt={plan.title} className={styles.planImage} />
+      <img
+        src={getImage(plan.title)}
+        alt={plan.title}
+        className={styles.planImage}
+      />
       <h2 className={styles.planTitle}>{plan.title}</h2>
     </div>
     <div className={styles.planContent}>
@@ -79,7 +102,7 @@ const PlanCard = ({ plan }) => (
         <span className={styles.startingFrom}>Starting from</span>
         <span className={styles.price}>
           {plan.price ? Number(plan.price).toLocaleString() : 0} ALL
-          {plan.price.includes("300") ? "" : "/Day"}
+          /{plan.Payment_Period}
         </span>
       </div>
       <p className={styles.description}>{plan.description}</p>
@@ -114,7 +137,31 @@ export default function MembershipPlans() {
         const response = await api.get(
           "https://acas4w1lnk.execute-api.eu-central-1.amazonaws.com/prod/categories"
         );
-        const transformedPlans = transformApiDataToPlans(response.data.data);
+        let transformedPlans = transformApiDataToPlans(response.data.data);
+        
+        // Log plan titles to debug
+        console.log("Plan titles before sorting:", transformedPlans.map(p => p.title));
+        
+        // Sort the plans so Flexible Desk appears before Dedicated Desk
+        transformedPlans = transformedPlans.sort((a, b) => {
+          const titleA = a.title.toLowerCase();
+          const titleB = b.title.toLowerCase();
+          
+          // Put Flexible Desk first
+          if (titleA.includes("flexible")) return -1;
+          if (titleB.includes("flexible")) return 1;
+          
+          // Put Dedicated Desk second
+          if (titleA.includes("dedicated") && !titleB.includes("flexible")) return -1;
+          if (titleB.includes("dedicated") && !titleA.includes("flexible")) return 1;
+          
+          // Leave other items in their original order
+          return 0;
+        });
+        
+        // Log plan titles after sorting
+        console.log("Plan titles after sorting:", transformedPlans.map(p => p.title));
+        
         // Duplicate the plans array with new unique keys
         const duplicatedPlans = [
           ...transformedPlans.map((plan) => ({

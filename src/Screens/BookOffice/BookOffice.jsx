@@ -23,7 +23,18 @@ const bookingPeriods = [
   { value: "Monthly", label: "Monthly" },
   { value: "Annually", label: "Annually" },
 ];
-
+const getProductName = (name) => {
+  switch (name.toLowerCase()) {
+    case "the pod":
+      return "3 People ";
+    case "the solo":
+      return "1 Person";
+    case "the duo":
+      return "2 People";
+    case "the suite":
+      return "4 People";
+  }
+};
 // Yup schema with validation for date
 const validationSchema = Yup.object({
   // selectedWorkspace: Yup.string().required("Workspace is required"),
@@ -253,6 +264,10 @@ export default function BookOffice() {
           toDate = new Date(fromDate);
           toDate.setMonth(fromDate.getMonth() + 1);
           break;
+        case "Annually":
+          toDate = new Date(fromDate);
+          toDate.setFullYear(fromDate.getFullYear() + 1);
+          break;
         default:
           toDate = new Date(fromDate);
           toDate.setDate(fromDate.getDate() + 1);
@@ -339,7 +354,7 @@ export default function BookOffice() {
                   }`}
                   onClick={() => handleWorkspaceSelect(workspace.value)}
                 >
-                  {workspace.label}
+                  {getProductName(workspace.label)}
                 </button>
               ))}
             </div>

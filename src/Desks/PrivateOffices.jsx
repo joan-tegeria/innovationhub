@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
+import { ENDPOINTS } from "../util/api";
 import { motion, AnimatePresence } from "framer-motion";
 import CircularProgress from "@mui/material/CircularProgress";
 import styles from "./PrivateOffices.module.css";
 import api from "../util/axiosConfig";
-import poffice4 from "../assets/poffice4.jpg";
-import test from "../assets/poffice1.jpg";
-import poffice2 from "../assets/poffice2.jpg";
-import poffice3 from "../assets/poffice3.jpg";
+import poffice4 from "../assets/3d-4people.webp";
+import poffice1 from "../assets/3d-1person.webp";
+import poffice2 from "../assets/3d-2people.webp";
+import poffice3 from "../assets/3d-3people.webp";
 import { image } from "framer-motion/client";
 // Add a currency formatter function
 const formatCurrency = (value) => {
@@ -25,13 +26,26 @@ const formatCurrency = (value) => {
 const getProductImage = (name) => {
   switch (name.toLowerCase()) {
     case "the pod":
-      return "poffice3";
+      return "https://hubitat.al/wp-content/uploads/2025/05/3d-3people-min-min.jpg";
     case "the solo":
-      return test;
+      return "https://hubitat.al/wp-content/uploads/2025/05/3d-1person-min.jpg";
     case "the duo":
-      return poffice2;
+      return "https://hubitat.al/wp-content/uploads/2025/05/3d-2people-min.jpg";
     case "the suite":
-      return poffice4;
+      return "https://hubitat.al/wp-content/uploads/2025/05/3d-4people-min.jpg";
+  }
+};
+
+const getProductName = (name) => {
+  switch (name.toLowerCase()) {
+    case "the pod":
+      return "3 People ";
+    case "the solo":
+      return "1 Person";
+    case "the duo":
+      return "2 People";
+    case "the suite":
+      return "4 People";
   }
 };
 
@@ -109,7 +123,7 @@ const PrivateOffices = () => {
             : "Annually";
 
         const response = await api.get(
-        `https://acas4w1lnk.execute-api.eu-central-1.amazonaws.com/prod/products?category=Private&period=${period}`
+          `${ENDPOINTS.PRODUCTS}?category=Private&period=${period}`
         );
         console.log(response.data.data);
 
@@ -138,6 +152,16 @@ const PrivateOffices = () => {
 
   return (
     <div className={styles.container}>
+      <div className={styles.titleContainer} style={{ marginBottom: "2rem" }}>
+        <span className={styles.title2}>Offices</span>
+        <span>
+          Your own space to innovate, collaborate, and grow. Our private,
+          fully-equipped offices are perfect for startups, growing teams, and
+          individuals who value privacy, focus, and a professional work
+          environment.
+        </span>
+      </div>
+
       <div className={styles.titleContainer}>
         <span className={styles.title}>Private Offices</span>
 
@@ -208,15 +232,17 @@ const PrivateOffices = () => {
               {deskData[activeTab].map((desk, index) => (
                 <motion.div
                   key={index}
-                  initial={{ opacity: 0, x: 0 }}
+                  initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1 * index }}
+                  transition={{ delay: 0.05 * index }}
                   className={styles.card}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
                   <div style={{ position: "relative" }}>
                     <img
                       loading="lazy"
-                      srcset={desk.image || test}
+                      srcset={getProductImage(desk.type)}
                       // decoding="async"
                       sizes="(max-width: 500px)"
                       alt={desk.type}
@@ -257,7 +283,12 @@ const PrivateOffices = () => {
                     </span>
                     <div className={styles.cardInfo}>
                       <span className={styles.rateLabel}>
-                        {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}{" "}
+                        {activeTab.charAt(0).toUpperCase() +
+                          activeTab.slice(1) ===
+                        "Annually"
+                          ? "Monthly"
+                          : activeTab.charAt(0).toUpperCase() +
+                            activeTab.slice(1)}{" "}
                         rate
                       </span>
                       <span className={styles.price}>{desk.price}</span>

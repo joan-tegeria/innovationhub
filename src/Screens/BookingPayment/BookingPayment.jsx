@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
+import { API_BASE_URL } from "../../util/api";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { CircularProgress, Chip } from "@mui/material";
 import styles from "./BookingPayment.module.css";
@@ -19,8 +20,7 @@ export default function BookingPayment() {
   const location = useLocation();
   // const { accessToken, tokenType } = useAuth();
 
-  const API_BASE_URL =
-    "https://acas4w1lnk.execute-api.eu-central-1.amazonaws.com/prod";
+  // Using API_BASE_URL from util/api.js
 
   // Get the state from navigation
   const {

@@ -1,8 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import CircularProgress from "@mui/material/CircularProgress";
 import styles from "./DedicatedDesks.module.css";
 import api from "../util/axiosConfig";
+import { ENDPOINTS } from "../util/api";
+
+import dedicatedImage from "../assets/3d-dedicated.jpg";
+import flexibleImage from "../assets/3d-flexible.jpg";
 
 // Add a currency formatter function
 const formatCurrency = (value) => {
@@ -32,7 +36,7 @@ const transformApiDataToDesks = (data, period) => {
         : period === "Monthly"
         ? "for 30 days access"
         : "for Annual access",
-  }));
+  })).reverse();
 };
 
 const DedicatedDesks = () => {
@@ -64,6 +68,17 @@ const DedicatedDesks = () => {
     }
   };
 
+  const getImage = (name) => {
+    switch (name.toLowerCase()) {
+      case "dedicated desk":
+        return "https://hubitat.al/wp-content/uploads/2025/05/dedicated-desks-min.jpg";
+      case "flexible desk":
+        return "https://hubitat.al/wp-content/uploads/2025/05/flexible-desks-min.jpg";
+      default:
+        return "https://hubitat.al/wp-content/uploads/2025/05/flexible-desks-min.jpg";
+    }
+  };
+
   useEffect(() => {
     const fetchDesks = async () => {
       setIsLoading(true);
@@ -77,7 +92,7 @@ const DedicatedDesks = () => {
             : "Monthly";
 
         const response = await api.get(
-          `https://acas4w1lnk.execute-api.eu-central-1.amazonaws.com/prod/products?category=Dedicated&period=${period}`
+          `${ENDPOINTS.PRODUCTS}?category=Dedicated&period=${period}`
         );
         console.log(response.data.data);
 
@@ -173,9 +188,7 @@ const DedicatedDesks = () => {
               >
                 <div style={{ position: "relative" }}>
                   <img
-                    src={
-                      "https://hubitat.al/wp-content/uploads/2024/11/image-15.png"
-                    }
+                    src={getImage(desk.type)}
                     alt={desk.type}
                     className={styles.imgContainer}
                   />

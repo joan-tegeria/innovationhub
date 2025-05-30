@@ -35,9 +35,21 @@ import VisitSPace from "./Screens/VIsitSPace/VisitSPace";
 
 const ExternalRedirect = ({ to }) => {
   useEffect(() => {
-    window.location.href = to;
+    // Only redirect if we're in production mode
+    if (import.meta.env.MODE === 'production') {
+      window.location.href = to;
+    }
+    // In development mode, log the redirect but don't actually redirect
+    else {
+      console.log(`[DEV MODE] Would redirect to: ${to}`);
+    }
   }, [to]);
 
+  // If we're in development, render a message instead of redirecting
+  if (import.meta.env.MODE !== 'production') {
+    return <Home/>
+  }
+  
   return null;
 };
 

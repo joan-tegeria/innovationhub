@@ -22,6 +22,12 @@
   margin-bottom: 1.5rem;
 }
 
+.title2 {
+  font-size: 24px;
+  font-weight: bold;
+  color: black;
+}
+
 .loadingContainer {
   position: absolute;
   display: flex;
@@ -87,7 +93,7 @@
   justify-content: center;
   font-size: 14px;
   text-transform: capitalize;
-  width: calc(100% / 3);
+  width: 100%;
 }
 
 .activeTab {
@@ -126,6 +132,7 @@
   display: flex;
   flex-direction: column;
   border: 1px solid #9d9fa365;
+  cursor: pointer;
 }
 
 .cardContent {
@@ -137,7 +144,6 @@
 
 .card:hover {
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  transform: translateY(-5px);
 }
 
 .cardInfo {

@@ -49,7 +49,7 @@ const ContactForm = () => {
 
       try {
         const response = await fetch(
-          "https://acas4w1lnk.execute-api.eu-central-1.amazonaws.com/prod/contact",
+          import.meta.env.VITE_API_BASE_URL + "/contact",
           {
             method: "POST",
             headers: {

@@ -29,7 +29,7 @@ const Footer = () => {
             </nav>
           </div>
 
-          <div className="footer-section" style={{ flex: 2 }}>
+          <div className="footer-section contact-details" >
             <h3>Contact details</h3>
             <div className="contact-info">
               <div className="contact-item">

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup"; // Import Yup
-import styles from "./BookDesk.module.css"; // Import the CSS module
+import FormControlLabel from "@mui/material/FormControlLabel";
+import { API_BASE_URL } from "../../util/api"; // Import the API base URL
 import api from "../../util/axiosConfig";
 import { transformWorkspacesResponse } from "../../util/transformers";
 import { useNavigate, useParams } from "react-router-dom";
@@ -9,6 +10,7 @@ import info from "../../assets/info.svg";
 import infowhite from "../../assets/infowhite.svg";
 import RestartBookingModal from "../BookModal/RestartBookingModal";
 
+import styles from "./BookDesk.module.css";
 // Get today's date in YYYY-MM-DD format
 const today = new Date().toISOString().split("T")[0];
 
@@ -17,6 +19,7 @@ const bookingPeriods = [
   { value: "Daily", label: "Daily" },
   { value: "Weekly", label: "Weekly" },
   { value: "Monthly", label: "Monthly" },
+  { value: "Annually", label: "Annually" },
 ];
 
 // Yup schema with validation for date
@@ -72,8 +75,7 @@ const validationSchema = Yup.object({
     ),
 });
 
-const API_BASE_URL =
-  "https://acas4w1lnk.execute-api.eu-central-1.amazonaws.com/prod";
+// Using API_BASE_URL from util/api.js
 
 export default function BookDesk() {
   const [workspaces, setWorkspaces] = useState([]);
@@ -183,6 +185,10 @@ export default function BookDesk() {
             bookingId: bookingResponse.data?.bookingId,
           };
 
+          console.log("Booking response", bookingResponse);
+
+          console.log("Navigation data", navigationData);
+
           // Validate all fields have values
           const missingFields = Object.entries(navigationData)
             .filter(
@@ -194,7 +200,7 @@ export default function BookDesk() {
             )
             .map(([key]) => key);
 
-          if (missingFields.length > 0) {
+          if (values.bookingPeriod !== "Annually" && missingFields.length > 0) {
             console.error(
               "Missing required fields for navigation:",
               missingFields
@@ -213,7 +219,15 @@ export default function BookDesk() {
           // Add a small delay to ensure all state updates are processed
           // This helps with iOS issues where state updates might not be immediately reflected
           setTimeout(() => {
-            navigate(`/booking/payment`, { state: navigationState });
+            if (values.bookingPeriod !== "Annually") {
+              navigate(`/booking/payment`, { state: navigationState });
+            } else {
+              navigate(`/booking-success`, {
+                state: {
+                  type: "private",
+                },
+              });
+            }
           }, 300);
         };
 
@@ -328,6 +342,10 @@ export default function BookDesk() {
         case "Monthly":
           toDate = new Date(fromDate);
           toDate.setMonth(fromDate.getMonth() + 1);
+          break;
+        case "Annually":
+          toDate = new Date(fromDate);
+          toDate.setFullYear(fromDate.getFullYear() + 1);
           break;
         default:
           toDate = new Date(fromDate);
@@ -631,19 +649,26 @@ export default function BookDesk() {
               </div>
               <div className={styles.divider} />
               <div className={styles.footer}>
-                <div className={styles.priceContainer}>
-                  <span>Total to pay</span>
-                  <span className={styles.price}>
-                    {price ? Number(price).toLocaleString() : 0} ALL
-                  </span>
-                </div>
-
+                {values.bookingPeriod !== "Annually" ? (
+                  <div className={styles.priceContainer}>
+                    <span>Total to pay</span>
+                    <span className={styles.price}>
+                      {price ? Number(price).toLocaleString() : 0} ALL
+                    </span>
+                  </div>
+                ) : (
+                  <div className={styles.priceContainer}></div>
+                )}
                 <button
                   type="submit"
                   className={styles.submitButton}
                   disabled={isSubmitting || !isAvailable}
                 >
-                  {isSubmitting ? "Creating..." : "Book Now"}
+                  {isSubmitting
+                    ? "Creating..."
+                    : values.bookingPeriod !== "Annually"
+                    ? "Book Now"
+                    : "Get a Quote"}
                 </button>
               </div>
             </form>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { ENDPOINTS } from "../util/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { useParams, Navigate } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -101,7 +102,7 @@ const DesksTables = ({ type }) => {
         const category = type === "dedicated" ? "Dedicated" : "Private";
 
         const response = await api.get(
-          `https://acas4w1lnk.execute-api.eu-central-1.amazonaws.com/prod/products?category=${category}&period=${period}`
+          `${ENDPOINTS.PRODUCTS}?category=${category}&period=${period}`
         );
 
         if (category === "Private") {

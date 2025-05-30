@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { ENDPOINTS } from "../util/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { useParams, Navigate } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -191,7 +192,7 @@ const EventTable = ({ type }) => {
         const apiPeriod = activeTab === "Half Day" ? "half day" : "full day";
 
         const response = await api.get(
-          `https://acas4w1lnk.execute-api.eu-central-1.amazonaws.com/prod/products?category=event&period=${apiPeriod}`
+          `${ENDPOINTS.PRODUCTS}?category=event&period=${apiPeriod}`
         );
 
         // if (category === "Private") {
