@@ -13,14 +13,24 @@ import RestartBookingModal from "../BookModal/RestartBookingModal.jsx";
  * BookingPayment Component
  * Handles the booking creation and payment process for workspace rentals
  */
+
 export default function BookingPayment() {
   // Navigation and route params
   // const { bookingId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  console.log("🚀 ~ BookingPayment ~ location:", location);
+  const quote = new URLSearchParams(location.search).get("quote");
+  const deal = new URLSearchParams(location.search).get("deal");
   // const { accessToken, tokenType } = useAuth();
 
-  // Using API_BASE_URL from util/api.js
+  useEffect(() => {
+    console.log("Search params", quote, deal);
+    if (quote && deal) {
+      setLoading(true);
+      handlePayment();
+    }
+  }, [location.search]);
 
   // Get the state from navigation
   const {
@@ -67,7 +77,7 @@ export default function BookingPayment() {
 
   // =========== STATE MANAGEMENT ===========
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(quote && deal ? true : false);
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
   const [invoiceId, setInvoiceId] = useState("");
@@ -159,8 +169,12 @@ export default function BookingPayment() {
    * 2. Get payment URL
    * 3. Open payment modal
    */
+
   const handlePayment = async (e) => {
-    e.preventDefault();
+    if (e) {
+      e.preventDefault();
+    }
+    setLoading(true);
     setPaymentStatus(null);
     setErrorMessage(null);
     setPaymentFailed(false);
@@ -189,11 +203,9 @@ export default function BookingPayment() {
       return;
     }
 
-    setLoading(true);
-
     try {
       console.log("Starting payment process...");
-
+      const isAnually = quote && deal;
       // Prepare booking data
       const bookingData = {
         bookingId: bookingId,
@@ -204,11 +216,18 @@ export default function BookingPayment() {
       console.log("Sending booking request with data:", bookingData);
 
       // Create the booking and get invoice
-      const bookingResponse = await api.post(
-        `${API_BASE_URL}/generatePayment`,
-        bookingData
-        // Removed auth headers
-      );
+      const bookingResponse = isAnually
+        ? await api.post(`${API_BASE_URL}/paymentlink`, {
+            quote: quote,
+            deal: deal,
+          })
+        : await api.post(
+            `${API_BASE_URL}/generatePayment`,
+            bookingData
+            // Removed auth headers
+          );
+
+      setLoading(false);
 
       console.log("Booking response received:", bookingResponse.data);
 
@@ -216,6 +235,8 @@ export default function BookingPayment() {
       const paymentUrl = `${bookingResponse.data.paymentSession}&mode=frameless`;
 
       if (!paymentUrl) {
+        setPaymentFailed(true);
+        console.log("ERROR NO URL");
         throw new Error("No payment URL received from server");
       }
 
@@ -237,6 +258,7 @@ export default function BookingPayment() {
         }, 10 * 60 * 1000); // 10 minutes in milliseconds
       }, 100);
     } catch (error) {
+      setPaymentFailed(true);
       setBookingInitiated(true);
       console.error("Error during booking/payment:", error);
     } finally {
@@ -473,10 +495,17 @@ export default function BookingPayment() {
     };
   }, []);
 
-  // =========== RENDER ===========
-  // if (loading) {
-  //   return <CircularProgress />;
-  // }
+  if (loading && quote && deal) {
+    console.log("🚀 ~ 1BookingPayment ~ deal:", deal);
+    console.log("🚀 ~ 1BookingPayment ~ quote:", quote);
+    console.log("🚀 ~ 1BookingPayment ~ loading:", loading);
+
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.spinner}></div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.background}>

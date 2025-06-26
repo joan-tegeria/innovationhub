@@ -145,6 +145,12 @@
   transition: border-color 0.3s;
 }
 
+input:disabled {
+  background-color: #e0e0e0; /* or gray, or whatever you prefer */
+  cursor: not-allowed;
+  color: #666;
+}
+
 .input:focus {
   outline: none;
   border-color: #4a90e2;

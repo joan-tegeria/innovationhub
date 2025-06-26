@@ -16,12 +16,25 @@ import "react-phone-number-input/style.css";
 import PhoneInput from "react-phone-number-input";
 // Get today's date in YYYY-MM-DD format
 const today = new Date().toISOString().split("T")[0];
+function getDaysBetween(startDate, endDate) {
+  // Convert to Date objects if they're strings
+  const start = new Date(startDate);
+  const end = new Date(endDate);
 
+  // Calculate the time difference in milliseconds
+  const timeDiff = end.getTime() - start.getTime();
+
+  // Convert milliseconds to days (1000ms * 60s * 60m * 24h)
+  const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+
+  return daysDiff;
+}
 // Define booking periods
 const bookingPeriods = [
   { value: "Daily", label: "Daily" },
   { value: "Monthly", label: "Monthly" },
   { value: "Annually", label: "Annually" },
+  { value: "Custom", label: "Custom" },
 ];
 const getProductName = (name) => {
   switch (name.toLowerCase()) {
@@ -37,18 +50,29 @@ const getProductName = (name) => {
 };
 // Yup schema with validation for date
 const validationSchema = Yup.object({
-  // selectedWorkspace: Yup.string().required("Workspace is required"),
   bookingPeriod: Yup.string().required("Booking period is required"),
   selectedDate: Yup.date()
     .required("Date is required")
     .min(today, "Date must be today or later"),
+  endDate: Yup.date().when("bookingPeriod", {
+    is: "Custom",
+    then: (schema) =>
+      schema
+        .required("End date is required for custom booking")
+        .min(Yup.ref("selectedDate"), "End date must be after start date"),
+    otherwise: (schema) => schema.nullable(),
+  }),
   businessName: Yup.string()
     .required("Business name is required")
-    .min(5, "Name must be at least 5 characters"),
+    .min(5, "Name must be at least 5 characters")
+    .matches(
+      /^[A-Za-z\s]+$/,
+      "Business name must contain only letters and spaces"
+    ), // ✅ Fixed: Allow spaces and mixed case
   nipt: Yup.string()
     .required("ID number is required")
     .matches(
-      /^[A-Z][0-9]{8}[A-Z]$/,
+      /^[A-Za-z][0-9]{8}[A-Za-z]$/, // ✅ Fixed: Allow both upper and lowercase
       "NIPT must be in format: A12345678B (letter, 8 digits, letter)"
     ),
   phoneNumber: Yup.string()
@@ -64,10 +88,12 @@ const validationSchema = Yup.object({
       /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
       "Email must have a valid domain (e.g., .com, .net, etc.)"
     ),
-
   city: Yup.string().required("City is required"),
   street: Yup.string().required("Address is required"),
   selectedType: Yup.string().required("Type is required"),
+  privacyPolicy: Yup.boolean()
+    .oneOf([true], "You must accept the privacy policy to continue.")
+    .required("You must accept the privacy policy to continue."),
 });
 
 const API_BASE_URL =
@@ -87,6 +113,7 @@ export default function BookOffice() {
   const [priceId, setPriceId] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [infoMessage, setInfoMessage] = useState("");
+  const [basePrice, setBasePrice] = useState(price);
   const navigate = useNavigate();
   const [endDate, setEndDate] = useState("");
   const {
@@ -101,18 +128,20 @@ export default function BookOffice() {
   } = useFormik({
     initialValues: {
       selectedWorkspace: "",
-      period: "",
+      bookingPeriod: "",
       selectedDate: "",
       businessName: "",
       nipt: "",
       phoneNumber: "",
       email: "",
       street: "",
+      endDate: "",
       city: "",
       selectedType: "business",
+      privacyPolicy: false,
     },
     validationSchema,
-    validateOnChange: false,
+    validateOnChange: true,
     validateOnBlur: true,
     onSubmit: async (values) => {
       setIsSubmitting(true);
@@ -137,6 +166,13 @@ export default function BookOffice() {
 
         const userId = userResponse.data.data;
 
+        const finalEndDate =
+          values.bookingPeriod === "Custom" ? values.endDate : endDate;
+        const durationindats = getDaysBetween(
+          values.selectedDate,
+          finalEndDate
+        );
+
         const bookingData = {
           username: values.businessName + " " + values.nipt,
           user: userId,
@@ -145,6 +181,10 @@ export default function BookOffice() {
           room: values.selectedWorkspace[0],
           booking: values.bookingPeriod,
           requestedFrom: "Business",
+          duration:
+            values.bookingPeriod.toLowerCase() === "custom"
+              ? durationindats
+              : 1,
         };
         console.log("🚀 ~ onSubmit: ~ bookingData:", bookingData);
         await api.post(
@@ -188,8 +228,70 @@ export default function BookOffice() {
   });
 
   useEffect(() => {
-    console.log(values);
-  }, [values]);
+    endDateCalculator();
+  }, [values.selectedDate, values.bookingPeriod]);
+
+  useEffect(() => {
+    calculatePrice();
+  }, [values.selectedDate, values.bookingPeriod, values.endDate]);
+
+  const calculatePrice = () => {
+    const duration = getDaysBetween(values.selectedDate, values.endDate);
+    if (
+      values.selectedDate &&
+      values.endDate &&
+      values.bookingPeriod === "Custom" &&
+      duration > 1
+    ) {
+      setPrice(basePrice * duration);
+    } else return;
+  };
+
+  const endDateCalculator = () => {
+    const fromDate = new Date(values.selectedDate);
+    if (isNaN(fromDate)) {
+      console.warn("Invalid fromDate", values.selectedDate);
+      return;
+    }
+
+    let endDate = new Date(fromDate); // create a copy
+
+    switch (values.bookingPeriod) {
+      case "Daily":
+        endDate.setDate(fromDate.getDate() + 1);
+        break;
+      case "Weekly":
+        endDate.setDate(fromDate.getDate() + 6);
+        break;
+      case "Monthly":
+        endDate.setMonth(fromDate.getMonth() + 1);
+        break;
+      case "Annually":
+        endDate.setFullYear(fromDate.getFullYear() + 1);
+        break;
+      case "Custom":
+        if (!values.endDate) return; // Don't overwrite the custom endDate
+        return;
+      default:
+        endDate.setDate(fromDate.getDate() + 1);
+    }
+
+    // Only set if endDate is valid
+    if (!isNaN(endDate)) {
+      setFieldValue("endDate", endDate.toISOString().split("T")[0]);
+    } else {
+      console.warn("Invalid endDate generated");
+    }
+  };
+
+  useEffect(() => {
+    console.log("Form validation status:");
+    console.log("isValid:", isValid);
+    console.log("errors:", errors);
+    console.log("isAvailable:", isAvailable);
+    console.log("isSubmitting:", isSubmitting);
+    console.log("values:", values);
+  }, [isValid, errors, isAvailable, isSubmitting, values]);
 
   useEffect(() => {
     setFieldValue(
@@ -304,6 +406,7 @@ export default function BookOffice() {
         const unitPrice = priceResponse.data.data[0].Unit_Price;
         setPrice(unitPrice);
         setPriceId(priceResponse.data.data[0].id);
+        setBasePrice(unitPrice);
         return unitPrice;
       }
 
@@ -385,35 +488,60 @@ export default function BookOffice() {
               <div className={styles.error}>{errors.bookingPeriod}</div>
             )}
           </div>
-
-          <div className={styles.formGroup}>
-            <label htmlFor="selectedDate" className={styles.label}>
-              Date
-            </label>
-            <input
-              type="date"
-              id="selectedDate"
-              name="selectedDate"
-              value={values.selectedDate}
-              onChange={handleChange}
-              className={styles.input}
-              autoComplete="off"
-              min={new Date(Date.now() + 86400000).toISOString().split("T")[0]}
-            />
-            {errors.selectedDate && touched.selectedDate && (
-              <div className={styles.error}>{errors.selectedDate}</div>
-            )}
-          </div>
-          {/* {infoMessage !== "" && (
-            <div
-              className={
-                isAvailable ? styles.infoContainer : styles.infoContainerErr
-              }
-            >
-              <img src={isAvailable ? info : infowhite} alt="" />
-              <span>{infoMessage}</span>
+          <div className={styles.formSection}>
+            <div className={styles.formGroup}>
+              <label htmlFor="selectedDate" className={styles.label}>
+                Date
+              </label>
+              <input
+                type="date"
+                id="selectedDate"
+                name="selectedDate"
+                value={values.selectedDate}
+                onChange={handleChange}
+                className={styles.input}
+                autoComplete="off"
+                min={
+                  new Date(Date.now() + 86400000).toISOString().split("T")[0]
+                }
+              />
+              {errors.selectedDate && touched.selectedDate && (
+                <div className={styles.error}>{errors.selectedDate}</div>
+              )}
             </div>
-          )} */}
+            <div className={styles.formGroup}>
+              <label htmlFor="endDate" className={styles.label}>
+                End Date
+              </label>
+              <input
+                type="date"
+                id="endDate"
+                name="endDate"
+                value={values.endDate}
+                onChange={handleChange}
+                className={styles.input}
+                disabled={values.bookingPeriod !== "Custom"}
+                autoComplete="off"
+                min={
+                  values.selectedDate ||
+                  new Date(Date.now()).toISOString().split("T")[0]
+                }
+                max={
+                  values.selectedDate
+                    ? new Date(
+                        new Date(values.selectedDate).getTime() +
+                          31 * 24 * 60 * 60 * 1000
+                      )
+                        .toISOString()
+                        .split("T")[0]
+                    : ""
+                }
+              />
+              {errors.endDate && touched.endDate && (
+                <div className={styles.error}>{errors.endDate}</div>
+              )}
+            </div>
+          </div>
           <div className={styles.divider} />
           <h1 className={styles.subHeading}>Personal Information</h1>
           <div className={`${styles.formGroup} ${styles.fullWidth}`}>
@@ -562,6 +690,49 @@ export default function BookOffice() {
               )}
             </div>
           </div>
+
+          <div className={styles.formGroup}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "0.5rem",
+              }}
+            >
+              <input
+                type="checkbox"
+                id="privacyPolicy"
+                name="privacyPolicy"
+                checked={values.privacyPolicy}
+                onChange={handleChange}
+                style={{
+                  cursor: "pointer",
+                  width: "16px",
+                  height: "16px",
+                  accentColor: "#eb3778",
+                }}
+              />
+              <label
+                htmlFor="privacyPolicy"
+                style={{ margin: 0, fontSize: "0.9rem" }}
+              >
+                I have read and agree to the{" "}
+                <a
+                  href="https://hubitat.al/privacy-policy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ textDecoration: "underline", color: "#eb3778" }}
+                >
+                  Privacy Policy
+                </a>{" "}
+                and understand how my data will be used.
+              </label>
+            </div>
+            {errors.privacyPolicy && touched.privacyPolicy && (
+              <div className={styles.error}>{errors.privacyPolicy}</div>
+            )}
+          </div>
+
           <div className={styles.divider} />
           <div className={styles.footer}>
             <div className={styles.priceContainer}>
@@ -573,7 +744,7 @@ export default function BookOffice() {
             <button
               type="submit"
               className={styles.submitButton}
-              disabled={isSubmitting || !isAvailable}
+              disabled={isSubmitting || !isAvailable || !isValid}
             >
               {isSubmitting ? "Creating..." : "Send request"}
             </button>

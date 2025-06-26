@@ -224,7 +224,7 @@ export default function MembershipPlans() {
         }}
         className={styles.plansWrapper}
         breakpoints={{
-          // Mobile and small tablets - show exactly one card, centered
+          
           320: {
             slidesPerView: 1,
             centeredSlides: true,
@@ -237,7 +237,6 @@ export default function MembershipPlans() {
             slidesPerView: 1,
             centeredSlides: true,
           },
-          // Medium-sized tablets and up - start showing partial cards
           771: {
             slidesPerView: 1.6,
             centeredSlides: true,
