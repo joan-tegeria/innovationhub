@@ -57,7 +57,7 @@ const DedicatedDesks = () => {
       deskType.toLowerCase() === "dedicated desk"
         ? "https://hubitat.al/dedicated-desk/"
         : deskType.toLowerCase() === "flexible desk"
-        ? "https://hubitat.al/flexible-desk/"
+      ? "https://hubitat.al/flexible-desk/"
         : "https://hubitat.al/private-offices/";
 
     // If in iframe, use parent window location
