@@ -205,7 +205,7 @@ export default function BookDesk() {
         const nameParts = values.fullName.split(" ");
         const firstName = nameParts[0];
         const lastName = nameParts.slice(1).join(" ");
-``
+        ``;
         const combinedData = {
           room: values.selectedWorkspace[0],
           from: values.selectedDate,
@@ -221,7 +221,8 @@ export default function BookDesk() {
           email: values.email,
           // birthday: values.birthday || "",
           id: values.selectedAccountType === "Business" ? "" : values.idNumber,
-          nipt: values.selectedAccountType === "Individual" ? "" : values.idNumber,
+          nipt:
+            values.selectedAccountType === "Individual" ? "" : values.idNumber,
           phone: values.phoneNumber,
           city: values.city,
           street: values.street,
@@ -267,7 +268,7 @@ export default function BookDesk() {
             startDate: values.selectedDate,
             period: values.bookingPeriod,
             seatId: randomSeat,
-            price: price * durationindats,
+            price,
             userEmail: values.email,
             userName: values.fullName,
             endDate: finalEndDate,
@@ -347,6 +348,7 @@ export default function BookDesk() {
       }
     },
   });
+  console.log("🚀 ~ prepareNavigation ~ price:", price);
 
   useEffect(() => {
     console.log("Values", values);
@@ -413,6 +415,13 @@ export default function BookDesk() {
   }, [true]);
 
   useEffect(() => {
+    console.log("🔄 Availability check triggered by:", {
+      selectedDate: values.selectedDate,
+      bookingPeriod: values.bookingPeriod,
+      selectedWorkspace: values.selectedWorkspace,
+      endDate: values.endDate,
+    });
+
     if (
       values.selectedDate &&
       values.bookingPeriod &&
@@ -420,6 +429,7 @@ export default function BookDesk() {
     ) {
       // For custom booking period, also check if endDate is available
       if (values.bookingPeriod === "Custom" && !values.endDate) {
+        console.log("⏸️ Waiting for endDate in custom booking");
         return; // Don't check availability until both dates are selected
       }
       checkOfficeAvailability(values.selectedDate, values.bookingPeriod);
@@ -489,7 +499,13 @@ export default function BookDesk() {
   };
 
   const checkOfficeAvailability = async (startDate, bookingPeriod) => {
+    console.log("🔍 Checking availability for:", {
+      startDate,
+      bookingPeriod,
+      workspace: values.selectedWorkspace,
+    });
     try {
+      setCheckingAvailability(true);
       const fromDate = new Date(startDate);
       let toDate;
 
@@ -526,7 +542,7 @@ export default function BookDesk() {
       const formattedFromDate = fromDate.toISOString().split("T")[0];
       const formattedToDate = toDate.toISOString().split("T")[0];
 
-      if (values.selectedWorkspace[0]) {
+      if (values.selectedWorkspace && values.selectedWorkspace[0]) {
         setEndDate(toDate.toISOString().split("T")[0]);
         const response = await api.get(
           `${API_BASE_URL}/shared/${
@@ -540,6 +556,10 @@ export default function BookDesk() {
           response.data.availableSeats &&
           response.data.availableSeats.length > 0
         ) {
+          console.log(
+            "✅ Space is available, seats:",
+            response.data.availableSeats.length
+          );
           setInfoMessage("The access to the space is available");
           setIsAvailable(true);
           setRandomSeat(
@@ -548,16 +568,28 @@ export default function BookDesk() {
             ]
           );
         } else {
+          console.log("❌ Space is not available");
           setInfoMessage("The access to the space is not available");
           setIsAvailable(false);
           setRandomSeat(null);
         }
 
         return response.data.availableSeats?.length > 0;
+      } else {
+        // Reset availability state when no workspace is selected
+        setInfoMessage("");
+        setIsAvailable(true);
+        setRandomSeat(null);
+        return true;
       }
     } catch (error) {
       console.error("Error checking availability:", error);
+      setInfoMessage("Error checking availability. Please try again.");
+      setIsAvailable(false);
+      setRandomSeat(null);
       return false;
+    } finally {
+      setCheckingAvailability(false);
     }
   };
 
@@ -748,6 +780,10 @@ export default function BookDesk() {
               </div>
               {isLoading ? (
                 <p>isLoading</p>
+              ) : checkingAvailability ? (
+                <div className={styles.infoContainer}>
+                  <span>Checking availability...</span>
+                </div>
               ) : (
                 infoMessage !== "" &&
                 values.selectedDate &&
@@ -1000,10 +1036,17 @@ export default function BookDesk() {
                 <button
                   type="submit"
                   className={styles.submitButton}
-                  disabled={isSubmitting || !isAvailable || !isValid}
+                  disabled={
+                    isSubmitting ||
+                    !isAvailable ||
+                    !isValid ||
+                    checkingAvailability
+                  }
                 >
                   {isSubmitting
                     ? "Creating..."
+                    : checkingAvailability
+                    ? "Checking..."
                     : values.bookingPeriod !== "Annually"
                     ? "Book Now"
                     : "Get a Quote"}
